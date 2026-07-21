@@ -2,7 +2,7 @@
 import type { GetStaticPaths } from "astro";
 import Pagination from "@/components/common/Pagination.astro";
 import PostPage from "@/components/layout/PostPage.astro";
-import { siteConfig } from "@/config";
+import { siteConfig, announcementConfig } from "@/config";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { getSortedPosts } from "@/utils/content-utils";
 export const getStaticPaths = (async ({ paginate }) => {
@@ -16,9 +16,39 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 
 const len = page.data.length;
+const announcement = announcementConfig;
 ---
 
 <MainGridLayout>
+  {
+    announcement && (
+      <div class="card-base onload-animation mb-4 p-4 rounded-xl" style="animation-delay: var(--content-delay);">
+        <div class="flex items-start gap-3">
+          <div class="shrink-0 text-xl">📢</div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-lg text-neutral-900 dark:text-neutral-100 mb-2">
+              {announcement.title}
+            </h3>
+            <p class="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-3 text-sm">
+              {announcement.content}
+            </p>
+            {
+              announcement.link && announcement.link.enable !== false && (
+                <a
+                  href={announcement.link.url}
+                  target={announcement.link.external ? "_blank" : "_self"}
+                  rel={announcement.link.external ? "noopener noreferrer" : undefined}
+                  class="btn-regular rounded-lg px-3 py-1.5 text-sm font-medium active:scale-95 transition-transform inline-block"
+                >
+                  {announcement.link.text}
+                </a>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    )
+  }
   <PostPage page={page} />
   {
     page.total > page.size && (
