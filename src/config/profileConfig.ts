@@ -9,10 +9,10 @@ export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/avatar.avif",
 
 	// 名字
-	name: "Firefly",
+	name: "冷漠-微笑",
 
 	// 个人签名
-	bio: "Hello, I'm Firefly.",
+	bio: "Hi～欢迎来到CXL避难所",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons
