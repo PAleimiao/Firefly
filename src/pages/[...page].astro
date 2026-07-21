@@ -21,29 +21,66 @@ const announcement = announcementConfig;
 
 <MainGridLayout>
   {
-    announcement && (
-      <div class="card-base onload-animation mb-4 p-4 rounded-xl" style="animation-delay: var(--content-delay);">
-        <div class="flex items-start gap-3">
-          <div class="shrink-0 text-xl">📢</div>
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-lg text-neutral-900 dark:text-neutral-100 mb-2">
-              {announcement.title}
-            </h3>
-            <p class="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-3 text-sm">
-              {announcement.content}
-            </p>
-            {
-              announcement.link && announcement.link.enable !== false && (
-                <a
-                  href={announcement.link.url}
-                  target={announcement.link.external ? "_blank" : "_self"}
-                  rel={announcement.link.external ? "noopener noreferrer" : undefined}
-                  class="btn-regular rounded-lg px-3 py-1.5 text-sm font-medium active:scale-95 transition-transform inline-block"
-                >
-                  {announcement.link.text}
-                </a>
-              )
-            }
+    announcement && announcement.content && (
+      <div
+        class="mb-4 onload-animation"
+        style="animation-delay: var(--content-delay);"
+      >
+        <div
+          style="
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+          "
+        >
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+            <span style="font-size: 1.25rem; line-height: 1; flex-shrink: 0;">⚠️</span>
+            <div style="flex: 1; min-width: 0;">
+              <h3
+                style="
+                  font-weight: 700;
+                  font-size: 1rem;
+                  margin-bottom: 0.5rem;
+                  color: inherit;
+                "
+              >
+                {announcement.title}
+              </h3>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  line-height: 1.6;
+                  margin-bottom: 0.75rem;
+                  opacity: 0.85;
+                "
+              >
+                {announcement.content}
+              </p>
+              {
+                announcement.link && announcement.link.enable !== false && (
+                  <a
+                    href={announcement.link.url}
+                    target={announcement.link.external ? "_blank" : "_self"}
+                    rel={announcement.link.external ? "noopener noreferrer" : undefined}
+                    style="
+                      display: inline-block;
+                      font-size: 0.875rem;
+                      font-weight: 500;
+                      padding: 0.375rem 0.875rem;
+                      border-radius: 8px;
+                      background: rgba(255, 193, 7, 0.15);
+                      border: 1px solid rgba(255, 193, 7, 0.25);
+                      color: inherit;
+                      text-decoration: none;
+                      transition: all 0.2s;
+                    "
+                  >
+                    {announcement.link.text}
+                  </a>
+                )
+              }
+            </div>
           </div>
         </div>
       </div>
