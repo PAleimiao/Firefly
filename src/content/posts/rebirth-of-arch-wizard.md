@@ -5,6 +5,7 @@ description: 关于我在凌晨一点把GitHub当成记事本、把Cloudflare当
 tags: [抽象, 博客, 白嫖, Arch Linux, 铁子, 屎山]
 category: 博客
 slug: rebirth-of-arch-wizard
+image: ./images/1784477622810.png
 ---
 
 # 序章：凌晨一点的召唤
