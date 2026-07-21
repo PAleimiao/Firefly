@@ -5,7 +5,7 @@ description: 耗时三小时、600+个npm依赖、无数报错与崩溃，终于
 tags: [Arch-web, Arch Linux, 屎山, 白嫖, 网页模拟器]
 category: 项目
 slug: arch-web-release
-image: ./images/arch-web-cover.png
+image: ./images/ly.png
 ---
 
 # 🖥️ Arch-web 勉强能用了
