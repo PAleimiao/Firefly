@@ -1,5 +1,5 @@
 ---
-title: 🐧 Arch Linux 安装教程：官方脚本版（有手就行）
+title: Arch Linux 安装教程：官方脚本版（有手就行）
 published: 2026-07-22
 description: 别被网上那些手动分区、手动挂载、手动配网络的教程吓退。Arch 官方早就给你准备了一个 archinstall 脚本，全程交互式，跟装 Windows 似的。
 tags: [Arch Linux, 安装教程, archinstall, 新手向, 教程]
@@ -11,7 +11,15 @@ slug: arch-linux-official-script-install
 
 <!-- more -->
 
-## 📥 第一步：下载 Arch ISO
+## (｀・ω・´) 准备工作
+
+- 电脑一台，笔记本台式都行
+- 没电脑的一边看乐呵去
+- 一个 8G 以上的 U 盘（装系统用的，别拿你存学习资料的盘）
+- 能上网的环境（没网装个锤子）
+- 脑子（建议带上，虽然官方脚本已经帮你把脑子省了）
+
+## (｡･ω･｡) 第一步：下载 Arch ISO
 
 去官网下镜像，认准这个地址：
 
@@ -26,7 +34,7 @@ https://archlinux.org/download/
 > [!TIP]
 > Ventoy 比 Rufus 好用一万倍，一次写入，以后换 ISO 直接复制进去就行，不用重新刷 U 盘。
 
-## 🔥 第二步：进 Live 环境
+## (ﾉ◕ヮ◕)ﾉ 第二步：进 Live 环境
 
 U 盘启动，选第一个 `Arch Linux install medium (x86_64, UEFI)`，回车。
 
@@ -38,7 +46,7 @@ root@archiso ~ #
 
 别慌，这就是 Arch 的 Live 环境，系统还没装，这是临时系统。
 
-## 🌐 第三步：连网（重要！）
+## (｡･ω･｡) 第三步：连网（重要！）
 
 archinstall 脚本要联网下载包，没网直接寄。
 
@@ -71,7 +79,7 @@ ping archlinux.org -c 3
 > [!WARNING]
 > 没网别往下走，archinstall 会报错。校园网/认证网可能比较麻烦，建议先插网线或者手机 USB 共享网络。
 
-## 🚀 第四步：运行 archinstall 脚本（核心）
+## ヾ(≧▽≦*)o 第四步：运行 archinstall 脚本（核心）
 
 输入下面这行，见证奇迹：
 
@@ -160,7 +168,7 @@ vim,nano,git,curl,wget,firefox
 
 选 `Asia/Shanghai`。
 
-## ✅ 第五步：确认安装
+## (｀・ω・´)b 第五步：确认安装
 
 全部选完后，脚本会让你 review 一遍配置。看没问题就选 `Install`。
 
@@ -168,7 +176,7 @@ vim,nano,git,curl,wget,firefox
 
 看到 `Installation completed without any errors!` 就是成了！
 
-## 🔄 第六步：重启进系统
+## (｡･ω･｡)ﾉ 第六步：重启进系统
 
 ```bash
 reboot
@@ -176,7 +184,7 @@ reboot
 
 记得拔掉 U 盘！
 
-## 🎉 装完干啥？
+## (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ 装完干啥？
 
 如果你选了桌面环境，进去就是图形界面了。
 
@@ -189,7 +197,7 @@ sudo pacman -S neofetch       # 装完必须跑一下，仪式感
 neofetch                      # 截图发朋友圈
 ```
 
-## ⚠️ 免责声明 & 售后服务
+## (´･ω･`) 免责声明 & 售后服务
 
 本教程基于 Arch 官方 `archinstall` 脚本，步骤已经尽量简化了。
 
