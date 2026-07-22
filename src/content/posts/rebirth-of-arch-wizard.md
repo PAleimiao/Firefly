@@ -18,6 +18,8 @@ image: ./images/1784477622810.png
 
 > "成了！(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ 终于搞定了！"
 
+![Cloudflare Pages](./images/cf-pages-logo.png)
+
 不，事情远没有结束。这只是**第一层地狱**的通关提示。
 
 ---
