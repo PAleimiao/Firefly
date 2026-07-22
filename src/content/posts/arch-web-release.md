@@ -1,11 +1,11 @@
 ---
-title: (｀・ω・´) Arch-web 勉强能用了——一个网页版Arch Linux的赛博奇迹
+title: 我做了一个网页版的Linux——说白了就是为了装X
 published: 2026-07-22
-description: 耗时三小时、600+个npm依赖、无数报错与崩溃，终于诞生了一个网页版Arch Linux。它很慢、很卡、有些软件能用有些不能，但它免费啊！
+description: 耗时三小时、600+个npm依赖、无数报错与崩溃，终于诞生了一个网页版Arch Linux。
 tags: [Arch-web, Arch Linux, 屎山, 白嫖, 网页模拟器]
 category: 项目
-slug: arch-web-release
 image: ./images/ly.png
+slug: arch-web-release
 ---
 
 # (｀・ω・´) Arch-web 勉强能用了
@@ -46,7 +46,7 @@ image: ./images/ly.png
 
 因为壁纸是从外部来源加载的，如果你的网络正在和 Cloudflare 进行一场**谁先放弃的博弈**，那壁纸可能会迟到，但永远不会缺席——大概。
 
-> **网站都免费了，还要啥自行车？慢慢加载得了。**
+> **网站都免费了，还要啥自行车？慢慢加载得了，有电脑就自个儿装去。**
 
 ---
 
