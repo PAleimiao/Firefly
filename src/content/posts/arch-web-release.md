@@ -18,6 +18,8 @@ image: ./images/ly.png
 
 ## 一、这是什么？
 
+![Under Construction](./images/under-construction.png)
+
 **Arch-web** 是一个运行在浏览器里的 **Arch Linux 模拟器**。
 
 对，你没看错。不是远程桌面，不是 VNC，是**纯前端**——用 React + Vite 手搓出来的一个"看起来像 Arch"的网页。
