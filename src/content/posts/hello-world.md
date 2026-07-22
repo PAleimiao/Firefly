@@ -4,8 +4,8 @@ published: 2026-07-22
 description: 每一个程序员的起点都是Hello World，每一个白嫖党的起点都是"这玩意儿能免费不？"。这是CXL避难所的第二篇帖子，也是我这个赛博巫师正式向世界宣告：我，有博客了！
 tags: [Hello World, 抽象, 白嫖, 程序员仪式]
 category: 博客
-slug: hello-world
 image: ./images/hello-world-cover.png
+slug: hello-world
 ---
 
 # 仪式开始
@@ -27,7 +27,7 @@ printf("Hello World\n");
 ```markdown
 # Hello World
 
-我是啊嘞喵，欢迎来到 CXL 避难所。
+Hi～欢迎来到 CXL 避难所。
 ```
 
 ---
