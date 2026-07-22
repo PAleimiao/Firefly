@@ -1,5 +1,5 @@
 ---
-title: 🤖 手把手教你搭一个 QQ 机器人（NapCat + AstrBot）
+title: (｡･ω･｡) 手把手教你搭一个 QQ 机器人（NapCat + AstrBot）
 published: 2026-07-22
 description: 想让你的 QQ 号变成 24 小时在线的赛博打工仔？来，整一个机器人。不用写代码，复制粘贴就能跑。
 tags: [QQ机器人, NapCat, AstrBot, Docker, 教程]
@@ -11,14 +11,14 @@ slug: napcat-astrbot-qq-bot
 
 <!-- more -->
 
-## 📋 你需要准备啥
+## (｡･ω･｡) 你需要准备啥
 
 - 一台 Linux 服务器 / VPS / 本地电脑（Ubuntu/Debian/Arch 都行）
 - 一个能登录的 QQ 小号（**别用大号**，万一风控了哭都没地儿哭）
 - Docker 和 Docker Compose（不会装？往下看）
 - 脑子（可选但建议带上）
 
-## 🐳 第一步：安装 Docker
+## (｡･ω･｡) 第一步：安装 Docker
 
 如果你服务器上已经有 Docker 了，直接跳到第二步。
 
@@ -38,7 +38,7 @@ sudo pacman -S docker-compose       # Arch 用户狂喜
 > [!TIP]
 > 如果你连 Docker 都装不上，建议先回去补补 Linux 基础，或者……直接找铁子。
 
-## 🐱 第二步：部署 NapCat（QQ 协议端）
+## (=^･ω･^=) 第二步：部署 NapCat（QQ 协议端）
 
 NapCat 相当于一个无头 QQ，在后台帮你收发消息。
 
@@ -64,7 +64,7 @@ docker logs -f napcat
 > [!WARNING]
 > 扫码登录的时候别手抖，扫错了号就尴尬了。建议提前把 QQ 小号登录到手机 QQ 上养几天号，降低风控概率。
 
-## ⚙️ 第三步：配置 NapCat 的 WebSocket
+## (｀・ω・´) 第三步：配置 NapCat 的 WebSocket
 
 进 NapCat 的配置目录改一下：
 
@@ -99,7 +99,7 @@ ls
 docker restart napcat
 ```
 
-## 🚀 第四步：部署 AstrBot（机器人大脑）
+## ヾ(≧▽≦*)o 第四步：部署 AstrBot（机器人大脑）
 
 ```bash
 # 创建目录
@@ -129,7 +129,7 @@ docker logs -f astrbot
 
 等看到 `AstrBot 启动成功` 类似的字样，就可以按 `Ctrl+C` 了。
 
-## 🧠 第五步：配置 AstrBot 连上 NapCat
+## (｀・ω・´) 第五步：配置 AstrBot 连上 NapCat
 
 1. 打开浏览器，访问 `http://你的服务器IP:6185`
 2. 第一次进要设管理员密码，设完登录
@@ -141,7 +141,7 @@ docker logs -f astrbot
 > [!NOTE]
 > 如果 AstrBot 和 NapCat 不在同一台机器，地址要填 NapCat 所在机器的实际 IP，比如 `ws://192.168.1.100:3001`。
 
-## 🎉 第六步：测试你的机器人
+## (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ 第六步：测试你的机器人
 
 用你的主号给机器人 QQ 发一条消息：
 
@@ -149,9 +149,9 @@ docker logs -f astrbot
 /help
 ```
 
-如果它回你了，恭喜你，赛博打工仔上线成功！🎊
+如果它回你了，恭喜你，赛博打工仔上线成功！(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 
-## 🔧 常见问题（FAQ）
+## (｀・ω・´) 常见问题（FAQ）
 
 ### Q: NapCat 登录不上，提示风控？
 
