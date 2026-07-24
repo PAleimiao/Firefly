@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Hi～欢迎来到避难所",
 
 	// 站点 URL
-	site_url: "https://cxl--package.top",
+	site_url: "https://www.cxl--package.top",
 
 	// 站点描述
 	description:
