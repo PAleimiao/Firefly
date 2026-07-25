@@ -5,6 +5,7 @@ description: 以瞎猜接口为耻，以认真查询为荣。看完这八句话�
 tags: [程序员, 八荣八耻, 代码规范, 吐槽, 开发哲学]
 category: 杂谈
 slug: programmer-eight-honors-shames
+image: ./images/programmer-meme.png
 ---
 
 > 以瞎猜接口为耻，以认真查询为荣
