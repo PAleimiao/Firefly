@@ -5,6 +5,7 @@ description: CXL 避难所站长啊嘞喵的正式声明。本站为个人非盈
 tags: [公告, 声明, 置顶]
 category: 公告
 slug: site-announcement
+image: ./images/announcement-cover.png
 pinned: true
 ---
 
