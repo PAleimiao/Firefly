@@ -88,6 +88,8 @@ yum install -y wget && wget -O install.sh https://download.bt.cn/install/install
 
 环境装好后，左侧菜单点 **"网站" → "添加站点"**。
 
+![宝塔面板网站列表](./images/bt-panel-websites.png)
+
 填写：
 - **域名**：输入你的域名，比如 `www.yourname.top`
 - **根目录**：默认就行（`/www/wwwroot/域名`）
@@ -168,6 +170,8 @@ curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_
 ### 4.2 登录并初始化
 
 浏览器打开地址，登录后会引导你安装基础环境（OpenResty、MySQL、PHP），跟宝塔类似。
+
+![1Panel面板概览](./images/1panel-overview.png)
 
 ### 4.3 创建网站
 
