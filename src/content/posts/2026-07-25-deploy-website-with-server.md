@@ -5,6 +5,7 @@ description: 服务器买了不会部署？宝塔面板和1Panel哪个好？这�
 tags: [教程, 建站, 服务器, 宝塔, 1Panel, Linux, 部署]
 category: 教程
 slug: deploy-website-with-server
+image: ./images/bt-panel-websites.png
 ---
 
 > 服务器买了，SSH连上了，然后呢？
