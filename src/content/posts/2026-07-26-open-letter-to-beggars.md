@@ -5,6 +5,7 @@ published: 2026-07-26
 tags: [吐槽, 伸手党, 教程, 新人, 暴躁]
 category: 随笔
 slug: open-letter-to-beggars
+image: ./images/keyboard-warrior.png
 ---
 
 > 本文语气暴躁，玻璃心请绕道。如果你看完觉得被冒犯了——**那说的就是你**。
