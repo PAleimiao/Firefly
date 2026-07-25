@@ -47,6 +47,8 @@ slug: deploy-website-without-server
 
 仓库名随便起，比如 `my-blog`、`my-website`，**公开（Public）** 就行。
 
+![GitHub创建仓库](./images/github-create-repo.png)
+
 > 为啥要公开？因为 Cloudflare Pages 免费版只能读取公开仓库。  
 > 不想公开？充钱开 Pro，或者看下一篇「有服务器版教程」。
 
@@ -96,6 +98,10 @@ git push origin main
 ### 4.2 创建 Pages 项目
 
 左侧菜单找到 **"Pages"**，点击 **"创建项目"**。
+
+![Cloudflare Pages](./images/cloudflare-pages-logo.png)
+
+![Cloudflare Pages部署界面](./images/cloudflare-pages-deploy.png)
 
 选择 **"连接到 Git"**，然后授权 Cloudflare 访问你的 GitHub 账号。
 
