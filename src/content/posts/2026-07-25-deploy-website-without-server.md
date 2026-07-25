@@ -5,6 +5,7 @@ description: 服务器过期了？不想备案？这篇教你用 GitHub + Cloudf
 tags: [教程, 建站, 白嫖, GitHub, Cloudflare, 无服务器, 免费]
 category: 教程
 slug: deploy-website-without-server
+image: ./images/cf-pages-overview.png
 ---
 
 > 服务器过期了，备案太麻烦，域名还要等20天？
