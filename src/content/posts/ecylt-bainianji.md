@@ -6,6 +6,7 @@ description: 二次元论坛正在举办「拜年纪 - 二次元初春集」活�
 tags: [宣传, 二次元, 拜年纪, 征稿]
 category: 公告
 slug: ecylt-bainianji
+image: ./images/bainianji-poster.png
 ---
 
 # 二次元论坛「拜年纪 - 二次元初春集」征稿中！
