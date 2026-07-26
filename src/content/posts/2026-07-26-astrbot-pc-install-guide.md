@@ -20,6 +20,8 @@ image: ./images/astrbot-architecture.png
 **AstrBot** 是一个开源的一站式 Agent 聊天机器人平台，说人话就是：  
 你把 AI 大模型（DeepSeek、GPT、Gemini 啥的）接进去，它就能帮你在 **QQ、QQ频道、微信、Telegram、飞书、钉钉、Discord** 这些平台上自动回复消息。
 
+![AstrBot 官网首页](./images/astrbot-official-site.png)
+
 它不只是聊天机器人，更是 Agent 平台：支持子代理（Sub-Agent）协同工作、复杂任务编排、工具调用与上下文管理，让 AI 具备真正的行动力。
 
 **电脑版 vs 手机版？**
@@ -47,6 +49,8 @@ image: ./images/astrbot-architecture.png
 - **U 盘**（≥8GB，用来写 Ubuntu 系统镜像）
 - **网线**（推荐有线连接，比 WiFi 稳）
 
+![硬件准备清单](./images/astrbot-hardware-prep.png)
+
 ### 2.2 软件准备
 
 - **BalenaEtcher**：把 Ubuntu 镜像写入 U 盘的工具  
@@ -72,6 +76,9 @@ image: ./images/astrbot-architecture.png
 
 1. 下载 BalenaEtcher 和 Ubuntu 24.04 ISO 镜像
 2. 打开 BalenaEtcher → 「从文件烧录」→ 选择 Ubuntu ISO → 选择你的 U 盘 → 「现在烧录！」
+
+![BalenaEtcher 烧录界面](./images/astrbot-balenaetcher.png)
+
 3. 烧录完成后，把 U 盘插到要装系统的电脑上
 
 ### 3.2 安装 Ubuntu 系统
@@ -84,6 +91,8 @@ image: ./images/astrbot-architecture.png
 6. 时区默认 **上海（Shanghai, China）**
 7. 创建用户：填用户名、密码，**记住这个密码，后面 SSH 登录要用**
 8. 等进度条跑完，重启，拔掉 U 盘
+
+![Ubuntu 安装界面](./images/astrbot-ubuntu-install.png)
 
 ### 3.3 安装 OpenSSH + 查看 IP
 
@@ -103,6 +112,8 @@ ip addr
 3. Username 填你创建的用户名
 4. 点 OK，输入密码，连上！
 
+![MobaXterm SSH 连接成功](./images/astrbot-ssh-login.png)
+
 ### 3.5 换国内软件源（加速下载）
 
 Ubuntu 默认源在国外，下载慢得离谱。用 **LinuxMirrors** 一键换源：
@@ -110,6 +121,8 @@ Ubuntu 默认源在国外，下载慢得离谱。用 **LinuxMirrors** 一键换�
 ```bash
 bash <(curl -sSL https://linuxmirrors.cn/main.sh)
 ```
+
+![LinuxMirrors 换源脚本](./images/astrbot-linuxmirrors.png)
 
 脚本会让你选择镜像站，推荐选：
 - **清华大学**（tuna）
@@ -126,14 +139,22 @@ CasaOS 是一个轻量级 NAS 系统，自带应用商店，可以像装手机 A
 curl -fsSL https://get.casaos.io | sudo bash
 ```
 
+![CasaOS 安装完成](./images/astrbot-casaos-install.png)
+
 装完会显示访问地址，一般是 `http://你的IP:80`。浏览器打开，注册一个 CasaOS 账号。
 
 ### 3.7 一键安装 AstrBot
 
 1. 进入 CasaOS 桌面 → 「App Store」应用商店
 2. 右上角搜索 **AstrBot**
+
+![CasaOS 应用商店搜索 AstrBot](./images/astrbot-casaos-store.png)
+
 3. 点击安装，CasaOS 会自动拉取 Docker 镜像、配置端口映射
 4. 等图标从灰色变彩色，就表示装好了
+
+![CasaOS 中 AstrBot 图标](./images/astrbot-casaos-astrbot-icon.png)
+
 5. 点击 AstrBot 图标进入，或者浏览器直接访问 `http://你的IP:6185`
 
 > 如果应用商店搜不到 AstrBot，或者你想手动控制版本，直接看下面的「方式二：Docker Compose」。
@@ -250,6 +271,8 @@ sudo docker logs -f napcat
 - 默认密码：`astrbot`
 - **首次登录会强制要求改密码**，改完才能进面板 (ﾉ*･ω･)ﾉ
 
+![AstrBot WebUI 登录页](./images/astrbot-webui-dashboard.png)
+
 ### 6.2 熟悉面板
 
 登录后左侧菜单：
@@ -261,6 +284,8 @@ sudo docker logs -f napcat
 - **知识库**：管理文档知识库
 - **人格设定**：机器人的性格、人设
 - **更多功能**：对话数据、自定义规则、未来任务、SubAgent、平台日志、MCP 等
+
+![AstrBot 仪表盘](./images/astrbot-dashboard.png)
 
 ---
 
@@ -279,6 +304,8 @@ sudo docker logs -f napcat
 - **嵌入（Embedding）**：OpenAI Embedding、Ollama Embedding 等，用于知识库和长期记忆
 - **重排序（Rerank）**：vLLM Rerank、Jina AI 等，用于优化知识库检索结果
 
+![模型提供商列表](./images/astrbot-model-providers.png)
+
 ### 7.2 以 MiniMax 为例（视频演示）
 
 1. 选择「OpenAI Compatible」（因为 MiniMax 兼容 OpenAI 格式）
@@ -286,6 +313,9 @@ sudo docker logs -f napcat
    - **ID**：`MINIMAX`（自定义，方便识别）
    - **API Key**：从 MiniMax 官网获取的 Key
    - **API Base URL**：`https://api.minimax.chat/v1`
+
+![MiniMax API 配置](./images/astrbot-minimax-config.png)
+
 3. 保存后，点击「获取模型列表」或「自定义模型」
 4. 添加模型，如 `MiniMax-M2.7`
 5. 点击模型旁边的开关，启用它
@@ -298,11 +328,17 @@ AstrBot 支持为不同机器人分别设置配置文件：
 
 1. 左侧「配置文件」→ 「新建配置文件」
 2. 给配置文件起个名字（比如 `default`、`群聊专用`）
+
+![配置文件管理](./images/astrbot-config-files.png)
+
 3. 在「AI 配置」里选择：
    - **默认对话模型**：主用的聊天模型
    - **回退对话模型列表**：主模型挂了自动切换的备用模型
    - **默认图片转述模型**：用于多模态（看图说话）
    - **Agent 执行方式**：内置 Agent 或第三方
+
+![选择模型](./images/astrbot-select-model.png)
+
 4. 在「平台配置」里选择接入的 IM 平台（QQ、微信等）
 5. 在「插件配置」里选择该机器人加载哪些插件
 
@@ -318,6 +354,9 @@ AstrBot 支持两种 QQ 接入方式：
 
 1. 访问 [QQ 开放平台](https://q.qq.com) → 创建机器人
 2. 获取 **AppID** 和 **Secret**
+
+![QQ 开放平台创建机器人](./images/astrbot-qq-openplatform.png)
+
 3. 回到 AstrBot → 「平台配置」→ 选择「QQ 官方机器人」
 4. 填写：
    - **AppID**：从开放平台复制
@@ -346,6 +385,9 @@ AstrBot 支持两种 QQ 接入方式：
 
 1. AstrBot 面板 → 「消息平台」→ 「新增适配器」
 2. 选择 **「接入 QQ 个人号（aiocqhttp）」**
+
+![平台配置界面](./images/astrbot-platform-config.png)
+
 3. 填写：
    - **反向 WebSocket 主机地址**：`0.0.0.0`
    - **端口**：`6199`
@@ -361,8 +403,13 @@ AstrBot 支持两种 QQ 接入方式：
 1. 在 QQ 里私聊机器人，发送 `/sid`
 2. 机器人会返回你的用户 ID（一串字母数字）
 3. 回到 AstrBot 面板 → 「平台配置」→ 「管理员 ID」
+
+![管理员配置](./images/astrbot-admin-config.png)
+
 4. 点击「添加」，把刚才的 ID 贴进去
 5. 保存，现在你有管理员权限了
+
+![QQ 聊天测试](./images/astrbot-qq-chat-test.png)
 
 ---
 
@@ -393,6 +440,8 @@ services:
 docker compose up -d
 ```
 
+![Ollama Docker Compose 安装](./images/astrbot-ollama-install.png)
+
 **方式 2：官方脚本**
 
 ```bash
@@ -412,7 +461,11 @@ docker exec ollama ollama pull mxbai-embed-large
 docker exec ollama ollama pull moondream
 ```
 
+![Ollama 运行状态](./images/astrbot-ollama-running.png)
+
 > 如果你直接在宿主机装的 Ollama（不是 Docker），去掉 `docker exec ollama` 前缀。
+
+![Ollama 下载模型](./images/astrbot-ollama-pull-model.png)
 
 ### 9.3 AstrBot 接入 Ollama
 
@@ -423,6 +476,8 @@ docker exec ollama ollama pull moondream
    - **API Base URL**：`http://你的服务器局域网IP:11434/v1`
 
    > ⚠️ **重点**：即使 Ollama 和 AstrBot 在同一台机器，也**不能填 `localhost` 或 `127.0.0.1`**！必须填局域网 IP（如 `http://192.168.31.226:11434/v1`），否则 AstrBot 找不到服务。
+
+![Ollama 提供商配置](./images/astrbot-ollama-provider.png)
 
 3. 保存 → 点击「获取模型列表」或手动添加模型 ID（如 `llama3.2`、`mxbai-embed-large`）
 4. 启用模型
@@ -442,6 +497,8 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 - **万能解析器**：解析抖音、B站、小红书、Instagram 链接
 - **语音合成/点歌/传话筒** 等
 
+![插件市场](./images/astrbot-plugins-market.png)
+
 装完重启 AstrBot 生效。
 
 ### 10.2 LivingMemory 长期记忆（视频演示）
@@ -450,9 +507,14 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 
 1. 插件市场搜索 **LivingMemory** → 安装
 2. 进入插件配置 → 选择 Embedding 模型（如 `OLLAMA/mxbai-embed-large`）
+
+![LivingMemory 配置](./images/astrbot-livingmemory-config.png)
+
 3. 选择 LLM 模型（用于总结记忆）
 4. 启用 WebUI 管理面板（可选）
 5. 保存后，机器人在聊天中会自动提取关键信息存入记忆
+
+![LivingMemory WebUI](./images/astrbot-livingmemory-webui.png)
 
 ---
 
@@ -464,12 +526,18 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 
 1. AstrBot 面板 → 「知识库」→ 「创建知识库」
 2. 填名称、选图标、选 Embedding 模型（如 `mxbai-embed-large`）
+
+![创建知识库](./images/astrbot-kb-create.png)
+
 3. 创建
 
 ### 11.2 上传文档
 
 1. 进入知识库 → 「上传文档」
 2. 支持 PDF、Word、TXT、Markdown 等格式
+
+![知识库文档上传](./images/astrbot-kb-upload.png)
+
 3. 上传后系统会自动分块、向量化
 4. 等「分块数」显示数字（如 513 块），就表示处理完了
 
@@ -498,6 +566,8 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 
 在「Skills」页面，你可以上传自定义技能文件（`.md` 格式），让机器人掌握特定能力。需要在「使用电脑能力」中把运行环境设为 `local` 或 `sandbox` 才能正常使用。
 
+![Skills 页面](./images/astrbot-skills.png)
+
 ### 12.2 SubAgent 编排
 
 把复杂任务拆给多个子代理完成。在「SubAgent 编排」里配置不同的 Agent 角色，主 Agent 会自动把任务分派给它们。
@@ -513,6 +583,8 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 ### 12.5 平台日志
 
 机器人出问题了？去「平台日志」看实时日志，DEBUG 级别可以看到最详细的报错信息。
+
+![平台日志](./images/astrbot-platform-logs.png)
 
 ---
 
