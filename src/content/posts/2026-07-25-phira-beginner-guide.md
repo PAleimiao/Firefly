@@ -187,7 +187,16 @@ Phira 支持自定义资源包，可以换按键皮肤、打击音效、背景�
 3. 进游戏「资源包」里选择启用
 
 **方法二：游戏内导入（推荐）**
-进游戏 → 点「资源包」 → 点左边「+」加号 → 找到你下载的 `.zip` 资源包文件 → 导入完成
+
+按下图步骤操作：
+
+![Step 1: 主界面点资源包](./images/phira-guide-respack-main.jpg)
+
+![Step 2: 点左边加号](./images/phira-guide-respack-plus.jpg)
+
+![Step 3: 找到下载的 .zip 资源包文件](./images/phira-guide-respack-download.jpg)
+
+> 红色箭头标注的就是要点的位置，跟着走就行。
 
 或者直接在 Phira 的在线资源包里浏览下载（需要联网）。
 
