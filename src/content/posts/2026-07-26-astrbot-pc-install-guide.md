@@ -19,7 +19,7 @@ image: ./images/astrbot-architecture.png
 
 **AstrBot** 是一个开源的一站式 Agent 聊天机器人平台，说人话就是：你把 AI 大模型（DeepSeek、GPT、Gemini 啥的）接进去，它就能帮你在 **QQ、QQ频道、微信、Telegram、飞书、钉钉、Discord** 这些平台上自动回复消息。
 
-![AstrBot 官网首页](./images/astrbot-official-site.png)
+![AstrBot 官网首页，展示跨平台 AI 助手功能](./images/astrbot-official-site.png)
 
 它不只是聊天机器人，更是 Agent 平台：支持子代理（Sub-Agent）协同工作、复杂任务编排、工具调用与上下文管理，让 AI 具备真正的行动力。
 
@@ -40,28 +40,24 @@ image: ./images/astrbot-architecture.png
 
 动手之前先把这几样凑齐，省得中途卡壳：
 
-### 2.1 硬件准备（物理机部署）
+### 2.1 硬件与软件准备（物理机部署）
 
-如果你打算用家里闲置电脑或工控机当服务器：
+如果你打算用家里闲置电脑或工控机当服务器，需要准备以下东西：
+
+![硬件与软件准备清单：X86电脑、U盘、BalenaEtcher、MobaXterm、Ubuntu镜像、大模型API](./images/astrbot-hardware-prep.png)
 
 - **X86 电脑**（台式机/笔记本/小主机都行，ARM 也可以但视频里演示的是 X86）
 - **U 盘**（≥8GB，用来写 Ubuntu 系统镜像）
-- **网线**（推荐有线连接，比 WiFi 稳）
-
-![硬件准备清单：X86电脑、U盘、BalenaEtcher、MobaXterm、Ubuntu镜像、大模型API](./images/astrbot-hardware-prep.png)
-
-### 2.2 软件准备
-
 - **BalenaEtcher**：把 Ubuntu 镜像写入 U 盘的工具  
   👉 https://etcher.balena.io
-- **Ubuntu 镜像**：推荐 **Ubuntu 24.04 LTS**  
-  👉 https://ubuntu.com/download/desktop
 - **MobaXterm**：Windows 下的 SSH 连接工具（比 PuTTY 好用一百倍）  
   👉 https://mobaxterm.mobatek.net
+- **Ubuntu 镜像**：推荐 **Ubuntu 24.04 LTS**  
+  👉 https://ubuntu.com/download/desktop
 - **大模型 API Key**：推荐 **硅基流动（SiliconCloud）** 或 **MiniMax**、**DeepSeek** 等
 - **一个 QQ 小号**：**千万别用主号！** 机器人有一定封号风险，用小号隔离。建议用养了几个月、有正常使用记录的号，新号容易被风控。
 
-### 2.3 如果你用云服务器/VPS
+### 2.2 如果你用云服务器/VPS
 
 那硬件和系统安装这一步可以跳过，直接看「方式二：Docker Compose」或「方式三：CasaOS」。
 
@@ -76,7 +72,7 @@ image: ./images/astrbot-architecture.png
 1. 下载 BalenaEtcher 和 Ubuntu 24.04 ISO 镜像
 2. 打开 BalenaEtcher → 「从文件烧录」→ 选择 Ubuntu ISO → 选择你的 U 盘 → 「现在烧录！」
 
-![BalenaEtcher 烧录界面，选择镜像文件和目标U盘](./images/astrbot-balenaetcher.png)
+![BalenaEtcher 软件界面，选择镜像文件和目标U盘进行烧录](./images/astrbot-balenaetcher.png)
 
 3. 烧录完成后，把 U 盘插到要装系统的电脑上
 
@@ -91,7 +87,7 @@ image: ./images/astrbot-architecture.png
 7. 创建用户：填用户名、密码，**记住这个密码，后面 SSH 登录要用**
 8. 等进度条跑完，重启，拔掉 U 盘
 
-![Ubuntu 24.04 安装欢迎界面](./images/astrbot-ubuntu-install.png)
+![Ubuntu 24.04 安装欢迎界面，选择语言和键盘布局](./images/astrbot-ubuntu-install.png)
 
 ### 3.3 安装 OpenSSH + 查看 IP
 
@@ -102,6 +98,8 @@ sudo apt install openssh-server -y
 ip addr
 ```
 
+![Ubuntu 终端中安装 OpenSSH 服务](./images/astrbot-ssh-install.png)
+
 找到类似 `192.168.31.226` 这样的内网 IP，记下来。
 
 ### 3.4 SSH 远程连接（MobaXterm）
@@ -111,7 +109,7 @@ ip addr
 3. Username 填你创建的用户名
 4. 点 OK，输入密码，连上！
 
-![MobaXterm SSH 连接成功，显示终端界面](./images/astrbot-mobaxterm.png)
+![MobaXterm 软件界面，配置 SSH 远程连接](./images/astrbot-mobaxterm.png)
 
 ### 3.5 换国内软件源（加速下载）
 
@@ -121,7 +119,7 @@ Ubuntu 默认源在国外，下载慢得离谱。用 **LinuxMirrors** 一键换�
 bash <(curl -sSL https://linuxmirrors.cn/main.sh)
 ```
 
-![LinuxMirrors 换源脚本运行中，选择清华/阿里云/中科大镜像站](./images/astrbot-linuxmirrors.png)
+![LinuxMirrors 换源脚本在终端中运行，选择国内镜像站](./images/astrbot-linuxmirrors.png)
 
 脚本会让你选择镜像站，推荐选：
 - **清华大学**（tuna）
@@ -138,7 +136,7 @@ CasaOS 是一个轻量级 NAS 系统，自带应用商店，可以像装手机 A
 curl -fsSL https://get.casaos.io | sudo bash
 ```
 
-![CasaOS 登录/注册界面](./images/astrbot-casaos-login.png)
+![CasaOS 登录/注册界面，输入用户名和密码创建账户](./images/astrbot-casaos-login.png)
 
 装完会显示访问地址，一般是 `http://你的IP:80`。浏览器打开，注册一个 CasaOS 账号。
 
@@ -280,7 +278,7 @@ sudo docker logs -f napcat
 - **嵌入（Embedding）**：OpenAI Embedding、Ollama Embedding 等，用于知识库
 - **重排序（Rerank）**：vLLM Rerank、Jina AI 等
 
-![模型提供商列表，支持对话/Agent/TTS/STT/Embedding/Rerank六大类](./images/astrbot-model-providers.png)
+![AstrBot 模型提供商列表，支持对话/Agent/TTS/STT/Embedding/Rerank六大类](./images/astrbot-model-providers.png)
 
 ### 7.2 接入示例（以 MiniMax 为例）
 
@@ -289,6 +287,9 @@ sudo docker logs -f napcat
    - **ID**：`MINIMAX`
    - **API Key**：从 MiniMax 官网获取
    - **API Base URL**：`https://api.minimax.chat/v1`
+
+![MiniMax API 配置界面，填写 ID、API Key 和 Base URL](./images/astrbot-minimax-config.png)
+
 3. 保存 → 点击「获取模型列表」→ 添加模型（如 `MiniMax-M2.7`）→ 启用
 
 > ⚠️ **注意**：Base URL 末尾必须加 `/v1`，不同提供商地址不一样。
@@ -354,7 +355,7 @@ AstrBot 支持为不同机器人分别设置配置文件：
 3. AstrBot 面板 → 「平台配置」→ 「管理员 ID」→ 添加你的 ID
 4. 保存，现在你有管理员权限了
 
-![QQ 聊天测试，机器人成功回复消息](./images/astrbot-qq-chat-test.png)
+![QQ 聊天测试，机器人成功回复消息并执行命令](./images/astrbot-qq-chat-test.png)
 
 ---
 
