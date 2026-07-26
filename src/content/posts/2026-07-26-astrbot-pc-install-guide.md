@@ -19,7 +19,7 @@ image: ./images/astrbot-architecture.png
 
 **AstrBot** 是一个开源的一站式 Agent 聊天机器人平台，说人话就是：你把 AI 大模型（DeepSeek、GPT、Gemini 啥的）接进去，它就能帮你在 **QQ、QQ频道、微信、Telegram、飞书、钉钉、Discord** 这些平台上自动回复消息。
 
-![AstrBot 官网首页，展示跨平台 AI 助手功能](./images/astrbot-official-site.png)
+![AstrBot 官网首页，展示跨平台 AI 助手功能](./images/astrbot-official-site-v2.png)
 
 它不只是聊天机器人，更是 Agent 平台：支持子代理（Sub-Agent）协同工作、复杂任务编排、工具调用与上下文管理，让 AI 具备真正的行动力。
 
@@ -44,7 +44,7 @@ image: ./images/astrbot-architecture.png
 
 如果你打算用家里闲置电脑或工控机当服务器，需要准备以下东西：
 
-![硬件与软件准备清单：X86电脑、U盘、BalenaEtcher、MobaXterm、Ubuntu镜像、大模型API](./images/astrbot-hardware-prep.png)
+![硬件与软件准备清单：X86电脑、U盘、BalenaEtcher、MobaXterm、Ubuntu镜像、大模型API](./images/astrbot-hardware-prep-v2.png)
 
 - **X86 电脑**（台式机/笔记本/小主机都行，ARM 也可以但视频里演示的是 X86）
 - **U 盘**（≥8GB，用来写 Ubuntu 系统镜像）
@@ -72,7 +72,7 @@ image: ./images/astrbot-architecture.png
 1. 下载 BalenaEtcher 和 Ubuntu 24.04 ISO 镜像
 2. 打开 BalenaEtcher → 「从文件烧录」→ 选择 Ubuntu ISO → 选择你的 U 盘 → 「现在烧录！」
 
-![BalenaEtcher 软件界面，选择镜像文件和目标U盘进行烧录](./images/astrbot-balenaetcher.png)
+![BalenaEtcher 软件界面，选择镜像文件和目标U盘进行烧录](./images/astrbot-balenaetcher-v2.png)
 
 3. 烧录完成后，把 U 盘插到要装系统的电脑上
 
@@ -87,7 +87,7 @@ image: ./images/astrbot-architecture.png
 7. 创建用户：填用户名、密码，**记住这个密码，后面 SSH 登录要用**
 8. 等进度条跑完，重启，拔掉 U 盘
 
-![Ubuntu 24.04 安装欢迎界面，选择语言和键盘布局](./images/astrbot-ubuntu-install.png)
+![Ubuntu 24.04 安装欢迎界面，选择语言和键盘布局](./images/astrbot-ubuntu-install-v2.png)
 
 ### 3.3 安装 OpenSSH + 查看 IP
 
@@ -98,7 +98,7 @@ sudo apt install openssh-server -y
 ip addr
 ```
 
-![Ubuntu 终端中安装 OpenSSH 服务](./images/astrbot-ssh-install.png)
+![Ubuntu 终端中安装 OpenSSH 服务](./images/astrbot-ssh-install-v2.png)
 
 找到类似 `192.168.31.226` 这样的内网 IP，记下来。
 
@@ -109,7 +109,7 @@ ip addr
 3. Username 填你创建的用户名
 4. 点 OK，输入密码，连上！
 
-![MobaXterm 软件界面，配置 SSH 远程连接](./images/astrbot-mobaxterm.png)
+![MobaXterm 软件界面，配置 SSH 远程连接](./images/astrbot-mobaxterm-v2.png)
 
 ### 3.5 换国内软件源（加速下载）
 
@@ -119,7 +119,7 @@ Ubuntu 默认源在国外，下载慢得离谱。用 **LinuxMirrors** 一键换�
 bash <(curl -sSL https://linuxmirrors.cn/main.sh)
 ```
 
-![LinuxMirrors 换源脚本在终端中运行，选择国内镜像站](./images/astrbot-linuxmirrors.png)
+![LinuxMirrors 换源脚本在终端中运行，选择国内镜像站](./images/astrbot-linuxmirrors-v2.png)
 
 脚本会让你选择镜像站，推荐选：
 - **清华大学**（tuna）
@@ -136,7 +136,7 @@ CasaOS 是一个轻量级 NAS 系统，自带应用商店，可以像装手机 A
 curl -fsSL https://get.casaos.io | sudo bash
 ```
 
-![CasaOS 登录/注册界面，输入用户名和密码创建账户](./images/astrbot-casaos-login.png)
+![CasaOS 登录/注册界面，输入用户名和密码创建账户](./images/astrbot-casaos-login-v2.png)
 
 装完会显示访问地址，一般是 `http://你的IP:80`。浏览器打开，注册一个 CasaOS 账号。
 
@@ -147,7 +147,7 @@ curl -fsSL https://get.casaos.io | sudo bash
 3. 点击安装，CasaOS 会自动拉取 Docker 镜像、配置端口映射
 4. 等图标从灰色变彩色，就表示装好了
 
-![CasaOS 应用商店中搜索并安装 AstrBot](./images/astrbot-casaos-store.png)
+![CasaOS 应用商店中搜索并安装 AstrBot](./images/astrbot-casaos-store-v2.png)
 
 5. 点击 AstrBot 图标进入，或者浏览器直接访问 `http://你的IP:6185`
 
@@ -259,7 +259,7 @@ sudo docker logs -f napcat
 
 登录后左侧菜单：欢迎、机器人、模型提供商、配置文件、插件、知识库、人格设定、更多功能等。
 
-![AstrBot WebUI 仪表盘，左侧菜单栏清晰可见](./images/astrbot-dashboard.png)
+![AstrBot WebUI 仪表盘，左侧菜单栏清晰可见](./images/astrbot-dashboard-v2.png)
 
 ---
 
@@ -278,7 +278,7 @@ sudo docker logs -f napcat
 - **嵌入（Embedding）**：OpenAI Embedding、Ollama Embedding 等，用于知识库
 - **重排序（Rerank）**：vLLM Rerank、Jina AI 等
 
-![AstrBot 模型提供商列表，支持对话/Agent/TTS/STT/Embedding/Rerank六大类](./images/astrbot-model-providers.png)
+![AstrBot 模型提供商列表，支持对话/Agent/TTS/STT/Embedding/Rerank六大类](./images/astrbot-model-providers-v2.png)
 
 ### 7.2 接入示例（以 MiniMax 为例）
 
@@ -288,7 +288,7 @@ sudo docker logs -f napcat
    - **API Key**：从 MiniMax 官网获取
    - **API Base URL**：`https://api.minimax.chat/v1`
 
-![MiniMax API 配置界面，填写 ID、API Key 和 Base URL](./images/astrbot-minimax-config.png)
+![MiniMax API 配置界面，填写 ID、API Key 和 Base URL](./images/astrbot-minimax-config-v2.png)
 
 3. 保存 → 点击「获取模型列表」→ 添加模型（如 `MiniMax-M2.7`）→ 启用
 
@@ -314,7 +314,7 @@ AstrBot 支持为不同机器人分别设置配置文件：
 1. 访问 [QQ 开放平台](https://q.qq.com) → 创建机器人
 2. 获取 **AppID** 和 **Secret**
 
-![QQ 开放平台创建机器人，获取 AppID 和 Secret](./images/astrbot-qq-openplatform.png)
+![QQ 开放平台创建机器人，获取 AppID 和 Secret](./images/astrbot-qq-openplatform-v2.png)
 
 3. AstrBot → 「平台配置」→ 选择「QQ 官方机器人」
 4. 填写 AppID、Secret、机器人名称，保存即可上线
@@ -355,7 +355,7 @@ AstrBot 支持为不同机器人分别设置配置文件：
 3. AstrBot 面板 → 「平台配置」→ 「管理员 ID」→ 添加你的 ID
 4. 保存，现在你有管理员权限了
 
-![QQ 聊天测试，机器人成功回复消息并执行命令](./images/astrbot-qq-chat-test.png)
+![QQ 聊天测试，机器人成功回复消息并执行命令](./images/astrbot-qq-chat-test-v2.png)
 
 ---
 
@@ -419,7 +419,7 @@ AstrBot 面板 → 「插件」→ 「插件市场」，挑喜欢的点「安装
 - **点歌插件**：网易云、QQ音乐、B站
 - **万能解析器**：解析抖音、B站、小红书链接
 
-![AstrBot 插件市场，各种插件一键安装](./images/astrbot-plugins-market.png)
+![AstrBot 插件市场，各种插件一键安装](./images/astrbot-plugins-market-v2.png)
 
 装完重启 AstrBot 生效。
 
