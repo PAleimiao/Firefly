@@ -10,6 +10,8 @@ slug: phira-advanced-guide
 > 如果你还没看过上一篇《Phira 新手入坑全攻略》，建议先去看完再来，不然你可能连游戏都没下好。
 >
 > 👉 **[Phira 新手入坑全攻略：从下载安装到导入谱面，一篇搞定](/posts/phira-beginner-guide)**
+>
+> 👉 **[Phira 新手打谱教程：音符操作、模组设置、练习模式、多人联机](/posts/phira-beginner-guide)**
 
 上一篇把**下载、注册、激活、导入谱面、换皮肤**这些「场外操作」讲完了。
 
