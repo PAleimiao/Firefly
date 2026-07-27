@@ -311,6 +311,7 @@ const SCRIPT = [
   { type: 'text', speaker: '立华奏', text: '...嗯。', char: 'kanade', pos: 'right' },
   { type: 'text', speaker: '音无结弦', text: '你...一直都知道吧。关于我。', char: 'yuzuru', pos: 'left' },
   { type: 'bg', src: 'cg_yuzuru_kanade_sunset.jpg' },
+  { type: 'bgm', src: 'ichiban_yui.mp3' },
   { type: 'text', speaker: '立华奏', text: '是的。音无同学的心脏...在我的身体里跳动着。', char: 'kanade', pos: 'right' },
   { type: 'text', speaker: '立华奏', text: '因为那颗心脏，我才来到了这个世界。', char: 'kanade', pos: 'right' },
   { type: 'text', speaker: '立华奏', text: '我想...对那颗心脏的主人，说一声谢谢。', char: 'kanade', pos: 'right' },
@@ -343,6 +344,7 @@ const SCRIPT = [
   { type: 'text', speaker: '', text: '日复一日，年复一年。' },
   { type: 'text', speaker: '', text: '直到...那个约定的时刻到来。' },
   { type: 'bg', src: 'bg_sunset_street.jpg' },
+  { type: 'bgm', src: 'ichiban.mp3' },
   { type: 'text', speaker: '', text: '现实世界的街道。阳光明媚。' },
   { type: 'text', speaker: '', text: '音无走在人行道上，心中空落落的。' },
   { type: 'text', speaker: '???', text: '那个...请问...' },
@@ -459,8 +461,34 @@ function setBG(src) {
 
 function playBGM(src) {
   const bgm = document.getElementById('bgm');
-  bgm.src = `assets/bgm/${src}`;
-  bgm.play().catch(()=>{});
+  const vol = settings.bgmVol / 100;
+
+  // 如果正在播放且是同一首歌，不重复切换
+  if(bgm.src && bgm.src.includes(src) && !bgm.paused) return;
+
+  // 淡出当前音乐
+  if(!bgm.paused) {
+    const fadeOut = setInterval(() => {
+      if(bgm.volume > 0.05) { bgm.volume -= 0.05; }
+      else {
+        clearInterval(fadeOut);
+        bgm.pause();
+        bgm.src = `assets/bgm/${src}`;
+        bgm.volume = 0;
+        bgm.play().then(() => {
+          // 淡入
+          const fadeIn = setInterval(() => {
+            if(bgm.volume < vol - 0.05) { bgm.volume += 0.05; }
+            else { bgm.volume = vol; clearInterval(fadeIn); }
+          }, 100);
+        }).catch(()=>{});
+      }
+    }, 80);
+  } else {
+    bgm.src = `assets/bgm/${src}`;
+    bgm.volume = vol;
+    bgm.play().catch(()=>{});
+  }
 }
 
 function handleChar(line) {
