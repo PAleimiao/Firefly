@@ -236,6 +236,24 @@ iOS 下音游比安卓麻烦，主要问题：**国区 App Store 很多音游没
 
 ---
 
+> 📌 **其他 TapTap 音游**（链接已验证）：
+> 
+> - **[Siglota](https://www.taptap.cn/app/382611)** —— 三角形判定线 3D 无轨下落式，霜影工作室
+> - **[Eilans Etah](https://www.taptap.cn/app/721483)** —— 三面下落式，高难度核心向
+> - **[BanG Dream! 少女乐团派对](https://www.taptap.cn/app/67848)** —— 乐队养成 + 下落式音游，bilibili 代理
+> - **[偶像梦幻祭2](https://www.taptap.cn/app/183321)** —— 全方位沉浸式偶像音游，乐元素出品
+> - **[D4DJ Groovy Mix](https://www.taptap.cn/app/214849)** —— DJ 主题搓盘音游，武士道出品
+> - **[SuperStar SMTOWN](https://www.taptap.cn/app/8764)** —— SM 旗下艺人卡牌音游
+> - **[Tone Sphere](https://www.taptap.cn/app/6950)** —— 3D 球形轨道音游，Sta 出品
+> - **[osu!droid](https://www.taptap.cn/app/7987)** —— 手机版 osu!，社区驱动
+> 
+> 还缺链接的（需要你补充）：
+> - 世界计划 彩色舞台 feat.初音未来
+> - Cytoid
+> - OverRapid
+> - 东方弹幕神乐
+> - 钢琴师、阳春艺曲、曲中剑、白键上的协奏曲、不可思议乐队、jubeat plus、太鼓达人Plus、永不言弃2、Mixlody、DataTide、Arellano、逆转节拍、暮色大师、Blophy
+
 *P.S. 渠道链接和上架情况可能随时间变动，如果发现链接失效或游戏换了平台，欢迎评论区提醒更新。*
 
 *P.P.S. 如果你发现这篇漏了某个音游，评论区补充，我补上。*
