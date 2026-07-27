@@ -33,6 +33,11 @@ slug: rhythm-games-official-download-guide
 - **[音乐世界赛特斯2 / Cytus II](https://tap.cn/lZbh6wKdw)** —— 龙渊网络代理，TapTap 下载
 - **[初音未来：缤纷舞台](https://tap.cn/lQWigBj9Z)** —— 朝夕光年官方版，TapTap 下载
 - **[节奏大师](https://tap.cn/lKzXXIEdS)** —— 腾讯官方版，TapTap 下载
+- **[律动轨迹 / Rizline](https://www.taptap.cn/app/302915)** —— 鸽游第二款作品，TapTap 独家
+- **[Berry Melody](https://www.taptap.cn/app/242115)** —— 下落式音游，剧情向，多首原创曲
+- **[Twirdora](https://www.taptap.cn/app/212893)** —— 六边形盘面旋转音游，硬核高难度
+- **[同步音律喵赛克](https://www.taptap.cn/app/6908)** —— 支持自定义音乐导入，洛天依联动
+- **[花雨旋律 / DEEMO II](https://www.taptap.cn/app/180183)** —— 雷亚出品，钢琴风剧情音游
 
 **TapTap 首页**：[https://www.taptap.cn/](https://www.taptap.cn/)（上面列的游戏都可以在里面搜到）
 
