@@ -195,7 +195,7 @@ html, body {
 <body>
 
 <!-- 标题画面 -->
-<div id="title-screen">
+<div id="title-screen" onclick="playTitleBGM()">
   <h1>Angel Beats!</h1>
   <h2>毕业</h2>
   <div class="title-btn" onclick="startGame()">开始游戏</div>
@@ -384,9 +384,18 @@ let history = [];
 let charsOnScreen = {};
 
 // ========== 初始化 ==========
+let titleBGMStarted = false;
 function init() {
   loadSettings();
   document.getElementById('bgm').volume = settings.bgmVol / 100;
+}
+function playTitleBGM() {
+  if(titleBGMStarted) return;
+  titleBGMStarted = true;
+  const bgm = document.getElementById('bgm');
+  bgm.src = 'assets/bgm/critical_mission.mp3';
+  bgm.volume = settings.bgmVol / 100;
+  bgm.play().catch(()=>{});
 }
 
 function startGame() {
@@ -396,6 +405,7 @@ function startGame() {
   history = [];
   charsOnScreen = {};
   document.getElementById('char-layer').innerHTML = '';
+  titleBGMStarted = false;
   processLine();
 }
 
@@ -409,6 +419,7 @@ function loadGame() {
     document.getElementById('top-ui').style.display = 'flex';
     charsOnScreen = {};
     document.getElementById('char-layer').innerHTML = '';
+    titleBGMStarted = false;
     processLine();
   } else {
     startGame();
