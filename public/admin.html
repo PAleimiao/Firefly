@@ -695,9 +695,17 @@
   </div>
 
   <div class="form-group">
-    <label>封面路径</label>
+    <label>封面来源</label>
+    <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+        <input type="radio" name="cover-type" value="local" checked onchange="toggleCoverInput()"> 本地上传
+      </label>
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+        <input type="radio" name="cover-type" value="remote" onchange="toggleCoverInput()"> 外部直链
+      </label>
+    </div>
     <input type="text" id="anime-cover" placeholder="/assets/anime-covers/shiwangzhe-s4.jpg">
-    <small style="color: #666; display: block; margin-top: 4px;">先上传封面到 public/assets/anime-covers/</small>
+    <small id="cover-hint" style="color: #666; display: block; margin-top: 4px;">先上传封面到 public/assets/anime-covers/，然后填路径</small>
   </div>
 
   <div class="form-group">
@@ -724,6 +732,19 @@
 
 <script>
 let episodes = [];
+
+function toggleCoverInput() {
+  const type = document.querySelector('input[name="cover-type"]:checked').value;
+  const input = document.getElementById('anime-cover');
+  const hint = document.getElementById('cover-hint');
+  if (type === 'local') {
+    input.placeholder = '/assets/anime-covers/shiwangzhe-s4.jpg';
+    hint.textContent = '先上传封面到 public/assets/anime-covers/，然后填路径';
+  } else {
+    input.placeholder = 'https://example.com/cover.jpg';
+    hint.textContent = '直接填写外部图片直链地址';
+  }
+}
 
 function addEpisode() {
   const idx = document.querySelectorAll('.ep-row').length + 1;
