@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Angel Beats - 毕业 - CXL避难所</title>
+<title>Angel Beats! - 毕业 - CXL避难所</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -16,9 +16,8 @@ html, body {
 #bg-layer {
   position: fixed; inset: 0; z-index: 1;
   background-size: cover; background-position: center;
-  transition: opacity 1s ease;
+  transition: opacity 1.2s ease;
 }
-#bg-layer.fade { opacity: 0; }
 
 /* 立绘层 */
 #char-layer {
@@ -28,38 +27,40 @@ html, body {
 }
 .char {
   position: absolute; bottom: 0; height: 90%;
-  opacity: 0; transform: translateY(20px);
-  transition: all 0.6s ease;
-  filter: drop-shadow(0 0 30px rgba(0,0,0,0.5));
+  opacity: 0; transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 40px rgba(0,0,0,0.6));
 }
 .char.active { opacity: 1; transform: translateY(0); }
-.char.left { left: 5%; }
-.char.center { left: 50%; transform: translateX(-50%) translateY(20px); }
+.char.left { left: 3%; }
+.char.center { left: 50%; transform: translateX(-50%) translateY(30px); }
 .char.center.active { transform: translateX(-50%) translateY(0); }
-.char.right { right: 5%; }
+.char.right { right: 3%; }
 
 /* 对话框 */
 #dialog-box {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-  width: 90%; max-width: 900px; z-index: 10;
-  background: rgba(0,0,0,0.75);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 12px; padding: 20px 28px;
-  backdrop-filter: blur(10px);
-  cursor: pointer; min-height: 120px;
+  position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+  width: 92%; max-width: 880px; z-index: 10;
+  background: rgba(0,0,0,0.78);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px; padding: 18px 26px;
+  backdrop-filter: blur(12px);
+  cursor: pointer; min-height: 110px;
+  transition: opacity 0.3s;
 }
+#dialog-box.hidden { opacity: 0; pointer-events: none; }
 #speaker {
-  font-size: 1.1rem; font-weight: bold; color: #a8edea;
-  margin-bottom: 8px; padding-left: 4px;
-  border-left: 3px solid #a8edea; padding-left: 10px;
+  font-size: 1.05rem; font-weight: bold;
+  margin-bottom: 6px; padding-left: 4px;
+  border-left: 3px solid; padding-left: 10px;
 }
 #text {
-  font-size: 1.05rem; line-height: 1.8; color: #eee;
-  min-height: 60px;
+  font-size: 1rem; line-height: 1.75; color: #eee;
+  min-height: 50px;
 }
 #text .cursor {
   display: inline-block; width: 2px; height: 1.1em;
-  background: #a8edea; margin-left: 2px;
+  background: currentColor; margin-left: 2px;
   animation: blink 0.8s infinite;
   vertical-align: text-bottom;
 }
@@ -69,100 +70,99 @@ html, body {
 #choices {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
   z-index: 20; display: none; flex-direction: column; gap: 12px;
-  width: 80%; max-width: 400px;
+  width: 80%; max-width: 380px;
 }
 #choices.active { display: flex; }
 .choice-btn {
-  background: rgba(0,0,0,0.8);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px; padding: 14px 20px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px; padding: 14px 22px;
   color: #fff; font-size: 1rem; cursor: pointer;
-  text-align: center; transition: all 0.2s;
+  text-align: center; transition: all 0.25s;
   backdrop-filter: blur(10px);
 }
 .choice-btn:hover {
-  background: rgba(168,237,234,0.15);
-  border-color: #a8edea; transform: translateX(5px);
+  background: rgba(168,237,234,0.12);
+  border-color: #a8edea; transform: translateX(6px);
 }
 
 /* 顶部UI */
 #top-ui {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30;
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 20px; background: rgba(0,0,0,0.3);
+  display: none; justify-content: space-between; align-items: center;
+  padding: 10px 18px; background: rgba(0,0,0,0.35);
 }
+#top-ui.active { display: flex; }
 #top-ui button {
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 6px; padding: 6px 14px; color: #ccc;
-  font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px; padding: 5px 12px; color: #bbb;
+  font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
 }
 #top-ui button:hover { background: rgba(255,255,255,0.15); color: #fff; }
-#chapter-title {
-  font-size: 0.9rem; color: #888; letter-spacing: 2px;
-}
+#chapter-title { font-size: 0.85rem; color: #888; letter-spacing: 2px; }
 
 /* 设置面板 */
 #settings {
   position: fixed; inset: 0; z-index: 40;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.88);
   display: none; align-items: center; justify-content: center;
 }
 #settings.active { display: flex; }
 .settings-box {
-  background: rgba(20,20,30,0.95); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 30px; width: 320px;
+  background: rgba(18,18,28,0.96); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px; padding: 28px; width: 300px;
 }
-.settings-box h2 { font-size: 1.3rem; margin-bottom: 20px; text-align: center; }
-.setting-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
-.setting-row label { font-size: 0.9rem; color: #aaa; }
-.setting-row input[type="range"] { width: 120px; }
-.setting-row span { font-size: 0.8rem; color: #888; width: 40px; text-align: right; }
+.settings-box h2 { font-size: 1.2rem; margin-bottom: 18px; text-align: center; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin: 14px 0; }
+.setting-row label { font-size: 0.88rem; color: #aaa; }
+.setting-row input[type="range"] { width: 110px; }
+.setting-row span { font-size: 0.78rem; color: #888; width: 42px; text-align: right; }
 .close-btn {
-  width: 100%; margin-top: 15px; padding: 10px;
-  background: rgba(168,237,234,0.15); border: 1px solid #a8edea;
-  border-radius: 8px; color: #a8edea; cursor: pointer;
+  width: 100%; margin-top: 12px; padding: 10px;
+  background: rgba(168,237,234,0.12); border: 1px solid #a8edea;
+  border-radius: 8px; color: #a8edea; cursor: pointer; font-size: 0.9rem;
 }
 
 /* 历史记录 */
 #history {
   position: fixed; inset: 0; z-index: 40;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0,0,0,0.92);
   display: none; flex-direction: column;
 }
 #history.active { display: flex; }
 #history-header {
-  padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex; justify-content: space-between; align-items: center;
 }
 #history-list {
-  flex: 1; overflow-y: auto; padding: 20px;
+  flex: 1; overflow-y: auto; padding: 18px;
 }
-.history-item { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; }
-.history-speaker { color: #a8edea; font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; }
-.history-text { color: #ccc; font-size: 0.9rem; }
+.history-item { margin-bottom: 10px; padding: 10px 12px; background: rgba(255,255,255,0.04); border-radius: 8px; }
+.history-speaker { color: #a8edea; font-weight: bold; font-size: 0.82rem; margin-bottom: 3px; }
+.history-text { color: #ccc; font-size: 0.88rem; }
 
 /* 标题画面 */
 #title-screen {
   position: fixed; inset: 0; z-index: 50;
-  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0d0d1a 100%);
+  background: linear-gradient(180deg, #080818 0%, #151528 50%, #0a0a18 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 #title-screen h1 {
-  font-size: 3rem; letter-spacing: 8px; margin-bottom: 10px;
+  font-size: 2.8rem; letter-spacing: 10px; margin-bottom: 8px;
   background: linear-gradient(90deg, #a8edea, #fed6e3);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 #title-screen h2 {
-  font-size: 1rem; color: #888; letter-spacing: 4px; margin-bottom: 60px;
+  font-size: 0.95rem; color: #777; letter-spacing: 5px; margin-bottom: 50px;
 }
 .title-btn {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px; padding: 12px 50px; margin: 8px 0;
-  color: #ddd; font-size: 1rem; cursor: pointer;
-  transition: all 0.3s; min-width: 200px; text-align: center;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 12px 48px; margin: 7px 0;
+  color: #ccc; font-size: 1rem; cursor: pointer;
+  transition: all 0.3s; min-width: 220px; text-align: center;
 }
 .title-btn:hover {
-  background: rgba(168,237,234,0.1); border-color: #a8edea; color: #fff;
+  background: rgba(168,237,234,0.08); border-color: #a8edea; color: #fff;
   transform: translateY(-2px);
 }
 
@@ -173,7 +173,7 @@ html, body {
 }
 #chapter-overlay.active { display: flex; }
 #chapter-overlay h1 {
-  font-size: 2.5rem; letter-spacing: 6px;
+  font-size: 2.2rem; letter-spacing: 5px; text-align: center;
   animation: chapterFade 2.5s ease forwards;
 }
 @keyframes chapterFade {
@@ -183,24 +183,32 @@ html, body {
   100% { opacity: 0; }
 }
 
-/* 跳过按钮 */
-#skip-hint {
-  position: fixed; bottom: 160px; right: 20px; z-index: 10;
-  color: #888; font-size: 0.75rem; opacity: 0;
-  transition: opacity 0.3s;
+/* 状态提示 */
+#status-toast {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  z-index: 50; padding: 8px 20px; background: rgba(0,0,0,0.8);
+  border: 1px solid rgba(168,237,234,0.3); border-radius: 20px;
+  color: #a8edea; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
 }
-#skip-hint.active { opacity: 1; }
+#status-toast.active { opacity: 1; }
+
+@media (max-width: 600px) {
+  #title-screen h1 { font-size: 2rem; letter-spacing: 5px; }
+  .char { height: 80%; }
+  #dialog-box { width: 96%; padding: 14px 18px; }
+}
 </style>
 </head>
 <body>
 
 <!-- 标题画面 -->
-<div id="title-screen" onclick="playTitleBGM()">
+<div id="title-screen">
   <h1>Angel Beats!</h1>
   <h2>毕业</h2>
-  <div class="title-btn" onclick="startGame()">开始游戏</div>
-  <div class="title-btn" onclick="loadGame()">继续游戏</div>
-  <div class="title-btn" onclick="showSettings()">设置</div>
+  <div class="title-btn" onclick="startGame(); event.stopPropagation();">开始游戏</div>
+  <div class="title-btn" onclick="loadGame(); event.stopPropagation();">继续游戏</div>
+  <div class="title-btn" onclick="showSettings(); event.stopPropagation();">设置</div>
 </div>
 
 <!-- 章节标题 -->
@@ -222,19 +230,19 @@ html, body {
 <div id="choices"></div>
 
 <!-- 顶部UI -->
-<div id="top-ui" style="display:none;">
+<div id="top-ui">
   <div id="chapter-title">毕业</div>
   <div>
     <button onclick="toggleAuto()" id="autoBtn">自动</button>
     <button onclick="toggleSkip()" id="skipBtn">快进</button>
     <button onclick="showHistory()">历史</button>
-    <button onclick="quickSave()">快速存档</button>
+    <button onclick="quickSave()">存档</button>
     <button onclick="showSettings()">设置</button>
   </div>
 </div>
 
 <!-- 设置 -->
-<div id="settings">
+<div id="settings" onclick="if(event.target===this) hideSettings();">
   <div class="settings-box">
     <h2>设置</h2>
     <div class="setting-row">
@@ -265,8 +273,8 @@ html, body {
   <div id="history-list"></div>
 </div>
 
-<!-- 跳过提示 -->
-<div id="skip-hint">按住Ctrl跳过已读</div>
+<!-- 状态提示 -->
+<div id="status-toast"></div>
 
 <!-- BGM -->
 <audio id="bgm" loop></audio>
@@ -274,8 +282,7 @@ html, body {
 <script>
 // ========== 剧本数据 ==========
 const SCRIPT = [
-  { type: 'chapter', text: 'Episode 13
-毕业' },
+  { type: 'chapter', text: 'Episode 13<br>毕业' },
   { type: 'bg', src: 'bg_classroom.jpg' },
   { type: 'bgm', src: 'ichiban.mp3' },
   { type: 'text', speaker: '', text: '死后世界战线的成员们，终于迎来了最后的时刻。' },
@@ -293,10 +300,9 @@ const SCRIPT = [
   { type: 'bg', src: 'cg_ed_group1.jpg' },
   { type: 'text', speaker: '由依', text: '由理姐...!', char: 'yui', pos: 'right' },
   { type: 'text', speaker: '日向秀树', text: '别哭啦，笨蛋。她可是笑着离开的。', char: 'hinata', pos: 'left' },
-  { type: 'bgm', src: 'theme_of_sss.mp3' },
   { type: 'text', speaker: '由依', text: '我、我才没哭呢! 只是...只是眼睛进沙子了...', char: 'yui', pos: 'right' },
+  { type: 'bgm', src: 'theme_of_sss.mp3' },
   { type: 'text', speaker: '', text: '一个接一个，SSS的成员们满足了自己的心愿，化作光芒消失。' },
-  { type: 'text', speaker: '', text: '椎名轻轻点头，也随之消散。' },
   { type: 'text', speaker: '', text: '椎名轻轻点头，也随之消散。' },
   { type: 'text', speaker: '日向秀树', text: '那么...我们也该走了吧，由依。', char: 'hinata', pos: 'left' },
   { type: 'text', speaker: '由依', text: '嗯! 下辈子...你要来娶我哦!', char: 'yui', pos: 'right' },
@@ -320,8 +326,8 @@ const SCRIPT = [
   { type: 'text', speaker: '音无结弦', text: '奏...', char: 'yuzuru', pos: 'left' },
   { type: 'text', speaker: '', text: '音无走上前，握住了奏的手。' },
   { type: 'text', speaker: '音无结弦', text: '奏，我...', char: 'yuzuru', pos: 'left' },
-  { type: 'bg', src: 'cg_kanade_hug.jpg' },
   { type: 'text', speaker: '音无结弦', text: '我喜欢你。', char: 'yuzuru', pos: 'left' },
+  { type: 'bg', src: 'cg_kanade_hug.jpg' },
   { type: 'text', speaker: '立华奏', text: '...!', char: 'kanade', pos: 'right' },
   { type: 'text', speaker: '立华奏', text: '音无同学...我也...', char: 'kanade', pos: 'right' },
   { type: 'text', speaker: '立华奏', text: '我也...喜欢你。', char: 'kanade', pos: 'right' },
@@ -372,7 +378,6 @@ const CHARACTERS = {
   yuri: { name: '仲村由理', color: '#e94560', img: 'yuri.png' },
   hinata: { name: '日向秀树', color: '#4dabf7', img: 'hinata.png' },
   yui: { name: '由依', color: '#ffd43b', img: 'yui.png' },
-  // shiina 暂无立绘
 };
 
 // ========== 状态 ==========
@@ -384,25 +389,18 @@ let skipMode = false;
 let settings = { textSpeed: 50, bgmVol: 70, seVol: 80 };
 let history = [];
 let charsOnScreen = {};
+let titleBGMStarted = false;
 
 // ========== 初始化 ==========
-let titleBGMStarted = false;
 function init() {
   loadSettings();
-  document.getElementById('bgm').volume = settings.bgmVol / 100;
-}
-function playTitleBGM() {
-  if(titleBGMStarted) return;
-  titleBGMStarted = true;
   const bgm = document.getElementById('bgm');
-  bgm.src = 'assets/bgm/my_soul_your_beats.mp3';
-  bgm.volume = settings.bgmVol / 100;
-  bgm.play().catch(()=>{});
+  if(bgm) bgm.volume = settings.bgmVol / 100;
 }
 
 function startGame() {
   document.getElementById('title-screen').style.display = 'none';
-  document.getElementById('top-ui').style.display = 'flex';
+  document.getElementById('top-ui').classList.add('active');
   currentIndex = 0;
   history = [];
   charsOnScreen = {};
@@ -414,23 +412,65 @@ function startGame() {
 function loadGame() {
   const save = localStorage.getItem('gal_save');
   if(save) {
-    const data = JSON.parse(save);
-    currentIndex = data.index || 0;
-    history = data.history || [];
-    document.getElementById('title-screen').style.display = 'none';
-    document.getElementById('top-ui').style.display = 'flex';
-    charsOnScreen = {};
-    document.getElementById('char-layer').innerHTML = '';
-    titleBGMStarted = false;
-    processLine();
+    try {
+      const data = JSON.parse(save);
+      currentIndex = data.index || 0;
+      history = data.history || [];
+      document.getElementById('title-screen').style.display = 'none';
+      document.getElementById('top-ui').classList.add('active');
+      charsOnScreen = {};
+      document.getElementById('char-layer').innerHTML = '';
+      titleBGMStarted = false;
+      processLine();
+    } catch(e) {
+      showToast('存档损坏，重新开始');
+      startGame();
+    }
   } else {
+    showToast('没有存档');
     startGame();
   }
 }
 
+// ========== BGM ==========
+function playBGM(src) {
+  const bgm = document.getElementById('bgm');
+  if(!bgm) return;
+  const vol = settings.bgmVol / 100;
+
+  if(bgm.src && bgm.src.includes(src) && !bgm.paused) return;
+
+  if(!bgm.paused && bgm.src) {
+    const fadeOut = setInterval(() => {
+      if(bgm.volume > 0.05) { bgm.volume -= 0.05; }
+      else {
+        clearInterval(fadeOut);
+        bgm.pause();
+        switchBGM(bgm, src, vol);
+      }
+    }, 80);
+  } else {
+    switchBGM(bgm, src, vol);
+  }
+}
+
+function switchBGM(bgm, src, vol) {
+  bgm.src = 'assets/bgm/' + src;
+  bgm.volume = 0;
+  bgm.play().then(() => {
+    const fadeIn = setInterval(() => {
+      if(bgm.volume < vol - 0.03) { bgm.volume += 0.03; }
+      else { bgm.volume = vol; clearInterval(fadeIn); }
+    }, 60);
+  }).catch(()=>{});
+}
+
 // ========== 核心处理 ==========
 function processLine() {
-  if(currentIndex >= SCRIPT.length) return;
+  if(currentIndex >= SCRIPT.length) {
+    showToast('故事结束');
+    return;
+  }
   const line = SCRIPT[currentIndex];
 
   switch(line.type) {
@@ -441,7 +481,7 @@ function processLine() {
     case 'bg':
       setBG(line.src);
       currentIndex++;
-      setTimeout(processLine, 800);
+      setTimeout(processLine, 1000);
       break;
     case 'bgm':
       playBGM(line.src);
@@ -451,7 +491,7 @@ function processLine() {
     case 'char':
       handleChar(line);
       currentIndex++;
-      setTimeout(processLine, 600);
+      setTimeout(processLine, 500);
       break;
     case 'text':
       showText(line);
@@ -459,85 +499,57 @@ function processLine() {
     case 'choice':
       showChoices(line.choices);
       break;
+    default:
+      currentIndex++;
+      processLine();
   }
 }
 
 function showChapter(text) {
   const overlay = document.getElementById('chapter-overlay');
-  document.getElementById('chapter-text').innerHTML = text.replace(/\n/g, '<br>');
+  document.getElementById('chapter-text').innerHTML = text;
   overlay.classList.add('active');
   setTimeout(() => { overlay.classList.remove('active'); }, 2500);
 }
 
 function setBG(src) {
   const bg = document.getElementById('bg-layer');
-  bg.style.backgroundImage = `url(assets/backgrounds/${src})`;
-}
-
-function playBGM(src) {
-  const bgm = document.getElementById('bgm');
-  const vol = settings.bgmVol / 100;
-
-  // 如果正在播放且是同一首歌，不重复切换
-  if(bgm.src && bgm.src.includes(src) && !bgm.paused) return;
-
-  // 淡出当前音乐
-  if(!bgm.paused) {
-    const fadeOut = setInterval(() => {
-      if(bgm.volume > 0.05) { bgm.volume -= 0.05; }
-      else {
-        clearInterval(fadeOut);
-        bgm.pause();
-        bgm.src = `assets/bgm/${src}`;
-        bgm.volume = 0;
-        bgm.play().then(() => {
-          // 淡入
-          const fadeIn = setInterval(() => {
-            if(bgm.volume < vol - 0.05) { bgm.volume += 0.05; }
-            else { bgm.volume = vol; clearInterval(fadeIn); }
-          }, 100);
-        }).catch(()=>{});
-      }
-    }, 80);
-  } else {
-    bgm.src = `assets/bgm/${src}`;
-    bgm.volume = vol;
-    bgm.play().catch(()=>{});
-  }
+  if(bg) bg.style.backgroundImage = "url(assets/backgrounds/" + src + ")";
 }
 
 function handleChar(line) {
   const layer = document.getElementById('char-layer');
+  if(!layer) return;
   const key = line.char + '_' + line.pos;
 
   if(line.action === 'hide') {
-    const el = document.querySelector(`.char[data-key="${key}"]`);
+    const el = document.querySelector('.char[data-key="' + key + '"]');
     if(el) { el.classList.remove('active'); setTimeout(()=>el.remove(), 600); }
     delete charsOnScreen[key];
     return;
   }
 
-  // 移除同位置的其他角色
   Object.keys(charsOnScreen).forEach(k => {
     if(k.endsWith('_' + line.pos) && k !== key) {
-      const old = document.querySelector(`.char[data-key="${k}"]`);
+      const old = document.querySelector('.char[data-key="' + k + '"]');
       if(old) { old.classList.remove('active'); setTimeout(()=>old.remove(), 600); }
       delete charsOnScreen[k];
     }
   });
 
   const charInfo = CHARACTERS[line.char];
-  let el = document.querySelector(`.char[data-key="${key}"]`);
+  if(!charInfo) return;
+
+  let el = document.querySelector('.char[data-key="' + key + '"]');
   if(!el) {
     el = document.createElement('img');
-    el.className = `char ${line.pos}`;
+    el.className = 'char ' + line.pos;
     el.dataset.key = key;
-    el.src = `assets/characters/${charInfo.img}`;
+    el.src = 'assets/characters/' + charInfo.img;
     el.alt = charInfo.name;
     layer.appendChild(el);
     charsOnScreen[key] = true;
   }
-  // 强制重排
   void el.offsetWidth;
   el.classList.add('active');
 }
@@ -545,25 +557,26 @@ function handleChar(line) {
 function showText(line) {
   const speakerEl = document.getElementById('speaker');
   const textEl = document.getElementById('text');
+  if(!speakerEl || !textEl) return;
 
   if(line.speaker) {
     const charInfo = CHARACTERS[Object.keys(CHARACTERS).find(k=>CHARACTERS[k].name===line.speaker)];
     speakerEl.textContent = line.speaker;
-    speakerEl.style.color = charInfo ? charInfo.color : '#a8edea';
-    speakerEl.style.borderLeftColor = charInfo ? charInfo.color : '#a8edea';
+    const color = charInfo ? charInfo.color : '#a8edea';
+    speakerEl.style.color = color;
+    speakerEl.style.borderLeftColor = color;
   } else {
     speakerEl.textContent = '';
   }
 
-  // 记录历史
   if(line.text) history.push({ speaker: line.speaker, text: line.text });
 
   textEl.innerHTML = '';
   isTyping = true;
 
-  const speed = 110 - settings.textSpeed; // 10~100
+  const speed = Math.max(8, 110 - settings.textSpeed);
   let i = 0;
-  const text = line.text;
+  const text = line.text || '';
 
   function typeChar() {
     if(!isTyping) return;
@@ -576,7 +589,7 @@ function showText(line) {
       textEl.textContent = text;
       isTyping = false;
       if(autoMode) {
-        setTimeout(() => { if(autoMode) advance(); }, 1500);
+        setTimeout(() => { if(autoMode) advance(); }, 1800);
       }
     }
   }
@@ -600,8 +613,9 @@ function advance() {
 // ========== 选项 ==========
 function showChoices(choices) {
   const container = document.getElementById('choices');
+  if(!container) return;
   container.innerHTML = '';
-  choices.forEach((c, i) => {
+  choices.forEach((c) => {
     const btn = document.createElement('div');
     btn.className = 'choice-btn';
     btn.textContent = c.text;
@@ -615,42 +629,45 @@ function showChoices(choices) {
 function quickSave() {
   const data = { index: currentIndex, history: history.slice(-50) };
   localStorage.setItem('gal_save', JSON.stringify(data));
-  showStatus('已存档');
+  showToast('已存档');
 }
 
-function showStatus(msg) {
-  const s = document.getElementById('status');
-  s.textContent = msg; s.style.color = '#a8edea';
-  setTimeout(() => { s.textContent = ''; s.style.color = '#555'; }, 1500);
+function showToast(msg) {
+  const t = document.getElementById('status-toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('active');
+  setTimeout(() => { t.classList.remove('active'); }, 1500);
 }
 
 // ========== 自动/快进 ==========
 function toggleAuto() {
   autoMode = !autoMode;
   skipMode = false;
-  document.getElementById('autoBtn').style.color = autoMode ? '#a8edea' : '#ccc';
-  document.getElementById('skipBtn').style.color = '#ccc';
-  document.getElementById('skip-hint').classList.remove('active');
+  updateBtnStyle('autoBtn', autoMode);
+  updateBtnStyle('skipBtn', false);
   if(autoMode && !isTyping) advance();
 }
 
 function toggleSkip() {
   skipMode = !skipMode;
   autoMode = false;
-  document.getElementById('skipBtn').style.color = skipMode ? '#a8edea' : '#ccc';
-  document.getElementById('autoBtn').style.color = '#ccc';
-  document.getElementById('skip-hint').classList.toggle('active', skipMode);
+  updateBtnStyle('skipBtn', skipMode);
+  updateBtnStyle('autoBtn', false);
+}
+
+function updateBtnStyle(id, active) {
+  const btn = document.getElementById(id);
+  if(btn) btn.style.color = active ? '#a8edea' : '#bbb';
 }
 
 // ========== 历史 ==========
 function showHistory() {
   const list = document.getElementById('history-list');
-  list.innerHTML = history.map(h => `
-    <div class="history-item">
-      <div class="history-speaker">${h.speaker || '旁白'}</div>
-      <div class="history-text">${h.text}</div>
-    </div>
-  `).join('');
+  if(!list) return;
+  list.innerHTML = history.map(h => 
+    '<div class="history-item"><div class="history-speaker">' + (h.speaker || '旁白') + '</div><div class="history-text">' + h.text + '</div></div>'
+  ).join('');
   document.getElementById('history').classList.add('active');
 }
 function hideHistory() { document.getElementById('history').classList.remove('active'); }
@@ -660,21 +677,43 @@ function showSettings() { document.getElementById('settings').classList.add('act
 function hideSettings() { document.getElementById('settings').classList.remove('active'); }
 function updateSetting(key, val) {
   settings[key] = parseInt(val);
-  if(key === 'textSpeed') document.getElementById('textSpeedVal').textContent = val < 40 ? '慢' : val > 70 ? '快' : '中';
-  if(key === 'bgmVol') { document.getElementById('bgmVolVal').textContent = val+'%'; document.getElementById('bgm').volume = val/100; }
-  if(key === 'seVol') document.getElementById('seVolVal').textContent = val+'%';
+  if(key === 'textSpeed') {
+    const label = val < 40 ? '慢' : val > 70 ? '快' : '中';
+    document.getElementById('textSpeedVal').textContent = label;
+  }
+  if(key === 'bgmVol') {
+    document.getElementById('bgmVolVal').textContent = val + '%';
+    const bgm = document.getElementById('bgm');
+    if(bgm) bgm.volume = val / 100;
+  }
+  if(key === 'seVol') document.getElementById('seVolVal').textContent = val + '%';
   saveSettings();
 }
 function saveSettings() { localStorage.setItem('gal_settings', JSON.stringify(settings)); }
 function loadSettings() {
   const s = localStorage.getItem('gal_settings');
-  if(s) { Object.assign(settings, JSON.parse(s)); document.getElementById('textSpeed').value = settings.textSpeed; document.getElementById('bgmVol').value = settings.bgmVol; document.getElementById('seVol').value = settings.seVol; }
+  if(s) {
+    try { Object.assign(settings, JSON.parse(s)); } catch(e) {}
+  }
+  const ts = document.getElementById('textSpeed');
+  const bv = document.getElementById('bgmVol');
+  const sv = document.getElementById('seVol');
+  if(ts) ts.value = settings.textSpeed;
+  if(bv) bv.value = settings.bgmVol;
+  if(sv) sv.value = settings.seVol;
+  updateSetting('textSpeed', settings.textSpeed);
+  updateSetting('bgmVol', settings.bgmVol);
+  updateSetting('seVol', settings.seVol);
 }
 
 // ========== 键盘 ==========
 document.addEventListener('keydown', e => {
-  if(document.getElementById('title-screen').style.display !== 'none') return;
-  if(e.key === ' ' || e.key === 'Enter') { e.preventDefault(); advance(); }
+  if(e.key === ' ' || e.key === 'Enter') {
+    const title = document.getElementById('title-screen');
+    if(title && title.style.display !== 'none') return;
+    e.preventDefault();
+    advance();
+  }
   if(e.key === 'Control') { if(!skipMode) toggleSkip(); }
   if(e.key === 'a' || e.key === 'A') toggleAuto();
   if(e.key === 's' || e.key === 'S') quickSave();
@@ -683,9 +722,9 @@ document.addEventListener('keyup', e => {
   if(e.key === 'Control' && skipMode) toggleSkip();
 });
 
-// 右键菜单屏蔽
 document.addEventListener('contextmenu', e => e.preventDefault());
 
+// 启动
 init();
 </script>
 </body>
