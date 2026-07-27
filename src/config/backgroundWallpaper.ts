@@ -64,7 +64,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 		// 支持单个视频路径（字符串）或多个视频循环（数组）
 		// 支持远程视频URL，本地视频请放在 public/assets/videos/ 目录下
 		// playerUrl: "/assets/videos/firefly.mp4",
-		playerUrl: "/assets/videos/bg.mp4",
+		playerUrl: "https://pan.ecylt.top/f/QRYF8/video_%E3%80%8A%E5%8F%8D%E4%B9%8C%E6%89%98%E9%82%A6Pt.2%E3%80%8B%E3%80%90%E4%BA%9A%E7%BB%86%E4%BA%9A%E6%97%B7%E4%B8%96..._0.mp4",
 	},
 	// 横幅壁纸和全屏壁纸共享配置
 	common: {
