@@ -1,0 +1,11 @@
+[
+  {
+    "slug": "demo-anime",
+    "title": "示例番剧",
+    "cover": "/assets/anime-covers/demo.jpg",
+    "description": "这是示例番剧，请修改 animeData.json 添加你自己的番剧",
+    "episodes": [
+      { "title": "第1集 示例", "url": "https://pan.ecylt.top/f/xxxx/ep1.mp4" }
+    ]
+  }
+]
