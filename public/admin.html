@@ -726,7 +726,7 @@
   </div>
 
   <button type="button" onclick="generateAnimeJson()" style="background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
-    🎬 生成番剧 JSON
+    💾 直接保存到仓库
   </button>
 </div>
 
@@ -760,7 +760,13 @@ function addEpisode() {
   document.getElementById('episode-list').appendChild(div);
 }
 
-function generateAnimeJson() {
+async function generateAnimeJson() {
+  const token = localStorage.getItem("github_token");
+  if (!token) {
+    alert("请先填写 GitHub Token 并验证");
+    return;
+  }
+
   const title = document.getElementById('anime-title').value.trim();
   const slug = document.getElementById('anime-slug').value.trim();
   const cover = document.getElementById('anime-cover').value.trim();
@@ -788,7 +794,7 @@ function generateAnimeJson() {
     return;
   }
 
-  const obj = {
+  const newAnime = {
     slug: slug,
     title: title,
     cover: cover,
@@ -796,14 +802,80 @@ function generateAnimeJson() {
     episodes: eps
   };
 
-  const jsonStr = JSON.stringify(obj, null, 2);
-  document.getElementById('anime-json').value = jsonStr + ',';
+  // 先读取现有数据
+  const btn = document.querySelector('button[onclick="generateAnimeJson()"]');
+  const oldText = btn.innerHTML;
+  btn.innerHTML = "🔄 保存中...";
+  btn.disabled = true;
 
-  navigator.clipboard.writeText(jsonStr + ',').then(() => {
-    alert('✅ 已复制到剪贴板！\n\n去 src/data/animeData.json 粘贴到方括号 [] 里面即可。');
-  }).catch(() => {
-    alert('生成成功，请手动复制 JSON 代码');
-  });
+  try {
+    const res = await fetch("https://api.github.com/repos/PAleimiao/Firefly/contents/src/data/animeData.json", {
+      headers: { "Authorization": "token " + token, "Accept": "application/vnd.github.v3+json" }
+    });
+
+    if (!res.ok) throw new Error("读取现有数据失败: " + res.status);
+
+    const data = await res.json();
+    const sha = data.sha;
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ""))));
+    let animeList = JSON.parse(content);
+
+    // 检查 slug 是否重复
+    if (animeList.some(a => a.slug === slug)) {
+      alert("错误：slug 「" + slug + "」已存在，请换一个");
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+      return;
+    }
+
+    // 追加新番剧
+    animeList.push(newAnime);
+
+    // 提交到仓库
+    const newJson = JSON.stringify(animeList, null, 2);
+    const encoded = btoa(unescape(encodeURIComponent(newJson)));
+
+    const saveRes = await fetch("https://api.github.com/repos/PAleimiao/Firefly/contents/src/data/animeData.json", {
+      method: "PUT",
+      headers: {
+        "Authorization": "token " + token,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "admin后台添加番剧: " + title,
+        content: encoded,
+        sha: sha,
+        branch: "master"
+      })
+    });
+
+    if (!saveRes.ok) {
+      const err = await saveRes.json();
+      throw new Error(err.message || "保存失败");
+    }
+
+    btn.innerHTML = "✅ 保存成功！";
+    setTimeout(() => {
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    }, 2000);
+
+    alert("✅ 番剧「" + title + "」已保存到仓库！\n\n请去 Cloudflare Pages 重新部署后生效。");
+
+    // 清空表单
+    document.getElementById('anime-title').value = '';
+    document.getElementById('anime-slug').value = '';
+    document.getElementById('anime-cover').value = '';
+    document.getElementById('anime-desc').value = '';
+    document.getElementById('episode-list').innerHTML = '';
+    addEpisode(); addEpisode();
+
+  } catch (e) {
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+    alert("❌ 保存失败: " + e.message);
+  }
 }
 
 // 初始化添加2集空白
