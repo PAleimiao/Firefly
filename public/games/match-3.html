@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>消消乐 - CXL避难所游戏站</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh; color: #fff; overflow: hidden; user-select: none;
+}
+.header { margin-top: 15px; text-align: center; }
+.header h1 {
+  font-size: 2rem; background: linear-gradient(90deg, #ff6b6b, #feca57);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.info { display: flex; gap: 25px; margin: 10px 0; font-size: 1rem; }
+.info span { color: #aaa; }
+.info strong { color: #fff; margin-left: 5px; }
+.btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  border: none; border-radius: 8px; padding: 8px 22px;
+  color: #fff; font-size: 0.95rem; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+}
+.btn:hover { transform: translateY(-2px); }
+#board {
+  display: grid; grid-template-columns: repeat(8, 1fr);
+  gap: 4px; padding: 10px; margin-top: 10px;
+  background: rgba(255,255,255,0.05); border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  touch-action: none;
+}
+.cell {
+  width: 40px; height: 40px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; cursor: pointer; transition: transform 0.2s;
+  position: relative; background: rgba(255,255,255,0.08);
+}
+.cell.selected { transform: scale(1.15); box-shadow: 0 0 15px currentColor; z-index: 10; }
+.cell.match { animation: matchPop 0.4s ease forwards; }
+.cell.fall { animation: fallIn 0.3s ease; }
+@keyframes matchPop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+  100% { transform: scale(0); opacity: 0; }
+}
+@keyframes fallIn {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.gem-red { color: #ff6b6b; text-shadow: 0 0 8px #ff6b6b; }
+.gem-blue { color: #4dabf7; text-shadow: 0 0 8px #4dabf7; }
+.gem-green { color: #51cf66; text-shadow: 0 0 8px #51cf66; }
+.gem-yellow { color: #ffd43b; text-shadow: 0 0 8px #ffd43b; }
+.gem-purple { color: #cc5de8; text-shadow: 0 0 8px #cc5de8; }
+.gem-orange { color: #ff922b; text-shadow: 0 0 8px #ff922b; }
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; align-items: center; justify-content: center; z-index: 100;
+}
+.overlay.active { display: flex; }
+.overlay-box {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+  padding: 35px; text-align: center;
+}
+.overlay-box h2 { font-size: 1.8rem; margin-bottom: 10px; }
+.overlay-box p { color: #aaa; margin-bottom: 20px; }
+
+.timer-bar {
+  width: 320px; height: 6px; background: rgba(255,255,255,0.1);
+  border-radius: 3px; margin-top: 8px; overflow: hidden;
+}
+.timer-fill {
+  height: 100%; background: linear-gradient(90deg, #51cf66, #ffd43b, #ff6b6b);
+  border-radius: 3px; transition: width 0.5s linear;
+}
+
+@media (max-width: 400px) {
+  .cell { width: 34px; height: 34px; font-size: 1.1rem; }
+  #board { gap: 3px; padding: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>消消乐</h1>
+  <div class="info">
+    <div>分数<strong id="score">0</strong></div>
+    <div>连击<strong id="combo">0</strong></div>
+    <div>时间<strong id="time">60</strong>s</div>
+  </div>
+  <button class="btn" onclick="startGame()">开始游戏</button>
+</div>
+<div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+<div id="board"></div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <h2 id="ovTitle">准备开始</h2>
+    <p id="ovText">点击相邻两个宝石交换位置，连成3个或以上即可消除！</p>
+    <button class="btn" onclick="startGame()">开始</button>
+  </div>
+</div>
+
+<script>
+const ROWS=8, COLS=8, GEMS=['💎','🔷','🔶','⭐','🌙','❤️'], COLORS=['gem-blue','gem-red','gem-orange','gem-yellow','gem-purple','gem-green'];
+let board=[], score=0, combo=0, timeLeft=60, timer=null, running=false, selected=null;
+
+function initBoard() {
+  board=[];
+  for(let r=0;r<ROWS;r++){
+    board[r]=[];
+    for(let c=0;c<COLS;c++){
+      let g;
+      do{ g=Math.floor(Math.random()*GEMS.length); }
+      while((r>=2 && board[r-1][c]===g && board[r-2][c]===g) || (c>=2 && board[r][c-1]===g && board[r][c-2]===g));
+      board[r][c]=g;
+    }
+  }
+}
+
+function render() {
+  const b=document.getElementById('board'); b.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const d=document.createElement('div'); d.className='cell '+COLORS[board[r][c]];
+      d.textContent=GEMS[board[r][c]]; d.dataset.r=r; d.dataset.c=c;
+      d.onclick=()=>onCellClick(r,c);
+      b.appendChild(d);
+    }
+  }
+}
+
+function onCellClick(r,c) {
+  if(!running) return;
+  const cells=document.querySelectorAll('.cell');
+  const idx=r*COLS+c;
+  if(selected===null){ selected={r,c}; cells[idx].classList.add('selected'); }
+  else {
+    const sr=selected.r, sc=selected.c;
+    cells[sr*COLS+sc].classList.remove('selected');
+    if(sr===r && sc===c){ selected=null; return; }
+    if(Math.abs(sr-r)+Math.abs(sc-c)===1){
+      swap(sr,sc,r,c);
+      if(!findMatches().length){ setTimeout(()=>swap(sr,sc,r,c), 200); selected=null; return; }
+      selected=null;
+      processMatches();
+    } else { selected={r,c}; cells[idx].classList.add('selected'); }
+  }
+}
+
+function swap(r1,c1,r2,c2) {
+  const t=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t;
+  render();
+}
+
+function findMatches() {
+  const matches=new Set();
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS-2;c++){
+      if(board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
+        matches.add(r*COLS+c); matches.add(r*COLS+c+1); matches.add(r*COLS+c+2);
+        let k=c+3; while(k<COLS && board[r][k]===board[r][c]){ matches.add(r*COLS+k); k++; }
+      }
+    }
+  }
+  for(let c=0;c<COLS;c++){
+    for(let r=0;r<ROWS-2;r++){
+      if(board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
+        matches.add(r*COLS+c); matches.add((r+1)*COLS+c); matches.add((r+2)*COLS+c);
+        let k=r+3; while(k<ROWS && board[k][c]===board[r][c]){ matches.add(k*COLS+c); k++; }
+      }
+    }
+  }
+  return [...matches];
+}
+
+function processMatches() {
+  const matches=findMatches();
+  if(!matches.length){ combo=0; document.getElementById('combo').textContent=0; return; }
+  combo++; document.getElementById('combo').textContent=combo;
+  score+=matches.length*10*(1+combo*0.5);
+  document.getElementById('score').textContent=Math.floor(score);
+  const cells=document.querySelectorAll('.cell');
+  matches.forEach(i=>cells[i].classList.add('match'));
+  setTimeout(()=>{
+    const colsToFill=[];
+    for(let c=0;c<COLS;c++){
+      let col=[];
+      for(let r=0;r<ROWS;r++) if(!matches.includes(r*COLS+c)) col.push(board[r][c]);
+      const missing=ROWS-col.length;
+      for(let i=0;i<missing;i++) col.unshift(Math.floor(Math.random()*GEMS.length));
+      for(let r=0;r<ROWS;r++) board[r][c]=col[r];
+      if(missing>0) colsToFill.push({c, missing});
+    }
+    render();
+    colsToFill.forEach(({c,missing})=>{
+      for(let r=0;r<missing;r++){
+        const cell=document.querySelectorAll('.cell')[r*COLS+c];
+        if(cell) cell.classList.add('fall');
+      }
+    });
+    setTimeout(()=>processMatches(), 300);
+  }, 350);
+}
+
+function startGame() {
+  document.getElementById('overlay').classList.remove('active');
+  score=0; combo=0; timeLeft=60; running=true; selected=null;
+  document.getElementById('score').textContent=0;
+  document.getElementById('combo').textContent=0;
+  document.getElementById('time').textContent=60;
+  document.getElementById('timerFill').style.width='100%';
+  initBoard(); render();
+  if(timer) clearInterval(timer);
+  timer=setInterval(()=>{
+    timeLeft--;
+    document.getElementById('time').textContent=timeLeft;
+    document.getElementById('timerFill').style.width=(timeLeft/60*100)+'%';
+    if(timeLeft<=0){ running=false; clearInterval(timer); gameOver(); }
+  }, 1000);
+}
+
+function gameOver() {
+  document.getElementById('ovTitle').textContent='时间到！';
+  document.getElementById('ovText').textContent=`最终得分: ${Math.floor(score)} | 最高连击: ${combo}`;
+  document.querySelector('.overlay-box button').textContent='再来一局';
+  document.getElementById('overlay').classList.add('active');
+}
+
+initBoard(); render();
+document.getElementById('overlay').classList.add('active');
+</script>
+</body>
+</html>
