@@ -811,5 +811,245 @@ addEpisode();
 addEpisode();
 </script>
 
+
+<!-- ========== 番剧列表 ========== -->
+<div class="section" style="margin-top: 40px; border-top: 2px solid #333; padding-top: 30px;">
+  <h2>📋 番剧列表</h2>
+  <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
+    点击番剧展开查看/编辑集数，可直接修改现有番剧或追加新集
+  </p>
+
+  <button type="button" onclick="loadAnimeList()" style="background: #3498db; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
+    🔄 加载番剧列表
+  </button>
+
+  <div id="anime-list-container" style="display: none;">
+    <div id="anime-list-items"></div>
+  </div>
+
+  <div id="anime-edit-area" style="display: none; margin-top: 20px; padding: 20px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333;">
+    <h3 id="edit-anime-title" style="margin-bottom: 15px;"></h3>
+    <input type="hidden" id="edit-anime-idx">
+
+    <div id="edit-episodes-list"></div>
+
+    <button type="button" onclick="addEditEpisode()" style="background: #444; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 10px 0;">
+      + 添加新集
+    </button>
+
+    <div style="margin-top: 15px;">
+      <button type="button" onclick="saveAnimeChanges()" style="background: #27ae60; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
+        💾 保存修改到仓库
+      </button>
+      <span id="anime-save-status" style="margin-left: 10px; color: #888;"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+let animeListData = [];
+let animeListSha = "";
+
+async function loadAnimeList() {
+  const token = localStorage.getItem("github_token");
+  if (!token) {
+    alert("请先填写 GitHub Token 并验证");
+    return;
+  }
+
+  document.getElementById("anime-list-container").style.display = "block";
+  document.getElementById("anime-list-items").innerHTML = "<p style='color:#888'>加载中...</p>";
+
+  try {
+    const res = await fetch("https://api.github.com/repos/PAleimiao/Firefly/contents/src/data/animeData.json", {
+      headers: { "Authorization": "token " + token, "Accept": "application/vnd.github.v3+json" }
+    });
+
+    if (!res.ok) throw new Error("读取失败: " + res.status);
+
+    const data = await res.json();
+    animeListSha = data.sha;
+    const content = atob(data.content.replace(/\n/g, ""));
+    animeListData = JSON.parse(content);
+
+    renderAnimeList();
+  } catch (e) {
+    document.getElementById("anime-list-items").innerHTML = "<p style='color:#e74c3c'>加载失败: " + e.message + "</p>";
+  }
+}
+
+function renderAnimeList() {
+  const container = document.getElementById("anime-list-items");
+  if (animeListData.length === 0) {
+    container.innerHTML = "<p style='color:#888'>暂无番剧</p>";
+    return;
+  }
+
+  let html = "";
+  animeListData.forEach((anime, idx) => {
+    html += `
+      <div style="margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; overflow: hidden;">
+        <div onclick="toggleAnimeDetail(${idx})" style="padding: 12px 15px; background: #222; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>${anime.title}</strong>
+            <span style="color: #888; margin-left: 10px; font-size: 12px;">共 ${anime.episodes.length} 集</span>
+          </div>
+          <span id="arrow-${idx}" style="color: #888;">▼</span>
+        </div>
+        <div id="detail-${idx}" style="display: none; padding: 15px; background: #1a1a1a;">
+          <p style="color: #888; font-size: 12px; margin-bottom: 10px;">slug: ${anime.slug} | 封面: ${anime.cover}</p>
+          <div style="display: grid; gap: 8px;">
+            ${anime.episodes.map((ep, eidx) => `
+              <div style="display: flex; gap: 10px; align-items: center; padding: 8px; background: #222; border-radius: 6px;">
+                <span style="color: #888; min-width: 50px;">第${eidx + 1}集</span>
+                <input type="text" value="${ep.title}" class="ep-edit-title-${idx}-${eidx}" style="flex: 1; background: #333; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px;">
+                <input type="text" value="${ep.url}" class="ep-edit-url-${idx}-${eidx}" style="flex: 2; background: #333; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px;">
+              </div>
+            `).join("")}
+          </div>
+          <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <button type="button" onclick="editAnime(${idx})" style="background: #3498db; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">✏️ 编辑/追加</button>
+            <button type="button" onclick="deleteAnime(${idx})" style="background: #c0392b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">🗑️ 删除</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function toggleAnimeDetail(idx) {
+  const detail = document.getElementById(`detail-${idx}`);
+  const arrow = document.getElementById(`arrow-${idx}`);
+  if (detail.style.display === "none") {
+    detail.style.display = "block";
+    arrow.textContent = "▲";
+  } else {
+    detail.style.display = "none";
+    arrow.textContent = "▼";
+  }
+}
+
+let currentEditIdx = -1;
+
+function editAnime(idx) {
+  currentEditIdx = idx;
+  const anime = animeListData[idx];
+  document.getElementById("edit-anime-title").textContent = "编辑: " + anime.title;
+  document.getElementById("edit-anime-idx").value = idx;
+  document.getElementById("anime-edit-area").style.display = "block";
+
+  const list = document.getElementById("edit-episodes-list");
+  list.innerHTML = "";
+
+  anime.episodes.forEach((ep, eidx) => {
+    const row = document.createElement("div");
+    row.className = "form-group";
+    row.style.cssText = "display: flex; gap: 10px; align-items: center;";
+    row.innerHTML = `
+      <span style="color: #888; min-width: 50px;">第${eidx + 1}集</span>
+      <input type="text" value="${ep.title}" class="edit-ep-title" data-eidx="${eidx}" style="flex: 1;" placeholder="标题">
+      <input type="text" value="${ep.url}" class="edit-ep-url" data-eidx="${eidx}" style="flex: 2;" placeholder="视频直链">
+      <button type="button" onclick="this.parentElement.remove()" style="background: #c0392b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">删除</button>
+    `;
+    list.appendChild(row);
+  });
+
+  document.getElementById("anime-save-status").textContent = "";
+}
+
+function addEditEpisode() {
+  const list = document.getElementById("edit-episodes-list");
+  const idx = list.children.length + 1;
+  const row = document.createElement("div");
+  row.className = "form-group";
+  row.style.cssText = "display: flex; gap: 10px; align-items: center;";
+  row.innerHTML = `
+    <span style="color: #888; min-width: 50px;">第${idx}集</span>
+    <input type="text" class="edit-ep-title" style="flex: 1;" placeholder="标题">
+    <input type="text" class="edit-ep-url" style="flex: 2;" placeholder="视频直链">
+    <button type="button" onclick="this.parentElement.remove()" style="background: #c0392b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">删除</button>
+  `;
+  list.appendChild(row);
+}
+
+function deleteAnime(idx) {
+  if (!confirm(`确定要删除「${animeListData[idx].title}」吗？此操作不可恢复！`)) return;
+  animeListData.splice(idx, 1);
+  saveAnimeListToGitHub();
+}
+
+async function saveAnimeChanges() {
+  if (currentEditIdx < 0) return;
+
+  const titles = document.querySelectorAll(".edit-ep-title");
+  const urls = document.querySelectorAll(".edit-ep-url");
+  const newEps = [];
+
+  for (let i = 0; i < titles.length; i++) {
+    const t = titles[i].value.trim();
+    const u = urls[i].value.trim();
+    if (t && u) {
+      newEps.push({ title: t, url: u });
+    }
+  }
+
+  if (newEps.length === 0) {
+    alert("至少保留一集");
+    return;
+  }
+
+  animeListData[currentEditIdx].episodes = newEps;
+  await saveAnimeListToGitHub();
+}
+
+async function saveAnimeListToGitHub() {
+  const token = localStorage.getItem("github_token");
+  if (!token) {
+    alert("请先填写 GitHub Token");
+    return;
+  }
+
+  const status = document.getElementById("anime-save-status");
+  status.textContent = "保存中...";
+  status.style.color = "#f39c12";
+
+  try {
+    const jsonStr = JSON.stringify(animeListData, null, 2);
+    const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    const res = await fetch("https://api.github.com/repos/PAleimiao/Firefly/contents/src/data/animeData.json", {
+      method: "PUT",
+      headers: {
+        "Authorization": "token " + token,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: "admin后台更新番剧数据",
+        content: encoded,
+        sha: animeListSha,
+        branch: "master"
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "保存失败");
+    }
+
+    const result = await res.json();
+    animeListSha = result.content.sha;
+    status.textContent = "✅ 保存成功！请去 Cloudflare 重新部署";
+    status.style.color = "#27ae60";
+
+    renderAnimeList();
+  } catch (e) {
+    status.textContent = "❌ 保存失败: " + e.message;
+    status.style.color = "#e74c3c";
+  }
+}
+</script>
+
 </body>
 </html>
