@@ -65,6 +65,12 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				url: "/watch/",
 				icon: "material-symbols:play-circle",
 			},
+			// 游戏站
+			{
+				name: "游戏",
+				url: "/games/",
+				icon: "material-symbols:sports-esports",
+			},
 
 			// 追番
 			LinkPresets.Anime,
