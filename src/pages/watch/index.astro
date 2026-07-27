@@ -1,0 +1,51 @@
+---
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import animeData from "@/data/animeData.json";
+
+const title = "看番";
+const description = "个人番剧收藏夹，点击封面开始观看";
+---
+
+<MainGridLayout title={title} description={description}>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2">{title}</h1>
+      <p class="text-white/60">{description}</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {animeData.map((anime) => (
+        <a 
+          href={`/watch/${anime.slug}/`}
+          class="group block rounded-xl overflow-hidden bg-white/5 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02]"
+        >
+          <div class="aspect-[3/4] overflow-hidden relative">
+            <img 
+              src={anime.cover} 
+              alt={anime.title}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+              <span class="opacity-0 group-hover:opacity-100 text-white font-bold text-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                ▶ 观看
+              </span>
+            </div>
+          </div>
+          <div class="p-3">
+            <h3 class="font-bold text-sm line-clamp-2 mb-1">{anime.title}</h3>
+            <p class="text-xs text-white/50 line-clamp-1">{anime.description}</p>
+            <p class="text-xs text-white/30 mt-1">共 {anime.episodes.length} 集</p>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {animeData.length === 0 && (
+      <div class="text-center py-20 text-white/40">
+        <p class="text-lg mb-2">暂无番剧</p>
+        <p class="text-sm">去 src/data/animeData.json 添加数据吧~</p>
+      </div>
+    )}
+  </div>
+</MainGridLayout>
