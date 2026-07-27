@@ -240,9 +240,9 @@ html, body {
 
 <script>
 const CHARACTERS = {
-  yuzuru:  { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
-  yuzuru2: { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
-  yuzuru3: { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
+  yuzuru:  { name: "音无结弦", color: "#a8edea", img: "yuzuru_fullbody.png" },
+  yuzuru2: { name: "音无结弦", color: "#a8edea", img: "yuzuru_fullbody.png" },
+  yuzuru3: { name: "音无结弦", color: "#a8edea", img: "yuzuru_fullbody.png" },
   kanade:  { name: "立华奏",   color: "#fed6e3", img: "kanade.png" },
   kanade2: { name: "立华奏",   color: "#fed6e3", img: "kanade.png" },
   yuri:    { name: "仲村由理", color: "#e94560", img: "yuri.png" },
@@ -250,7 +250,6 @@ const CHARACTERS = {
   yui:     { name: "由依",     color: "#ffd43b", img: "yui.png" },
 };
 
-// ========== 贴合原著的剧本（含新CG） ==========
 const SCRIPT = [
   { type: "chapter", text: "Episode 13<br>毕业" },
   { type: "bg", src: "bg_campus_panorama.jpg" },
@@ -262,14 +261,23 @@ const SCRIPT = [
   { type: "text", speaker: "", text: "曾经充满战斗与喧嚣的死后世界，如今安静得只剩下风声。", char: "", pos: "" },
   { type: "text", speaker: "", text: "死后世界战线的成员们，迎来了最后的时刻。", char: "", pos: "" },
 
-  { type: "bg", src: "bg_auditorium.jpg" },
-  { type: "text", speaker: "", text: "礼堂里，大家穿着整齐的校服，静静地坐着。", char: "", pos: "" },
+  // --- 由理回忆 ---
+  { type: "cg", src: "cg_yuri_sniper.jpg" },
+  { type: "wait", ms: 1500 },
+  { type: "text", speaker: "", text: "（回忆）", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那个手持狙击枪、带领着大家反抗命运的少女。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "如今，她的眼中已没有了战意。", char: "", pos: "" },
+  { type: "cg", src: "" },
 
-  // --- 由理 ---
+  // --- 大厅 ---
+  { type: "bg", src: "bg_hall.png" },
+  { type: "text", speaker: "", text: "学校的大厅里，大家穿着整齐的校服，静静地坐着。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "今天，是毕业典礼的日子。", char: "", pos: "" },
+
   { type: "char", char: "yuri", pos: "center" },
   { type: "text", speaker: "仲村由理", text: "……那么，毕业典礼，现在开始。", char: "yuri", pos: "center" },
 
-  { type: "text", speaker: "", text: "由理站在礼堂前方，目光扫过在场的每一个人。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "由理站在前方，目光扫过在场的每一个人。", char: "", pos: "" },
   { type: "text", speaker: "", text: "她的眼中，没有了往日的锋芒，只剩下温柔。", char: "", pos: "" },
 
   { type: "char", char: "yuri", pos: "center" },
@@ -293,7 +301,6 @@ const SCRIPT = [
   { type: "text", speaker: "仲村由理", text: "谢谢大家……陪我走到这里。", char: "yuri", pos: "center" },
 
   { type: "text", speaker: "", text: "由理的身体开始发出淡淡的、温暖的光芒。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "那光芒并不刺眼，像是春日午后的阳光。", char: "", pos: "" },
 
   { type: "char", char: "hinata", pos: "right" },
   { type: "text", speaker: "日向秀树", text: "由理……！", char: "hinata", pos: "right" },
@@ -304,21 +311,33 @@ const SCRIPT = [
   { type: "text", speaker: "仲村由理", text: "下辈子……一定要再见哦。", char: "yuri", pos: "center" },
 
   { type: "text", speaker: "", text: "由理化作无数金色的光点，缓缓升向空中。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "她的笑容，是那样纯净，那样美丽。", char: "", pos: "" },
 
   { type: "char", char: "yuri", pos: "center", action: "hide" },
   { type: "wait", ms: 1000 },
 
-  // --- 其他成员消失 ---
-  { type: "text", speaker: "", text: "由理消失后，礼堂里陷入了短暂的沉默。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "然后，一个接一个，剩下的成员也开始化作光芒。", char: "", pos: "" },
-
-  { type: "cg", src: "cg_group_sleep.jpg" },
-  { type: "wait", ms: 2000 },
+  // --- 音无独白 ---
+  { type: "cg", src: "cg_yuzuru_petals.jpg" },
+  { type: "wait", ms: 1500 },
+  { type: "text", speaker: "", text: "音无望着飘落的花瓣，心中五味杂陈。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那个曾经带领着大家战斗的少女，终于放下了执念。", char: "", pos: "" },
   { type: "cg", src: "" },
 
-  // --- 日向与由依 ---
-  { type: "bg", src: "bg_field.jpg" },
+  // --- 回忆 ---
+  { type: "cg", src: "cg_four_members.png" },
+  { type: "wait", ms: 2000 },
+  { type: "text", speaker: "", text: "曾经一起欢笑、一起战斗的伙伴们。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那些日子，仿佛就在昨天。", char: "", pos: "" },
+  { type: "cg", src: "" },
+
+  // --- 由依 ---
+  { type: "bg", src: "bg_field_aerial.png" },
+  { type: "text", speaker: "", text: "操场上，由依静静地望着天空。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_yui_grass.jpg" },
+  { type: "wait", ms: 1500 },
+  { type: "text", speaker: "", text: "那个总是充满活力的女孩，此刻安静得像一只小猫。", char: "", pos: "" },
+  { type: "cg", src: "" },
+
   { type: "char", char: "hinata", pos: "left" },
   { type: "text", speaker: "日向秀树", text: "……由依。我们也该走了吧。", char: "hinata", pos: "left" },
 
@@ -342,7 +361,8 @@ const SCRIPT = [
   { type: "text", speaker: "日向秀树", text: "下辈子，我来娶你。", char: "hinata", pos: "left" },
   { type: "text", speaker: "日向秀树", text: "所以……你可别嫁给别人啊。", char: "hinata", pos: "left" },
 
-  { type: "cg", src: "cg_yui_scene.jpg" },
+  { type: "cg", src: "cg_yui_guitar.jpg" },
+  { type: "wait", ms: 1500 },
   { type: "char", char: "yui", pos: "right" },
   { type: "text", speaker: "由依", text: "……笨蛋。", char: "yui", pos: "right" },
   { type: "text", speaker: "由依", text: "约定好了哦。我会一直等你的。", char: "yui", pos: "right" },
@@ -353,15 +373,6 @@ const SCRIPT = [
   { type: "char", char: "hinata", pos: "left", action: "hide" },
   { type: "char", char: "yui", pos: "right", action: "hide" },
   { type: "wait", ms: 1000 },
-
-  // --- 礼堂空荡 ---
-  { type: "bg", src: "bg_auditorium.jpg" },
-  { type: "text", speaker: "", text: "偌大的礼堂，如今只剩下寥寥数人。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "曾经喧闹的死后世界战线，如今只剩下回忆。", char: "", pos: "" },
-
-  { type: "cg", src: "cg_ed_group1.jpg" },
-  { type: "wait", ms: 2500 },
-  { type: "cg", src: "" },
 
   // --- 走廊：奏与音无 ---
   { type: "bg", src: "bg_corridor.jpg" },
@@ -375,7 +386,6 @@ const SCRIPT = [
   { type: "text", speaker: "立华奏", text: "……音无同学。", char: "kanade", pos: "right" },
 
   { type: "text", speaker: "", text: "奏转过身，夕阳为她的银发镀上一层金边。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "她的表情一如既往地平静，但眼中却闪烁着某种光芒。", char: "", pos: "" },
 
   { type: "char", char: "yuzuru", pos: "left" },
   { type: "text", speaker: "音无结弦", text: "你……一直都知道吧。", char: "yuzuru", pos: "left" },
@@ -397,7 +407,13 @@ const SCRIPT = [
   { type: "text", speaker: "", text: "音无感到眼眶发热。", char: "", pos: "" },
   { type: "text", speaker: "", text: "原来，这个一直在战斗的少女……只是为了对他说一声谢谢。", char: "", pos: "" },
 
-  { type: "cg", src: "cg_kanade_yuzuru.jpg" },
+  { type: "cg", src: "cg_kanade_piano.jpg" },
+  { type: "wait", ms: 2000 },
+  { type: "text", speaker: "", text: "（回忆中，奏在星空下弹奏着钢琴。）", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那优美的旋律，正是 My Soul, Your Beats。", char: "", pos: "" },
+  { type: "cg", src: "" },
+
+  { type: "bg", src: "bg_corridor.jpg" },
   { type: "char", char: "yuzuru3", pos: "left" },
   { type: "text", speaker: "音无结弦", text: "奏……我……", char: "yuzuru3", pos: "left" },
 
@@ -408,7 +424,6 @@ const SCRIPT = [
   { type: "text", speaker: "音无结弦", text: "我喜欢你。", char: "yuzuru3", pos: "left" },
   { type: "text", speaker: "音无结弦", text: "从第一次见面开始……就喜欢你。", char: "yuzuru3", pos: "left" },
 
-  { type: "cg", src: "" },
   { type: "char", char: "kanade2", pos: "right" },
   { type: "text", speaker: "立华奏", text: "……！", char: "kanade2", pos: "right" },
 
@@ -438,7 +453,9 @@ const SCRIPT = [
   { type: "text", speaker: "立华奏", text: "我们一定会……再见的。", char: "kanade", pos: "right" },
 
   { type: "text", speaker: "", text: "奏的身体开始发出温暖的光芒。", char: "", pos: "" },
-  { type: "text", speaker: "", text: "那光芒包裹着音无，像是最后的拥抱。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_kanade_night.jpg" },
+  { type: "text", speaker: "", text: "那光芒如同夜空中的星辰，美丽而遥远。", char: "", pos: "" },
 
   { type: "char", char: "kanade", pos: "right" },
   { type: "text", speaker: "立华奏", text: "谢谢你……音无同学。", char: "kanade", pos: "right" },
@@ -447,6 +464,7 @@ const SCRIPT = [
   { type: "text", speaker: "", text: "奏化作无数光之粒子，消散在夕阳之中。", char: "", pos: "" },
   { type: "text", speaker: "", text: "音无伸出的手，只触碰到了虚无。", char: "", pos: "" },
 
+  { type: "cg", src: "" },
   { type: "char", char: "kanade", pos: "right", action: "hide" },
   { type: "wait", ms: 1200 },
 
@@ -459,20 +477,19 @@ const SCRIPT = [
   { type: "char", char: "yuzuru2", pos: "center", action: "hide" },
 
   // --- 守望 ---
-  { type: "bg", src: "bg_campus.jpg" },
+  { type: "bg", src: "bg_classroom.png" },
   { type: "bgm", src: "brave_song.mp3" },
   { type: "wait", ms: 1500 },
 
   { type: "text", speaker: "", text: "音无选择了留下。", char: "", pos: "" },
   { type: "text", speaker: "", text: "他成为了学生会长，帮助那些迷茫的灵魂找到归宿。", char: "", pos: "" },
 
-  { type: "bg", src: "bg_classroom.jpg" },
   { type: "text", speaker: "", text: "他在空无一人的教室里，为新生讲解这个世界的规则。", char: "", pos: "" },
 
-  { type: "bg", src: "bg_field.jpg" },
+  { type: "bg", src: "bg_field_aerial.png" },
   { type: "text", speaker: "", text: "他在操场上，陪伴那些不愿接受现实的少年少女。", char: "", pos: "" },
 
-  { type: "bg", src: "bg_campus.jpg" },
+  { type: "bg", src: "bg_campus_panorama.jpg" },
   { type: "text", speaker: "", text: "日复一日，年复一年。", char: "", pos: "" },
   { type: "text", speaker: "", text: "他看着一批又一批的灵魂，带着满足的笑容离开。", char: "", pos: "" },
 
