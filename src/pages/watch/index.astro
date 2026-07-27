@@ -3,7 +3,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import animeData from "@/data/animeData.json";
 
 const title = "看番";
-const description = "个人番剧收藏夹，点击封面开始观看";
+const description = "点击封面开始观看";
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -43,8 +43,8 @@ const description = "个人番剧收藏夹，点击封面开始观看";
 
     {animeData.length === 0 && (
       <div class="text-center py-20 text-white/40">
-        <p class="text-lg mb-2">暂无番剧</p>
-        <p class="text-sm">去 src/data/animeData.json 添加数据吧~</p>
+        <p class="text-lg mb-2">暂时没有番剧可看</p>
+        <p class="text-sm">去后台 admin → 番剧管理 添加数据吧~</p>
       </div>
     )}
   </div>
