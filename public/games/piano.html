@@ -7,120 +7,145 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: linear-gradient(180deg, #0d0d0d 0%, #1a1a2e 100%);
+  background: #0c0c14;
   font-family: 'Segoe UI', system-ui, sans-serif;
   display: flex; flex-direction: column; align-items: center;
-  min-height: 100vh; color: #fff; overflow: hidden;
+  min-height: 100vh; color: #e0e0e0; overflow: hidden;
 }
-.header {
-  margin-top: 10px; text-align: center; width: 100%; padding: 0 10px;
+.top-bar {
+  width: 100%; max-width: 900px; padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.header h1 {
-  font-size: 1.6rem; background: linear-gradient(90deg, #a8edea, #fed6e3);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+.top-bar h1 {
+  font-size: 1.3rem; font-weight: 600; color: #fff;
+  letter-spacing: 2px;
 }
 .controls {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
-  margin: 8px 0; align-items: center;
+  display: flex; align-items: center; gap: 12px;
 }
 .btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border: none; border-radius: 6px; padding: 6px 14px;
-  color: #fff; font-size: 0.85rem; cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px; padding: 6px 16px;
+  color: #ccc; font-size: 0.8rem; cursor: pointer;
   transition: all 0.2s;
 }
-.btn:hover { transform: translateY(-1px); opacity: 0.9; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
 input[type="file"] { display: none; }
-.file-label {
-  background: linear-gradient(135deg, #11998e, #38ef7d);
-  border-radius: 6px; padding: 6px 14px; color: #fff;
-  font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+.file-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px; padding: 6px 16px;
+  color: #ccc; font-size: 0.8rem; cursor: pointer;
+  transition: all 0.2s;
 }
-.speed-label { color: #aaa; font-size: 0.8rem; }
-#speedVal { color: #fff; font-weight: bold; }
+.file-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.speed-wrap { display: flex; align-items: center; gap: 6px; }
+.speed-wrap span { font-size: 0.75rem; color: #888; }
+.speed-wrap input[type="range"] {
+  width: 70px; height: 4px; -webkit-appearance: none;
+  background: rgba(255,255,255,0.1); border-radius: 2px; outline: none;
+}
+.speed-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  background: #888; border-radius: 50%; cursor: pointer;
+}
 
-#fallArea {
-  position: relative; width: 640px; height: 280px;
-  background: rgba(0,0,0,0.3); border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow: hidden; margin: 5px 0;
+/* CAVA 频谱 */
+#visualizer {
+  width: 100%; max-width: 900px; height: 100px;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 3px; padding: 10px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-#fallCanvas {
-  width: 100%; height: 100%; display: block;
+.bar {
+  width: 8px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.05s ease;
+  opacity: 0.7;
 }
 
-.piano-container {
-  position: relative; display: flex; justify-content: center;
-  margin-top: 5px; padding-bottom: 20px;
+/* 钢琴 */
+.piano-wrap {
+  flex: 1; display: flex; align-items: flex-end; justify-content: center;
+  padding: 20px; width: 100%; max-width: 900px;
 }
-.keys-wrapper {
+.piano {
   position: relative; display: flex;
-  height: 160px;
+  background: #1a1a2e; border-radius: 8px 8px 4px 4px;
+  padding: 4px 4px 0 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 .white-key {
-  width: 40px; height: 160px; background: linear-gradient(180deg, #fff 0%, #e8e8e8 100%);
-  border: 1px solid #bbb; border-radius: 0 0 4px 4px;
-  margin: 0 1px; cursor: pointer; position: relative;
-  transition: background 0.05s, transform 0.05s;
+  width: 44px; height: 180px;
+  background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
+  border: 1px solid #bbb; border-bottom: 3px solid #999;
+  border-radius: 0 0 4px 4px; margin: 0 1px;
+  cursor: pointer; position: relative;
   display: flex; align-items: flex-end; justify-content: center;
-  padding-bottom: 6px; font-size: 0.65rem; color: #666;
+  padding-bottom: 8px; font-size: 0.6rem; color: #666;
+  transition: all 0.05s;
 }
-.white-key.active {
-  background: linear-gradient(180deg, #a8edea 0%, #667eea 100%);
+.white-key:active, .white-key.active {
+  background: linear-gradient(180deg, #ddd 0%, #ccc 100%);
+  border-bottom: 1px solid #999;
   transform: translateY(2px);
-  box-shadow: 0 0 15px rgba(102,126,234,0.5);
 }
+.white-key .label { position: absolute; bottom: 6px; font-size: 0.55rem; color: #999; }
 .black-key {
-  width: 24px; height: 100px;
+  width: 26px; height: 110px;
   background: linear-gradient(180deg, #333 0%, #111 100%);
-  border-radius: 0 0 3px 3px; position: absolute; top: 0;
+  border: 1px solid #000; border-bottom: 3px solid #000;
+  border-radius: 0 0 3px 3px; position: absolute; top: 4px;
   cursor: pointer; z-index: 10;
-  transition: background 0.05s, transform 0.05s;
+  transition: all 0.05s;
 }
-.black-key.active {
-  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+.black-key:active, .black-key.active {
+  background: linear-gradient(180deg, #222 0%, #000 100%);
+  border-bottom: 1px solid #000;
   transform: translateY(2px);
-  box-shadow: 0 0 12px rgba(102,126,234,0.6);
+}
+.black-key .label { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); font-size: 0.5rem; color: #666; }
+
+.status-bar {
+  width: 100%; max-width: 900px; padding: 8px 20px;
+  text-align: center; font-size: 0.8rem; color: #555;
+  border-top: 1px solid rgba(255,255,255,0.04);
 }
 
-.status {
-  color: #888; font-size: 0.8rem; margin-top: 4px; height: 20px;
-}
-
-@media (max-width: 660px) {
-  #fallArea { width: 100vw; max-width: 100vw; }
-  .white-key { width: 32px; height: 130px; font-size: 0.55rem; }
-  .black-key { width: 20px; height: 80px; }
-  .keys-wrapper { height: 130px; }
+@media (max-width: 700px) {
+  .white-key { width: 34px; height: 140px; font-size: 0.5rem; }
+  .black-key { width: 20px; height: 85px; }
+  .bar { width: 5px; }
 }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>🎹 钢琴</h1>
+<div class="top-bar">
+  <h1>PIANO</h1>
   <div class="controls">
-    <label class="file-label" for="midiFile">📁 导入 MIDI</label>
+    <label class="file-btn" for="midiFile">导入 MIDI</label>
     <input type="file" id="midiFile" accept=".mid,.midi" onchange="loadMidi(event)">
-    <button class="btn" id="playBtn" onclick="togglePlay()" disabled>▶ 播放</button>
-    <button class="btn" onclick="stopPlay()">⏹ 停止</button>
-    <span class="speed-label">速度: <span id="speedVal">1.0</span>x</span>
-    <input type="range" id="speedRange" min="0.3" max="2.0" step="0.1" value="1.0" oninput="updateSpeed()" style="width:80px">
+    <button class="btn" id="playBtn" onclick="togglePlay()" disabled>播放</button>
+    <button class="btn" onclick="stopPlay()">停止</button>
+    <div class="speed-wrap">
+      <span id="speedVal">1.0x</span>
+      <input type="range" id="speedRange" min="0.3" max="2.0" step="0.1" value="1.0" oninput="updateSpeed()">
+    </div>
   </div>
 </div>
 
-<div id="fallArea">
-  <canvas id="fallCanvas" width="640" height="280"></canvas>
+<div id="visualizer"></div>
+
+<div class="piano-wrap">
+  <div class="piano" id="piano"></div>
 </div>
 
-<div class="status" id="status">导入 MIDI 文件或点击琴键演奏</div>
-
-<div class="piano-container">
-  <div class="keys-wrapper" id="keysWrapper"></div>
-</div>
+<div class="status-bar" id="status">点击琴键演奏，或导入 MIDI 文件自动播放</div>
 
 <script>
-// ========== Web Audio ==========
+// ========== Audio ==========
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 function ensureAudio() {
@@ -128,25 +153,107 @@ function ensureAudio() {
   if(audioCtx.state === 'suspended') audioCtx.resume();
 }
 
-function playNote(note, duration=0.3, velocity=0.5) {
+// 模拟钢琴音色：多个泛音叠加 + ADSR
+function playPiano(note, duration=0.8, velocity=0.5) {
   ensureAudio();
-  const freq = 440 * Math.pow(2, (note - 69) / 12);
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'triangle';
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(velocity * 0.4, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime + duration);
+  const baseFreq = 440 * Math.pow(2, (note - 69) / 12);
+  const t = audioCtx.currentTime;
+  const dur = Math.max(duration, 0.3);
+  const masterGain = audioCtx.createGain();
+  masterGain.connect(audioCtx.destination);
+  masterGain.gain.setValueAtTime(velocity * 0.5, t);
+  masterGain.gain.exponentialRampToValueAtTime(0.001, t + dur + 0.5);
+
+  // 基频 + 泛音 模拟钢琴
+  const harmonics = [
+    { type: 'sine', freq: 1.0, gain: 0.6 },
+    { type: 'triangle', freq: 2.0, gain: 0.25 },
+    { type: 'sine', freq: 3.0, gain: 0.12 },
+    { type: 'triangle', freq: 4.0, gain: 0.06 },
+    { type: 'sine', freq: 6.0, gain: 0.03 },
+  ];
+
+  harmonics.forEach(h => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = h.type;
+    osc.frequency.value = baseFreq * h.freq;
+    // 低中高音微调
+    if(note < 48) { // 低音区加强
+      g.gain.setValueAtTime(h.gain * velocity * 1.3, t);
+    } else if(note > 72) { // 高音区减弱泛音
+      g.gain.setValueAtTime(h.gain * velocity * 0.6, t);
+    } else {
+      g.gain.setValueAtTime(h.gain * velocity, t);
+    }
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur * (0.5 + h.freq * 0.1));
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + dur + 0.5);
+  });
+
+  // 低频增强（低音区）
+  if(note < 60) {
+    const sub = audioCtx.createOscillator();
+    const subG = audioCtx.createGain();
+    sub.type = 'sine'; sub.frequency.value = baseFreq * 0.5;
+    subG.gain.setValueAtTime(velocity * 0.15, t);
+    subG.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    sub.connect(subG); subG.connect(masterGain);
+    sub.start(t); sub.stop(t + dur);
+  }
+
+  // 触发频谱条
+  triggerSpectrum(note, velocity);
+}
+
+// ========== CAVA Visualizer ==========
+const NUM_BARS = 64;
+let bars = [];
+let spectrumData = new Array(NUM_BARS).fill(0);
+
+function initVisualizer() {
+  const container = document.getElementById('visualizer');
+  container.innerHTML = '';
+  bars = [];
+  for(let i=0; i<NUM_BARS; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = '2px';
+    container.appendChild(bar);
+    bars.push(bar);
+  }
+}
+
+function triggerSpectrum(note, velocity) {
+  // 根据音符频率映射到频谱条
+  const idx = Math.floor(((note - 48) / 48) * NUM_BARS);
+  if(idx >= 0 && idx < NUM_BARS) {
+    spectrumData[idx] = Math.max(spectrumData[idx], velocity * 80 + 20);
+    // 扩散到相邻条
+    if(idx > 0) spectrumData[idx-1] = Math.max(spectrumData[idx-1], velocity * 50);
+    if(idx < NUM_BARS-1) spectrumData[idx+1] = Math.max(spectrumData[idx+1], velocity * 50);
+  }
+}
+
+function animateSpectrum() {
+  for(let i=0; i<NUM_BARS; i++) {
+    spectrumData[i] *= 0.92; // 衰减
+    spectrumData[i] = Math.max(spectrumData[i], 2 + Math.sin(Date.now()*0.003 + i*0.2)*2);
+    bars[i].style.height = Math.min(spectrumData[i], 90) + 'px';
+    // 颜色随高度变化
+    const h = spectrumData[i];
+    if(h > 60) bars[i].style.background = 'linear-gradient(180deg, #ff6b6b, #ee5a5a)';
+    else if(h > 35) bars[i].style.background = 'linear-gradient(180deg, #667eea, #764ba2)';
+    else bars[i].style.background = 'linear-gradient(180deg, #4a90e2, #357abd)';
+  }
+  requestAnimationFrame(animateSpectrum);
 }
 
 // ========== Piano Keys ==========
-const START_NOTE = 60; // C4
-const END_NOTE = 83;   // B5 (2 octaves)
+const START_NOTE = 48; // C3
+const END_NOTE = 84;   // C6 (3 octaves)
 const WHITE_KEYS = [];
 const NOTE_TO_KEY = {};
-let keyIdCounter = 0;
 
 function isBlack(note) {
   const n = note % 12;
@@ -155,41 +262,47 @@ function isBlack(note) {
 
 function noteName(note) {
   const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-  return names[note%12] + (Math.floor(note/12)-1);
+  return names[note%12];
 }
 
-const wrapper = document.getElementById('keysWrapper');
+const piano = document.getElementById('piano');
 let whiteKeyIndex = 0;
+
 for(let n=START_NOTE; n<=END_NOTE; n++) {
   if(!isBlack(n)) {
     const k = document.createElement('div');
-    k.className = 'white-key'; k.dataset.note = n;
-    k.textContent = noteName(n);
+    k.className = 'white-key';
+    k.dataset.note = n;
+    const label = document.createElement('span');
+    label.className = 'label'; label.textContent = noteName(n);
+    k.appendChild(label);
     k.onmousedown = ()=>pressKey(n); k.onmouseup = ()=>releaseKey(n);
     k.ontouchstart = (e)=>{e.preventDefault(); pressKey(n);};
     k.ontouchend = (e)=>{e.preventDefault(); releaseKey(n);};
-    wrapper.appendChild(k);
+    piano.appendChild(k);
     WHITE_KEYS.push({note:n, el:k, index:whiteKeyIndex});
     NOTE_TO_KEY[n] = {el:k, type:'white'};
     whiteKeyIndex++;
   }
 }
-// Black keys positioned absolutely
-let blackIndex = 0;
+
 for(let n=START_NOTE; n<=END_NOTE; n++) {
   if(isBlack(n)) {
     const prevWhite = WHITE_KEYS.find(w=>w.note===n-1);
     if(prevWhite) {
       const k = document.createElement('div');
-      k.className = 'black-key'; k.dataset.note = n;
-      const left = (prevWhite.index * 42) + 40 - 12; // 42 = 40+2 margin
+      k.className = 'black-key';
+      k.dataset.note = n;
+      const left = (prevWhite.index * 46) + 44 - 13;
       k.style.left = left + 'px';
+      const label = document.createElement('span');
+      label.className = 'label'; label.textContent = noteName(n);
+      k.appendChild(label);
       k.onmousedown = ()=>pressKey(n); k.onmouseup = ()=>releaseKey(n);
       k.ontouchstart = (e)=>{e.preventDefault(); pressKey(n);};
       k.ontouchend = (e)=>{e.preventDefault(); releaseKey(n);};
-      wrapper.appendChild(k);
+      piano.appendChild(k);
       NOTE_TO_KEY[n] = {el:k, type:'black'};
-      blackIndex++;
     }
   }
 }
@@ -197,20 +310,21 @@ for(let n=START_NOTE; n<=END_NOTE; n++) {
 function pressKey(note) {
   const info = NOTE_TO_KEY[note]; if(!info) return;
   info.el.classList.add('active');
-  playNote(note, 0.5, 0.6);
+  playPiano(note, 0.8, 0.5);
 }
 function releaseKey(note) {
   const info = NOTE_TO_KEY[note]; if(!info) return;
   info.el.classList.remove('active');
 }
 
-// Keyboard mapping (QWERTY row for white keys)
+// Keyboard mapping
 const KEY_MAP = {
-  'z':60,'x':62,'c':64,'v':65,'b':67,'n':69,'m':71, // C4-B4
-  ',':72,'.':74,'/':76, // C5-E5
-  'a':61,'s':63,'d':66,'f':68,'g':70, // black keys lower
-  'q':72,'w':74,'e':76,'r':77,'t':79,'y':81,'u':83, // upper octave
-  '2':73,'3':75,'5':78,'6':80,'7':82 // black upper
+  'z':48,'x':50,'c':52,'v':53,'b':55,'n':57,'m':59, // C3-B3
+  ',':60,'.':62,'/':64, // C4-E4
+  'a':49,'s':51,'d':54,'f':56,'g':58, // black lower
+  'q':60,'w':62,'e':64,'r':65,'t':67,'y':69,'u':71,'i':72,'o':74,'p':76,'[':77,']':79, // C4-G5
+  '2':61,'3':63,'5':66,'6':68,'7':70,'9':73,'0':75,'=':78, // black upper
+  'k':72,'l':74,';':76,"'":77, // extra
 };
 document.addEventListener('keydown', e=>{
   if(e.repeat) return;
@@ -222,291 +336,70 @@ document.addEventListener('keyup', e=>{
   if(n && n>=START_NOTE && n<=END_NOTE) releaseKey(n);
 });
 
-// ========== Falling Notes Canvas ==========
-const canvas = document.getElementById('fallCanvas');
-const ctx = canvas.getContext('2d');
-let NOTE_WIDTH = 40, FALL_HEIGHT = 280;
-
-function resizeCanvas() {
-  const rect = document.getElementById('fallArea').getBoundingClientRect();
-  canvas.width = rect.width; canvas.height = rect.height;
-  FALL_HEIGHT = rect.height;
-  NOTE_WIDTH = rect.width / WHITE_KEYS.length;
-}
-window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-let fallingNotes = []; // {note, y, height, color, active}
-let midiNotes = [];    // parsed midi: {note, time, duration, velocity}
-let isPlaying = false, playStartTime = 0, speed = 1.0;
-let animationId;
-
-function noteToX(note) {
-  const info = NOTE_TO_KEY[note];
-  if(!info) return -1;
-  if(info.type==='white') {
-    const wk = WHITE_KEYS.find(w=>w.note===note);
-    return wk ? wk.index * NOTE_WIDTH + NOTE_WIDTH/2 : -1;
-  } else {
-    const prev = WHITE_KEYS.find(w=>w.note===note-1);
-    if(prev) return prev.index * NOTE_WIDTH + NOTE_WIDTH + 1;
-    return -1;
-  }
-}
-
-function drawFall() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // Draw lane lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-  ctx.lineWidth = 1;
-  for(let i=0;i<=WHITE_KEYS.length;i++){
-    ctx.beginPath(); ctx.moveTo(i*NOTE_WIDTH,0); ctx.lineTo(i*NOTE_WIDTH,FALL_HEIGHT); ctx.stroke();
-  }
-  // Draw notes
-  const now = (Date.now() - playStartTime) * speed;
-  const hitLine = FALL_HEIGHT - 20;
-  const pixelsPerMs = 0.15; // fall speed
-
-  fallingNotes.forEach(fn => {
-    const x = noteToX(fn.note);
-    if(x<0) return;
-    const y = hitLine - (fn.endTime - now) * pixelsPerMs;
-    const h = fn.duration * pixelsPerMs;
-    const top = y - h;
-    if(top > FALL_HEIGHT || y < 0) return;
-
-    const isWhite = !isBlack(fn.note);
-    const w = isWhite ? NOTE_WIDTH - 2 : NOTE_WIDTH * 0.6;
-    const drawX = isWhite ? x - w/2 : x - w/2;
-
-    const hue = (fn.note * 15) % 360;
-    const grad = ctx.createLinearGradient(0, top, 0, y);
-    grad.addColorStop(0, `hsla(${hue},80%,60%,0.3)`);
-    grad.addColorStop(1, `hsla(${hue},80%,60%,0.9)`);
-
-    ctx.fillStyle = grad;
-    roundRect(ctx, drawX, Math.max(0, top), w, Math.min(FALL_HEIGHT, y) - Math.max(0, top), 3);
-    ctx.fill();
-
-    // Glow at bottom
-    if(y >= hitLine - 10 && y <= hitLine + 10) {
-      ctx.shadowColor = `hsla(${hue},80%,60%,1)`;
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = `hsla(${hue},80%,70%,1)`;
-      ctx.beginPath(); ctx.arc(x, hitLine, 6, 0, Math.PI*2); ctx.fill();
-      ctx.shadowBlur = 0;
-    }
-  });
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath();
-}
-
-function animate() {
-  if(!isPlaying) return;
-  const now = (Date.now() - playStartTime) * speed;
-
-  // Check notes to play
-  midiNotes.forEach(mn => {
-    if(!mn.played && mn.time <= now + 50) {
-      mn.played = true;
-      playNote(mn.note, mn.duration/1000, mn.velocity);
-      const info = NOTE_TO_KEY[mn.note];
-      if(info) {
-        info.el.classList.add('active');
-        setTimeout(()=>info.el.classList.remove('active'), Math.min(mn.duration, 300));
-      }
-    }
-  });
-
-  // Update falling notes
-  fallingNotes = midiNotes.map(mn => ({
-    note: mn.note, endTime: mn.time + mn.duration,
-    duration: mn.duration, velocity: mn.velocity
-  })).filter(fn => {
-    const y = (FALL_HEIGHT - 20) - (fn.endTime - now) * 0.15;
-    return y > -100 && y - fn.duration*0.15 < FALL_HEIGHT + 50;
-  });
-
-  drawFall();
-
-  if(midiNotes.every(mn=>mn.played) && fallingNotes.length===0) {
-    stopPlay(); document.getElementById('status').textContent = '播放完成';
-    return;
-  }
-  animationId = requestAnimationFrame(animate);
-}
-
 // ========== MIDI Parser ==========
 function parseMidi(buffer) {
-  const data = new Uint8Array(buffer);
-  let pos = 0;
+  const data = new Uint8Array(buffer); let pos = 0;
   function read32() { return (data[pos++]<<24)|(data[pos++]<<16)|(data[pos++]<<8)|data[pos++]; }
   function read16() { return (data[pos++]<<8)|data[pos++]; }
   function readVarLen() { let v=0, b; do{ b=data[pos++]; v=(v<<7)|(b&0x7f); }while(b&0x80); return v; }
-
   if(String.fromCharCode(...data.slice(0,4))!=='MThd') throw new Error('不是标准MIDI文件');
-  pos+=4; read32(); // len
-  const format=read16(), numTracks=read16(), division=read16();
-  const ticksPerBeat = division & 0x7fff;
-
-  let tempo = 500000; // default 120bpm
-  const allNotes = [];
-
+  pos+=4; read32(); const format=read16(), numTracks=read16(), division=read16(); const ticksPerBeat = division & 0x7fff; let tempo = 500000; const allNotes = [];
   for(let t=0; t<numTracks; t++) {
     if(String.fromCharCode(...data.slice(pos,pos+4))!=='MTrk') { pos++; t--; continue; }
-    pos+=4;
-    const trackLen = read32();
-    const endPos = pos + trackLen;
-    let trackTime = 0;
-    let runningStatus = 0;
-    const noteOnEvents = {}; // track pending note-ons
-
-    while(pos < endPos) {
-      const delta = readVarLen();
-      trackTime += delta;
-      let status = data[pos];
-      if(status & 0x80) { runningStatus = status; pos++; }
-      else status = runningStatus;
-
-      const type = status & 0xf0;
-      const channel = status & 0x0f;
-
-      if(type === 0x90) { // Note On
-        const note = data[pos++];
-        const vel = data[pos++];
-        if(vel > 0) {
-          const key = `${channel}-${note}`;
-          noteOnEvents[key] = { time: trackTime, velocity: vel/127 };
-        } else { // Note On vel=0 = Note Off
-          const key = `${channel}-${note}`;
-          if(noteOnEvents[key]) {
-            allNotes.push({
-              note, time: noteOnEvents[key].time,
-              duration: trackTime - noteOnEvents[key].time,
-              velocity: noteOnEvents[key].velocity
-            });
-            delete noteOnEvents[key];
-          }
-        }
-      } else if(type === 0x80) { // Note Off
-        const note = data[pos++]; pos++; // vel
-        const key = `${channel}-${note}`;
-        if(noteOnEvents[key]) {
-          allNotes.push({
-            note, time: noteOnEvents[key].time,
-            duration: trackTime - noteOnEvents[key].time,
-            velocity: noteOnEvents[key].velocity
-          });
-          delete noteOnEvents[key];
-        }
-      } else if(status === 0xff) { // Meta
-        const metaType = data[pos++];
-        const metaLen = readVarLen();
-        if(metaType === 0x51) { // Tempo
-          tempo = (data[pos]<<16)|(data[pos+1]<<8)|data[pos+2];
-        }
-        pos += metaLen;
-      } else if(status === 0xf0 || status === 0xf7) { // SysEx
-        const len = readVarLen(); pos += len;
-      } else {
-        // Other events: skip known lengths
-        if(type===0xc0 || type===0xd0) pos++;
-        else if(type===0xa0 || type===0xb0 || type===0xe0) pos+=2;
-        else { pos++; } // unknown, try recover
-      }
+    pos+=4; const trackLen = read32(); const endPos = pos + trackLen; let trackTime = 0; let runningStatus = 0; const noteOnEvents = {};
+    while(pos < endPos) { const delta = readVarLen(); trackTime += delta; let status = data[pos]; if(status & 0x80) { runningStatus = status; pos++; } else status = runningStatus; const type = status & 0xf0; const channel = status & 0x0f;
+      if(type === 0x90) { const note = data[pos++]; const vel = data[pos++]; if(vel > 0) { noteOnEvents[`${channel}-${note}`] = { time: trackTime, velocity: vel/127 }; } else { const key = `${channel}-${note}`; if(noteOnEvents[key]) { allNotes.push({ note, time: noteOnEvents[key].time, duration: trackTime - noteOnEvents[key].time, velocity: noteOnEvents[key].velocity }); delete noteOnEvents[key]; } } }
+      else if(type === 0x80) { const note = data[pos++]; pos++; const key = `${channel}-${note}`; if(noteOnEvents[key]) { allNotes.push({ note, time: noteOnEvents[key].time, duration: trackTime - noteOnEvents[key].time, velocity: noteOnEvents[key].velocity }); delete noteOnEvents[key]; } }
+      else if(status === 0xff) { const metaType = data[pos++]; const metaLen = readVarLen(); if(metaType === 0x51) { tempo = (data[pos]<<16)|(data[pos+1]<<8)|data[pos+2]; } pos += metaLen; }
+      else if(status === 0xf0 || status === 0xf7) { const len = readVarLen(); pos += len; }
+      else { if(type===0xc0 || type===0xd0) pos++; else if(type===0xa0 || type===0xb0 || type===0xe0) pos+=2; else pos++; }
     }
   }
-
-  // Convert ticks to ms
-  const msPerTick = tempo / ticksPerBeat;
-  allNotes.forEach(n => {
-    n.time = Math.round(n.time * msPerTick);
-    n.duration = Math.round(n.duration * msPerTick);
-  });
-
-  // Filter to our key range and sort
+  const msPerTick = tempo / ticksPerBeat; allNotes.forEach(n => { n.time = Math.round(n.time * msPerTick); n.duration = Math.round(n.duration * msPerTick); });
   return allNotes.filter(n=>n.note>=START_NOTE && n.note<=END_NOTE).sort((a,b)=>a.time-b.time);
 }
+
+let midiNotes = [], isPlaying = false, playStartTime = 0, speed = 1.0, animationId;
 
 function loadMidi(e) {
   const file = e.target.files[0]; if(!file) return;
   document.getElementById('status').textContent = '正在解析: ' + file.name;
   const reader = new FileReader();
   reader.onload = ev => {
-    try {
-      midiNotes = parseMidi(ev.target.result);
-      midiNotes.forEach(n=>n.played=false);
-      document.getElementById('status').textContent = `解析成功! 共 ${midiNotes.length} 个音符`;
-      document.getElementById('playBtn').disabled = false;
-      // Preview first few notes
-      drawStaticNotes();
-    } catch(err) {
-      document.getElementById('status').textContent = '解析失败: ' + err.message;
-    }
+    try { midiNotes = parseMidi(ev.target.result); midiNotes.forEach(n=>n.played=false); document.getElementById('status').textContent = '解析成功, 共 ' + midiNotes.length + ' 个音符'; document.getElementById('playBtn').disabled = false; }
+    catch(err) { document.getElementById('status').textContent = '解析失败: ' + err.message; }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function drawStaticNotes() {
-  if(isPlaying) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const hitLine = FALL_HEIGHT - 20;
-  const pixelsPerMs = 0.15;
+function animate() {
+  if(!isPlaying) return;
+  const now = (Date.now() - playStartTime) * speed;
   midiNotes.forEach(mn => {
-    const x = noteToX(mn.note); if(x<0) return;
-    const y = hitLine - mn.time * pixelsPerMs;
-    const h = mn.duration * pixelsPerMs;
-    if(y+h < 0 || y > FALL_HEIGHT) return;
-    const isWhite = !isBlack(mn.note);
-    const w = isWhite ? NOTE_WIDTH - 2 : NOTE_WIDTH * 0.6;
-    const drawX = x - w/2;
-    const hue = (mn.note * 15) % 360;
-    ctx.fillStyle = `hsla(${hue},70%,60%,0.6)`;
-    roundRect(ctx, drawX, Math.max(0,y), w, Math.min(FALL_HEIGHT,y+h)-Math.max(0,y), 3);
-    ctx.fill();
+    if(!mn.played && mn.time <= now + 50) {
+      mn.played = true;
+      playPiano(mn.note, mn.duration/1000, mn.velocity);
+      const info = NOTE_TO_KEY[mn.note];
+      if(info) { info.el.classList.add('active'); setTimeout(()=>info.el.classList.remove('active'), Math.min(mn.duration, 300)); }
+    }
   });
+  if(midiNotes.every(mn=>mn.played)) { stopPlay(); document.getElementById('status').textContent = '播放完成'; return; }
+  animationId = requestAnimationFrame(animate);
 }
 
 function togglePlay() {
   if(isPlaying) { pausePlay(); return; }
   if(!midiNotes.length) return;
-  ensureAudio();
-  isPlaying = true;
-  playStartTime = Date.now();
-  midiNotes.forEach(n=>n.played=false);
-  document.getElementById('playBtn').textContent = '⏸ 暂停';
-  document.getElementById('status').textContent = '播放中...';
+  ensureAudio(); isPlaying = true; playStartTime = Date.now(); midiNotes.forEach(n=>n.played=false);
+  document.getElementById('playBtn').textContent = '暂停'; document.getElementById('status').textContent = '播放中...';
   animate();
 }
+function pausePlay() { isPlaying = false; cancelAnimationFrame(animationId); document.getElementById('playBtn').textContent = '继续'; document.getElementById('status').textContent = '已暂停'; }
+function stopPlay() { isPlaying = false; cancelAnimationFrame(animationId); midiNotes.forEach(n=>n.played=false); document.getElementById('playBtn').textContent = '播放'; document.getElementById('playBtn').disabled = midiNotes.length===0; document.getElementById('status').textContent = '已停止'; }
+function updateSpeed() { speed = parseFloat(document.getElementById('speedRange').value); document.getElementById('speedVal').textContent = speed.toFixed(1) + 'x'; }
 
-function pausePlay() {
-  isPlaying = false; cancelAnimationFrame(animationId);
-  document.getElementById('playBtn').textContent = '▶ 继续';
-  document.getElementById('status').textContent = '已暂停';
-}
-
-function stopPlay() {
-  isPlaying = false; cancelAnimationFrame(animationId);
-  midiNotes.forEach(n=>n.played=false);
-  document.getElementById('playBtn').textContent = '▶ 播放';
-  document.getElementById('playBtn').disabled = midiNotes.length===0;
-  document.getElementById('status').textContent = '已停止';
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-}
-
-function updateSpeed() {
-  speed = parseFloat(document.getElementById('speedRange').value);
-  document.getElementById('speedVal').textContent = speed.toFixed(1);
-}
-
-// Initial draw
-resizeCanvas();
+initVisualizer();
+animateSpectrum();
 </script>
 </body>
 </html>
