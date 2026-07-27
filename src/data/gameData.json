@@ -27,8 +27,16 @@
     "slug": "piano",
     "title": "钢琴",
     "cover": "/games/covers/piano.png",
-    "description": "网页钢琴模拟器，支持键盘演奏，可导入MIDI文件自动播放，带音符条下落可视化。",
+    "description": "网页钢琴模拟器，支持键盘演奏，可导入MIDI文件自动播放，带CAVA风格频谱可视化。",
     "filePath": "/games/piano.html",
     "category": "音乐"
+  },
+  {
+    "slug": "gal",
+    "title": "Angel Beats - 毕业",
+    "cover": "/games/covers/gal.png",
+    "description": "Angel Beats最终章同人视觉小说。死后世界战线的最后告别，音无与奏的约定。",
+    "filePath": "/games/gal/index.html",
+    "category": "视觉小说"
   }
 ]
