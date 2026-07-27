@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "2048",
+    "title": "2048",
+    "cover": "/games/covers/2048.png",
+    "description": "经典数字合成游戏，滑动方块，合成2048！支持键盘和触屏操作。",
+    "filePath": "/games/2048.html",
+    "category": "益智"
+  },
+  {
+    "slug": "brick-breaker",
+    "title": "弹珠弹球",
+    "cover": "/games/covers/brick-breaker.png",
+    "description": "经典打砖块，控制挡板反弹弹珠，击碎所有砖块过关。支持鼠标、触摸和键盘操作。",
+    "filePath": "/games/brick-breaker.html",
+    "category": "街机"
+  },
+  {
+    "slug": "match-3",
+    "title": "消消乐",
+    "cover": "/games/covers/match-3.png",
+    "description": "经典三消游戏，60秒限时挑战，连击越高分数翻倍！点击相邻宝石交换位置。",
+    "filePath": "/games/match-3.html",
+    "category": "休闲"
+  },
+  {
+    "slug": "piano",
+    "title": "钢琴",
+    "cover": "/games/covers/piano.png",
+    "description": "网页钢琴模拟器，支持键盘演奏，可导入MIDI文件自动播放，带音符条下落可视化。",
+    "filePath": "/games/piano.html",
+    "category": "音乐"
+  }
+]
