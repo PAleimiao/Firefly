@@ -24,14 +24,14 @@ slug: rhythm-games-official-download-guide
 **地位**：国内音游第一大本营，很多音游独家首发或独家运营。
 
 **独家/主要渠道的游戏**：
-- **Phigros** —— 鸽游出品，TapTap 独家，免费无内购
-- **Milthm** —— 雨声音乐出品，TapTap 独家
-- **Orzmic** —— BTworks 出品，TapTap 官方渠道
-- **Arcaea 国服** —— 心动网络代理，TapTap 下载
-- **旋转音律 / Rotaeno 国服** —— 心动网络发行，TapTap 下载
-- **Muse Dash** —— peropero 出品，TapTap 正版
+- **[Phigros](https://www.taptap.cn/app/165287)** —— 鸽游出品，TapTap 独家，免费无内购
+- **[Milthm](https://www.taptap.cn/app/301888)** —— 雨声音乐出品，TapTap 独家
+- **[Orzmic](https://www.taptap.cn/app/194778)** —— BTworks 出品，TapTap 官方渠道
+- **[Arcaea 国服](https://www.taptap.cn/app/201633)** —— 心动网络代理，TapTap 下载
+- **[旋转音律 / Rotaeno 国服](https://www.taptap.cn/app/231280)** —— 心动网络发行，TapTap 下载
+- **[Muse Dash](https://www.taptap.cn/app/742548)** —— peropero 出品，TapTap 正版
 
-**直达链接**：[https://www.taptap.cn/](https://www.taptap.cn/)
+**TapTap 首页**：[https://www.taptap.cn/](https://www.taptap.cn/)（上面列的游戏都可以在里面搜到）
 
 > ⚠️ 注意：TapTap 分「国内版」和「国际版」，国内版域名是 taptap.cn，国际版是 taptap.io。下国服去 .cn，下国际服去 .io。
 
@@ -40,10 +40,10 @@ slug: rhythm-games-official-download-guide
 **地位**：字节跳动旗下，部分音游独家渠道，跟 TapTap 是竞品关系。
 
 **独家/主要渠道的游戏**：
-- **Phira** —— 好游快爆独家渠道（也有 GitHub 开源版）
-- **范式起源 / Paradigm: Reboot** —— 好游快爆独家
+- **[Phira](https://bbs.3839.com/thread-8830224.htm?from=hykb)** —— 好游快爆独家渠道（也有 [GitHub 开源版](https://github.com/TeamFlos/phira/releases)）
+- **[范式起源 / Paradigm: Reboot](https://m.3839.com/a/128686.htm)** —— 好游快爆独家
 
-**直达链接**：[https://www.3839.com/](https://www.3839.com/)
+**好游快爆首页**：[https://www.3839.com/](https://www.3839.com/)
 
 > Phira 在好游快爆有官方社区和攻略，但游戏本体也可以去 GitHub 下（后面会讲）。
 
@@ -85,7 +85,7 @@ slug: rhythm-games-official-download-guide
 
 **具体游戏**：
 - **Phira** —— 开源项目，GitHub 有最新 Release 和源码
-  - 仓库：[https://github.com/TeamFlos/phira](https://github.com/TeamFlos/phira)
+  - 仓库：[https://github.com/TeamFlos/phira](https://github.com/TeamFlos/phira)（[Releases 页直接下 APK](https://github.com/TeamFlos/phira/releases)）
   - releases 页直接下 APK
 
 > Phira 的 iOS 版只能通过 ipa 文件自签安装，GitHub 上也有 ipa release。
@@ -135,18 +135,18 @@ slug: rhythm-games-official-download-guide
 
 | 游戏 | 国服渠道 | 国际服渠道 | 备注 |
 |------|----------|------------|------|
-| **Phigros** | TapTap 独家 | 无国际服 | 免费，无内购，鸽游良心作 |
-| **Milthm** | TapTap 独家 | 无国际服 | 雨声音乐出品 |
-| **Phira** | 好游快爆 / GitHub | GitHub | 开源社区音游，iOS 需自签 |
-| **范式起源 / Paradigm** | 好游快爆 独家 | 暂无 | 科幻风下落式音游 |
-| **Arcaea** | TapTap / 心动官网 / 应用商店 | Google Play / App Store | 国服国际服数据不互通 |
-| **Orzmic** | TapTap / 4399 | 暂无 | BTworks 出品 |
-| **Lanota** | 无国服 | Google Play / 外区 App Store | 需台区/美区 Apple ID |
-| **Rotaeno / 旋转音律** | TapTap / 应用商店 | Google Play / 外区 App Store | 体感旋转玩法 |
-| **Muse Dash** | TapTap / Steam | Steam / Google Play / App Store | PC手机数据互通 |
-| **Cytus II** | 无国服（已停服） | Google Play / App Store | 雷亚出品，剧情向 |
-| **Deemo** | 无国服 | Google Play / App Store | 雷亚出品，钢琴风 |
-| **VOEZ / 兰空** | 国服「兰空VOEZ」 | 国际服 VOEZ | 国服有代理 |
+| **[Phigros](https://www.taptap.cn/app/165287)** | [TapTap](https://www.taptap.cn/app/165287) 独家 | 无国际服 | 免费，无内购，鸽游良心作 |
+| **[Milthm](https://www.taptap.cn/app/301888)** | [TapTap](https://www.taptap.cn/app/301888) 独家 | 无国际服 | 雨声音乐出品 |
+| **[Phira](https://bbs.3839.com/thread-8830224.htm?from=hykb)** | [好游快爆](https://bbs.3839.com/thread-8830224.htm?from=hykb) / [GitHub](https://github.com/TeamFlos/phira/releases) | [GitHub](https://github.com/TeamFlos/phira/releases) | 开源社区音游，iOS 需自签 |
+| **[范式起源](https://m.3839.com/a/128686.htm)** | [好游快爆](https://m.3839.com/a/128686.htm) 独家 | [App Store 外区](https://apps.apple.com/us/app/paradigm-reboot/id1606001885) / [Google Play](https://play.google.com/store/apps/details?id=com.tunergames.paradigm) | 科幻风下落式音游 |
+| **[Arcaea](https://www.taptap.cn/app/201633)** | [TapTap 国服](https://www.taptap.cn/app/201633) / 应用商店 | [Google Play](https://play.google.com/store/apps/details?id=low.moe.Arcaea) / [App Store 外区](https://apps.apple.com/us/app/arcaea/id1200358964) | 国服国际服数据不互通 |
+| **[Orzmic](https://www.taptap.cn/app/194778)** | [TapTap](https://www.taptap.cn/app/194778) / 4399 | 暂无 | BTworks 出品 |
+| **[Lanota](https://play.google.com/store/apps/details?id=com.noxygames.lanota)** | 无国服 | [Google Play](https://play.google.com/store/apps/details?id=com.noxygames.lanota) / [App Store 外区](https://apps.apple.com/us/app/lanota/id1060669847) | 需台区/美区 Apple ID |
+| **[Rotaeno](https://www.taptap.cn/app/231280)** | [TapTap 国服](https://www.taptap.cn/app/231280) / 应用商店 | [Google Play](https://play.google.com/store/apps/details?id=com.dreamenginegames.rotaeno) / [App Store 外区](https://apps.apple.com/us/app/rotaeno/id1454803326) | 体感旋转玩法 |
+| **[Muse Dash](https://www.taptap.cn/app/742548)** | [TapTap](https://www.taptap.cn/app/742548) / [Steam](https://store.steampowered.com/app/774171/Muse_Dash/) | [Steam](https://store.steampowered.com/app/774171/Muse_Dash/) / [Google Play](https://play.google.com/store/apps/details?id=com.peroperogames.musedash) / [App Store](https://apps.apple.com/cn/app/muse-dash/id1361472815) | PC手机数据互通 |
+| **[Cytus II](https://play.google.com/store/apps/details?id=com.rayark.cytus2)** | 无国服（已停服） | [Google Play](https://play.google.com/store/apps/details?id=com.rayark.cytus2) / [App Store](https://apps.apple.com/us/app/cytus-ii/id1299756052) | 雷亚出品，剧情向 |
+| **[Deemo](https://play.google.com/store/apps/details?id=com.rayark.pluto)** | 无国服 | [Google Play](https://play.google.com/store/apps/details?id=com.rayark.pluto) / [App Store](https://apps.apple.com/us/app/deemo/id685554562) | 雷亚出品，钢琴风 |
+| **[VOEZ / 兰空](https://www.taptap.cn/search?kw=VOEZ)** | 国服「兰空VOEZ」 | 国际服 [App Store](https://apps.apple.com/us/app/voez/id1017149595) / [Google Play](https://play.google.com/store/apps/details?id=com.rayark.voez) | 国服有代理 |
 
 ---
 
