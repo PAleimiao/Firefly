@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Angel Beats! - Episode 13 毕业</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #000; font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  color: #fff; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+#game-root {
+  position: fixed; inset: 0; z-index: 99999;
+  width: 100vw; height: 100vh; overflow: hidden; background: #000;
+}
+#bg-layer {
+  position: absolute; inset: 0; z-index: 1;
+  background-size: cover; background-position: center;
+  transition: opacity 1.5s ease;
+}
+#cg-layer {
+  position: absolute; inset: 0; z-index: 2;
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+  opacity: 0; transition: opacity 1.2s ease; pointer-events: none;
+}
+#cg-layer.active { opacity: 1; }
+#char-layer {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+  height: 78%; pointer-events: none;
+}
+.char {
+  position: absolute; bottom: 0; height: 92%;
+  opacity: 0; transform: translateY(40px);
+  transition: all 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 0 50px rgba(0,0,0,0.7));
+  max-width: 55%;
+}
+.char.active { opacity: 1; transform: translateY(0); }
+.char.left { left: 2%; }
+.char.center { left: 50%; transform: translateX(-50%) translateY(40px); }
+.char.center.active { transform: translateX(-50%) translateY(0); }
+.char.right { right: 2%; }
+#vignette {
+  position: absolute; inset: 0; z-index: 4;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+#dialog-box {
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+  width: 94%; max-width: 900px; z-index: 10;
+  background: rgba(0,0,0,0.82);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 18px 24px 20px;
+  backdrop-filter: blur(16px);
+  cursor: pointer; min-height: 120px;
+  transition: opacity 0.4s;
+}
+#dialog-box.hidden { opacity: 0; pointer-events: none; }
+#speaker {
+  font-size: 1.05rem; font-weight: bold; margin-bottom: 8px;
+  border-left: 3px solid; padding-left: 10px; letter-spacing: 1px;
+}
+#text { font-size: 1rem; line-height: 1.85; color: #eee; min-height: 56px; letter-spacing: 0.5px; }
+#text .cursor {
+  display: inline-block; width: 2px; height: 1.1em; background: currentColor;
+  margin-left: 3px; animation: blink 0.85s infinite; vertical-align: text-bottom;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+#top-ui {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 30;
+  display: none; justify-content: space-between; align-items: center;
+  padding: 10px 16px; background: rgba(0,0,0,0.4);
+}
+#top-ui.active { display: flex; }
+#top-ui button {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 5px 12px; color: #aaa; font-size: 0.76rem;
+  cursor: pointer; transition: all 0.2s; margin-left: 6px;
+}
+#top-ui button:hover { background: rgba(255,255,255,0.14); color: #fff; }
+#chapter-title { font-size: 0.82rem; color: #999; letter-spacing: 2px; }
+#settings {
+  position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,0.9);
+  display: none; align-items: center; justify-content: center;
+}
+#settings.active { display: flex; }
+.settings-box {
+  background: rgba(14,14,24,0.98); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 32px; width: 320px;
+}
+.settings-box h2 { font-size: 1.25rem; margin-bottom: 22px; text-align: center; letter-spacing: 3px; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin: 16px 0; }
+.setting-row label { font-size: 0.88rem; color: #aaa; }
+.setting-row input[type="range"] { width: 120px; }
+.setting-row span { font-size: 0.78rem; color: #888; width: 46px; text-align: right; }
+.close-btn {
+  width: 100%; margin-top: 16px; padding: 11px;
+  background: rgba(168,237,234,0.1); border: 1px solid rgba(168,237,234,0.4);
+  border-radius: 10px; color: #a8edea; cursor: pointer; font-size: 0.92rem;
+}
+#history {
+  position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,0.94);
+  display: none; flex-direction: column;
+}
+#history.active { display: flex; }
+#history-header {
+  padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: space-between; align-items: center;
+}
+#history-list { flex: 1; overflow-y: auto; padding: 18px; }
+.history-item { margin-bottom: 12px; padding: 12px 14px; background: rgba(255,255,255,0.035); border-radius: 10px; }
+.history-speaker { color: #a8edea; font-weight: bold; font-size: 0.82rem; margin-bottom: 4px; }
+.history-text { color: #ccc; font-size: 0.9rem; line-height: 1.6; }
+#title-screen {
+  position: absolute; inset: 0; z-index: 50;
+  background: linear-gradient(180deg, #060614 0%, #121228 45%, #080818 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#title-screen h1 { font-size: 2.4rem; letter-spacing: 10px; margin-bottom: 8px;
+  background: linear-gradient(90deg, #a8edea, #fed6e3);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#title-screen h2 { font-size: 0.85rem; color: #666; letter-spacing: 5px; margin-bottom: 45px; }
+.title-btn {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 13px 52px; margin: 8px 0; color: #bbb;
+  font-size: 1rem; cursor: pointer; transition: all 0.35s;
+  min-width: 240px; text-align: center; letter-spacing: 2px;
+}
+.title-btn:hover { background: rgba(168,237,234,0.08); border-color: rgba(168,237,234,0.5); color: #fff; transform: translateY(-2px); }
+#chapter-overlay {
+  position: absolute; inset: 0; z-index: 45; background: #000;
+  display: none; align-items: center; justify-content: center;
+}
+#chapter-overlay.active { display: flex; }
+#chapter-overlay h1 { font-size: 2rem; letter-spacing: 6px; text-align: center; line-height: 1.8;
+  animation: chapterFade 3s ease forwards; }
+@keyframes chapterFade {
+  0% { opacity: 0; transform: scale(0.9); } 25% { opacity: 1; transform: scale(1); }
+  75% { opacity: 1; } 100% { opacity: 0; }
+}
+#status-toast {
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 50;
+  padding: 9px 24px; background: rgba(0,0,0,0.85); border: 1px solid rgba(168,237,234,0.25);
+  border-radius: 24px; color: #a8edea; font-size: 0.85rem; opacity: 0;
+  transition: opacity 0.35s; pointer-events: none; letter-spacing: 1px;
+}
+#status-toast.active { opacity: 1; }
+#end-screen {
+  position: absolute; inset: 0; z-index: 48; background: #000;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+}
+#end-screen.active { display: flex; }
+#end-screen h1 { font-size: 1.8rem; letter-spacing: 8px; margin-bottom: 16px; color: #a8edea; }
+#end-screen p { color: #888; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 20px; }
+#end-screen .end-btn {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 12px 40px; color: #bbb; cursor: pointer;
+  font-size: 0.95rem; transition: all 0.3s; letter-spacing: 2px; margin: 6px 0;
+}
+#end-screen .end-btn:hover { background: rgba(168,237,234,0.1); border-color: #a8edea; color: #fff; }
+@media (max-width: 600px) {
+  #title-screen h1 { font-size: 1.7rem; letter-spacing: 5px; }
+  .char { height: 82%; } #dialog-box { width: 96%; padding: 14px 16px 16px; bottom: 14px; }
+  #text { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+<div id="game-root">
+
+<div id="title-screen">
+  <h1>Angel Beats!</h1>
+  <h2>Episode 13 毕业</h2>
+  <div class="title-btn" onclick="startGame(); event.stopPropagation();">开始本章</div>
+  <div class="title-btn" onclick="loadGame(); event.stopPropagation();">继续游戏</div>
+  <div class="title-btn" onclick="showSettings(); event.stopPropagation();">设置</div>
+  <div class="title-btn" onclick="location.href='../'">返回章节选择</div>
+</div>
+
+<div id="chapter-overlay"><h1 id="chapter-text"></h1></div>
+<div id="bg-layer"></div>
+<div id="cg-layer"></div>
+<div id="vignette"></div>
+<div id="char-layer"></div>
+
+<div id="dialog-box" onclick="advance()">
+  <div id="speaker"></div>
+  <div id="text"></div>
+</div>
+
+<div id="top-ui">
+  <div id="chapter-title">Episode 13 毕业</div>
+  <div>
+    <button onclick="toggleAuto()" id="autoBtn">自动</button>
+    <button onclick="toggleSkip()" id="skipBtn">快进</button>
+    <button onclick="showHistory()">历史</button>
+    <button onclick="quickSave()">存档</button>
+    <button onclick="showSettings()">设置</button>
+  </div>
+</div>
+
+<div id="settings" onclick="if(event.target===this) hideSettings();">
+  <div class="settings-box">
+    <h2>设置</h2>
+    <div class="setting-row">
+      <label>文字速度</label>
+      <input type="range" id="textSpeed" min="10" max="100" value="50" oninput="updateSetting('textSpeed', this.value)">
+      <span id="textSpeedVal">中</span>
+    </div>
+    <div class="setting-row">
+      <label>BGM音量</label>
+      <input type="range" id="bgmVol" min="0" max="100" value="70" oninput="updateSetting('bgmVol', this.value)">
+      <span id="bgmVolVal">70%</span>
+    </div>
+    <div class="setting-row">
+      <label>音效音量</label>
+      <input type="range" id="seVol" min="0" max="100" value="80" oninput="updateSetting('seVol', this.value)">
+      <span id="seVolVal">80%</span>
+    </div>
+    <button class="close-btn" onclick="hideSettings()">关闭</button>
+  </div>
+</div>
+
+<div id="history">
+  <div id="history-header"><h3>历史记录</h3><button onclick="hideHistory()">关闭</button></div>
+  <div id="history-list"></div>
+</div>
+
+<div id="end-screen">
+  <h1>Episode 13 完</h1>
+  <p>「就算忘记了一切，我也会再次找到你。」</p>
+  <div class="end-btn" onclick="location.href='../'">返回章节选择</div>
+  <div class="end-btn" onclick="location.reload()">再玩一次</div>
+</div>
+
+<div id="status-toast"></div>
+<audio id="bgm" loop></audio>
+
+<script>
+const CHARACTERS = {
+  yuzuru:  { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
+  yuzuru2: { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
+  yuzuru3: { name: "音无结弦", color: "#a8edea", img: "yuzuru.png" },
+  kanade:  { name: "立华奏",   color: "#fed6e3", img: "kanade.png" },
+  kanade2: { name: "立华奏",   color: "#fed6e3", img: "kanade.png" },
+  yuri:    { name: "仲村由理", color: "#e94560", img: "yuri.png" },
+  hinata:  { name: "日向秀树", color: "#4dabf7", img: "hinata.png" },
+  yui:     { name: "由依",     color: "#ffd43b", img: "yui.png" },
+};
+
+// ========== 贴合原著的剧本（含新CG） ==========
+const SCRIPT = [
+  { type: "chapter", text: "Episode 13<br>毕业" },
+  { type: "bg", src: "bg_campus_panorama.jpg" },
+  { type: "bgm", src: "ichiban.mp3" },
+  { type: "wait", ms: 2000 },
+
+  // --- 开场 ---
+  { type: "text", speaker: "", text: "春日的阳光温柔地洒落在校园里。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "曾经充满战斗与喧嚣的死后世界，如今安静得只剩下风声。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "死后世界战线的成员们，迎来了最后的时刻。", char: "", pos: "" },
+
+  { type: "bg", src: "bg_auditorium.jpg" },
+  { type: "text", speaker: "", text: "礼堂里，大家穿着整齐的校服，静静地坐着。", char: "", pos: "" },
+
+  // --- 由理 ---
+  { type: "char", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "……那么，毕业典礼，现在开始。", char: "yuri", pos: "center" },
+
+  { type: "text", speaker: "", text: "由理站在礼堂前方，目光扫过在场的每一个人。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "她的眼中，没有了往日的锋芒，只剩下温柔。", char: "", pos: "" },
+
+  { type: "char", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "我们死后世界战线……是为了反抗神而成立的组织。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "我们战斗过，叛逆过，给这个世界添了很多麻烦。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "但是……我们错了。", char: "yuri", pos: "center" },
+
+  { type: "text", speaker: "", text: "由理的声音很轻，却清晰地传进每个人的耳中。", char: "", pos: "" },
+
+  { type: "char", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "我们不是为了反抗什么，才来到这里的。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "我们只是……想好好活过一次。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "想拥有朋友。想被人需要。想……不留遗憾地离开。", char: "yuri", pos: "center" },
+
+  { type: "char", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "由理……", char: "yuzuru", pos: "left" },
+
+  { type: "cg", src: "cg_yuri_hat.jpg" },
+  { type: "char", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "能遇见你们……是我这辈子最幸运的事。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "谢谢大家……陪我走到这里。", char: "yuri", pos: "center" },
+
+  { type: "text", speaker: "", text: "由理的身体开始发出淡淡的、温暖的光芒。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那光芒并不刺眼，像是春日午后的阳光。", char: "", pos: "" },
+
+  { type: "char", char: "hinata", pos: "right" },
+  { type: "text", speaker: "日向秀树", text: "由理……！", char: "hinata", pos: "right" },
+
+  { type: "cg", src: "" },
+  { type: "char", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "再见啦，大家。", char: "yuri", pos: "center" },
+  { type: "text", speaker: "仲村由理", text: "下辈子……一定要再见哦。", char: "yuri", pos: "center" },
+
+  { type: "text", speaker: "", text: "由理化作无数金色的光点，缓缓升向空中。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "她的笑容，是那样纯净，那样美丽。", char: "", pos: "" },
+
+  { type: "char", char: "yuri", pos: "center", action: "hide" },
+  { type: "wait", ms: 1000 },
+
+  // --- 其他成员消失 ---
+  { type: "text", speaker: "", text: "由理消失后，礼堂里陷入了短暂的沉默。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "然后，一个接一个，剩下的成员也开始化作光芒。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_group_sleep.jpg" },
+  { type: "wait", ms: 2000 },
+  { type: "cg", src: "" },
+
+  // --- 日向与由依 ---
+  { type: "bg", src: "bg_field.jpg" },
+  { type: "char", char: "hinata", pos: "left" },
+  { type: "text", speaker: "日向秀树", text: "……由依。我们也该走了吧。", char: "hinata", pos: "left" },
+
+  { type: "char", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "嗯……日向前辈。", char: "yui", pos: "right" },
+
+  { type: "char", char: "hinata", pos: "left" },
+  { type: "text", speaker: "日向秀树", text: "你下辈子……想做什么？", char: "hinata", pos: "left" },
+
+  { type: "char", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "我想做一个普通的女孩子。", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "能跑、能跳……能和自己喜欢的人在一起。", char: "yui", pos: "right" },
+
+  { type: "char", char: "hinata", pos: "left" },
+  { type: "text", speaker: "日向秀树", text: "……那我来娶你吧。", char: "hinata", pos: "left" },
+
+  { type: "char", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "……诶？", char: "yui", pos: "right" },
+
+  { type: "char", char: "hinata", pos: "left" },
+  { type: "text", speaker: "日向秀树", text: "下辈子，我来娶你。", char: "hinata", pos: "left" },
+  { type: "text", speaker: "日向秀树", text: "所以……你可别嫁给别人啊。", char: "hinata", pos: "left" },
+
+  { type: "cg", src: "cg_yui_scene.jpg" },
+  { type: "char", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "……笨蛋。", char: "yui", pos: "right" },
+  { type: "text", speaker: "由依", text: "约定好了哦。我会一直等你的。", char: "yui", pos: "right" },
+
+  { type: "text", speaker: "", text: "两人相视而笑，手牵着手，一同化作温暖的光芒。", char: "", pos: "" },
+
+  { type: "cg", src: "" },
+  { type: "char", char: "hinata", pos: "left", action: "hide" },
+  { type: "char", char: "yui", pos: "right", action: "hide" },
+  { type: "wait", ms: 1000 },
+
+  // --- 礼堂空荡 ---
+  { type: "bg", src: "bg_auditorium.jpg" },
+  { type: "text", speaker: "", text: "偌大的礼堂，如今只剩下寥寥数人。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "曾经喧闹的死后世界战线，如今只剩下回忆。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_ed_group1.jpg" },
+  { type: "wait", ms: 2500 },
+  { type: "cg", src: "" },
+
+  // --- 走廊：奏与音无 ---
+  { type: "bg", src: "bg_corridor.jpg" },
+  { type: "text", speaker: "", text: "夕阳将走廊染成金色。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "长长的走廊尽头，站着一个银发少女。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "……奏。", char: "yuzuru", pos: "left" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "……音无同学。", char: "kanade", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏转过身，夕阳为她的银发镀上一层金边。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "她的表情一如既往地平静，但眼中却闪烁着某种光芒。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "你……一直都知道吧。", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "关于我。关于……那颗心脏。", char: "yuzuru", pos: "left" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "……是的。", char: "kanade", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏低下头，轻轻按住自己的胸口。", char: "", pos: "" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "音无同学的心脏……在我的身体里跳动着。", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "因为接受了音无同学的心脏，我才来到了这个世界。", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "我想……对那颗心脏的主人……说一声谢谢。", char: "kanade", pos: "right" },
+
+  { type: "char", char: "yuzuru2", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "奏……", char: "yuzuru2", pos: "left" },
+
+  { type: "text", speaker: "", text: "音无感到眼眶发热。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "原来，这个一直在战斗的少女……只是为了对他说一声谢谢。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_kanade_yuzuru.jpg" },
+  { type: "char", char: "yuzuru3", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "奏……我……", char: "yuzuru3", pos: "left" },
+
+  { type: "text", speaker: "", text: "音无走上前，握住了奏的手。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那双手很凉，很柔软，却让他感到前所未有的温暖。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru3", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "我喜欢你。", char: "yuzuru3", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "从第一次见面开始……就喜欢你。", char: "yuzuru3", pos: "left" },
+
+  { type: "cg", src: "" },
+  { type: "char", char: "kanade2", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "……！", char: "kanade2", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏的脸颊微微泛红，那是音无从未见过的表情。", char: "", pos: "" },
+
+  { type: "char", char: "kanade2", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "音无同学……", char: "kanade2", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "我也……喜欢你。", char: "kanade2", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏的脸上，第一次露出了发自内心的、幸福的笑容。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_kanade_hug.jpg" },
+  { type: "wait", ms: 3000 },
+
+  { type: "cg", src: "" },
+  { type: "bg", src: "bg_corridor.jpg" },
+
+  { type: "char", char: "kanade2", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "谢谢你……给了我这么多美好的回忆。", char: "kanade2", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "现在……我可以安心地离开了。", char: "kanade2", pos: "right" },
+
+  { type: "char", char: "yuzuru2", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "奏……不要走……！", char: "yuzuru2", pos: "left" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "没关系的。", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "我们一定会……再见的。", char: "kanade", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏的身体开始发出温暖的光芒。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那光芒包裹着音无，像是最后的拥抱。", char: "", pos: "" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "谢谢你……音无同学。", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "谢谢你……让我的人生……变得如此美好。", char: "kanade", pos: "right" },
+
+  { type: "text", speaker: "", text: "奏化作无数光之粒子，消散在夕阳之中。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "音无伸出的手，只触碰到了虚无。", char: "", pos: "" },
+
+  { type: "char", char: "kanade", pos: "right", action: "hide" },
+  { type: "wait", ms: 1200 },
+
+  { type: "char", char: "yuzuru2", pos: "center" },
+  { type: "text", speaker: "音无结弦", text: "奏——！！", char: "yuzuru2", pos: "center" },
+
+  { type: "text", speaker: "", text: "空荡荡的走廊，只剩下音无一个人的身影。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "夕阳渐渐沉落，将他的影子拉得很长很长。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru2", pos: "center", action: "hide" },
+
+  // --- 守望 ---
+  { type: "bg", src: "bg_campus.jpg" },
+  { type: "bgm", src: "brave_song.mp3" },
+  { type: "wait", ms: 1500 },
+
+  { type: "text", speaker: "", text: "音无选择了留下。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "他成为了学生会长，帮助那些迷茫的灵魂找到归宿。", char: "", pos: "" },
+
+  { type: "bg", src: "bg_classroom.jpg" },
+  { type: "text", speaker: "", text: "他在空无一人的教室里，为新生讲解这个世界的规则。", char: "", pos: "" },
+
+  { type: "bg", src: "bg_field.jpg" },
+  { type: "text", speaker: "", text: "他在操场上，陪伴那些不愿接受现实的少年少女。", char: "", pos: "" },
+
+  { type: "bg", src: "bg_campus.jpg" },
+  { type: "text", speaker: "", text: "日复一日，年复一年。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "他看着一批又一批的灵魂，带着满足的笑容离开。", char: "", pos: "" },
+
+  { type: "text", speaker: "", text: "有时候，他会站在走廊尽头，望着夕阳发呆。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "仿佛下一秒，那个银发少女就会出现在那里。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "但那里，永远只有风。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "直到……那个约定的时刻到来。", char: "", pos: "" },
+
+  // --- 重逢 ---
+  { type: "bg", src: "bg_sunset_street.jpg" },
+  { type: "bgm", src: "my_soul_your_beats.mp3" },
+  { type: "wait", ms: 2000 },
+
+  { type: "text", speaker: "", text: "现实世界的街道。阳光明媚。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "樱花纷飞的季节。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru", pos: "center" },
+  { type: "text", speaker: "音无结弦", text: "（……又是春天了啊。）", char: "yuzuru", pos: "center" },
+
+  { type: "text", speaker: "", text: "音无走在人行道上，心中空落落的。", char: "", pos: "" },
+
+  { type: "text", speaker: "???", text: "那个……请问……", char: "", pos: "" },
+
+  { type: "text", speaker: "", text: "身后传来一个熟悉的声音。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那声音很轻，很柔，却让音无的心脏猛地停了一拍。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru3", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "……！", char: "yuzuru3", pos: "left" },
+
+  { type: "char", char: "kanade", pos: "right" },
+  { type: "text", speaker: "立华奏", text: "请问……我们是不是在哪里见过？", char: "kanade", pos: "right" },
+
+  { type: "text", speaker: "", text: "银发少女站在阳光下，微微歪着头。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "她的嘴角，不自觉地哼着一段熟悉的旋律。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "——My Soul, Your Beats!", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "奏……", char: "yuzuru", pos: "left" },
+
+  { type: "text", speaker: "", text: "音无的眼眶湿润了。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "所有的等待，所有的孤独，在这一刻都化作了喜悦。", char: "", pos: "" },
+
+  { type: "char", char: "yuzuru", pos: "left" },
+  { type: "text", speaker: "音无结弦", text: "我终于……找到你了。", char: "yuzuru", pos: "left" },
+
+  { type: "text", speaker: "", text: "少女愣了一下，然后露出了微笑。", char: "", pos: "" },
+  { type: "text", speaker: "", text: "那笑容，和记忆中一模一样。", char: "", pos: "" },
+
+  { type: "cg", src: "cg_ed_final.jpg" },
+  { type: "wait", ms: 4000 },
+
+  { type: "text", speaker: "", text: "END", char: "", pos: "" },
+  { type: "text", speaker: "", text: "「Angel Beats! - 毕业」", char: "", pos: "" },
+  { type: "text", speaker: "", text: "Thank you for playing.", char: "", pos: "" },
+];
+
+let currentIndex = 0, isTyping = false, typeTimer = null;
+let autoMode = false, skipMode = false;
+let settings = { textSpeed: 50, bgmVol: 70, seVol: 80 };
+let history = [], charsOnScreen = {}, cgActive = false;
+
+function init() {
+  loadSettings();
+  const bgm = document.getElementById('bgm');
+  if(bgm) bgm.volume = settings.bgmVol / 100;
+}
+
+function startGame() {
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('top-ui').classList.add('active');
+  currentIndex = 0; history = []; charsOnScreen = {}; cgActive = false;
+  document.getElementById('char-layer').innerHTML = '';
+  document.getElementById('cg-layer').classList.remove('active');
+  document.getElementById('end-screen').classList.remove('active');
+  processLine();
+}
+
+function loadGame() {
+  const save = localStorage.getItem('gal_ch13_save');
+  if(save) {
+    try {
+      const data = JSON.parse(save);
+      currentIndex = data.index || 0; history = data.history || [];
+      document.getElementById('title-screen').style.display = 'none';
+      document.getElementById('top-ui').classList.add('active');
+      charsOnScreen = {}; cgActive = false;
+      document.getElementById('char-layer').innerHTML = '';
+      document.getElementById('cg-layer').classList.remove('active');
+      document.getElementById('end-screen').classList.remove('active');
+      processLine();
+    } catch(e) { showToast('存档损坏，重新开始'); startGame(); }
+  } else { showToast('没有存档'); startGame(); }
+}
+
+function playBGM(src) {
+  const bgm = document.getElementById('bgm'); if(!bgm) return;
+  const vol = settings.bgmVol / 100;
+  if(bgm.src && bgm.src.includes(src) && !bgm.paused) return;
+  if(!bgm.paused && bgm.src) {
+    const fadeOut = setInterval(() => {
+      if(bgm.volume > 0.05) bgm.volume -= 0.05;
+      else { clearInterval(fadeOut); bgm.pause(); switchBGM(bgm, src, vol); }
+    }, 80);
+  } else { switchBGM(bgm, src, vol); }
+}
+
+function switchBGM(bgm, src, vol) {
+  bgm.src = 'assets/bgm/' + src; bgm.volume = 0;
+  bgm.play().then(() => {
+    const fadeIn = setInterval(() => {
+      if(bgm.volume < vol - 0.03) bgm.volume += 0.03;
+      else { bgm.volume = vol; clearInterval(fadeIn); }
+    }, 60);
+  }).catch(()=>{});
+}
+
+function processLine() {
+  if(currentIndex >= SCRIPT.length) { showEndScreen(); return; }
+  const line = SCRIPT[currentIndex];
+  switch(line.type) {
+    case 'chapter': showChapter(line.text); currentIndex++; break;
+    case 'bg': setBG(line.src); currentIndex++; setTimeout(processLine, 800); break;
+    case 'cg': showCG(line.src); currentIndex++; setTimeout(processLine, line.src ? 1200 : 600); break;
+    case 'bgm': playBGM(line.src); currentIndex++; processLine(); break;
+    case 'char': handleChar(line); currentIndex++; setTimeout(processLine, 600); break;
+    case 'text': showText(line); break;
+    case 'wait': currentIndex++; setTimeout(processLine, line.ms); break;
+    default: currentIndex++; processLine();
+  }
+}
+
+function showChapter(text) {
+  const overlay = document.getElementById('chapter-overlay');
+  document.getElementById('chapter-text').innerHTML = text;
+  overlay.classList.add('active');
+  setTimeout(() => overlay.classList.remove('active'), 3000);
+}
+
+function setBG(src) {
+  const bg = document.getElementById('bg-layer'); if(!bg) return;
+  if(src) { bg.style.backgroundImage = "url(assets/backgrounds/" + src + ")"; bg.style.opacity = '1'; }
+  else { bg.style.opacity = '0'; }
+}
+
+function showCG(src) {
+  const cg = document.getElementById('cg-layer'); if(!cg) return;
+  if(src) {
+    cg.style.backgroundImage = "url(assets/backgrounds/" + src + ")";
+    cg.classList.add('active'); cgActive = true;
+    document.getElementById('dialog-box').style.opacity = '0.85';
+  } else {
+    cg.classList.remove('active'); cgActive = false;
+    document.getElementById('dialog-box').style.opacity = '1';
+  }
+}
+
+function handleChar(line) {
+  const layer = document.getElementById('char-layer'); if(!layer) return;
+  const key = line.char + '_' + line.pos;
+  if(line.action === 'hide') {
+    const el = document.querySelector('.char[data-key="' + key + '"]');
+    if(el) { el.classList.remove('active'); setTimeout(()=>{if(el.parentNode)el.remove()}, 700); }
+    delete charsOnScreen[key]; return;
+  }
+  Object.keys(charsOnScreen).forEach(k => {
+    if(k.endsWith('_' + line.pos) && k !== key) {
+      const old = document.querySelector('.char[data-key="' + k + '"]');
+      if(old) { old.classList.remove('active'); setTimeout(()=>{if(old.parentNode)old.remove()}, 700); }
+      delete charsOnScreen[k];
+    }
+  });
+  const charInfo = CHARACTERS[line.char]; if(!charInfo) return;
+  let el = document.querySelector('.char[data-key="' + key + '"]');
+  if(!el) {
+    el = document.createElement('img'); el.className = 'char ' + line.pos;
+    el.dataset.key = key; el.src = 'assets/characters/' + charInfo.img; el.alt = charInfo.name;
+    layer.appendChild(el); charsOnScreen[key] = true;
+  }
+  void el.offsetWidth; el.classList.add('active');
+}
+
+function showText(line) {
+  const speakerEl = document.getElementById('speaker'), textEl = document.getElementById('text');
+  if(!speakerEl || !textEl) return;
+  if(line.char && line.pos) {
+    const charKey = line.char + '_' + line.pos;
+    const charInfo = CHARACTERS[line.char];
+    if(charInfo) {
+      if(!charsOnScreen[charKey]) handleChar({ char: line.char, pos: line.pos });
+      speakerEl.textContent = charInfo.name;
+      speakerEl.style.color = charInfo.color; speakerEl.style.borderLeftColor = charInfo.color;
+    }
+  } else if(line.speaker) {
+    speakerEl.textContent = line.speaker;
+    const found = Object.keys(CHARACTERS).find(k => CHARACTERS[k].name === line.speaker);
+    const color = found ? CHARACTERS[found].color : '#a8edea';
+    speakerEl.style.color = color; speakerEl.style.borderLeftColor = color;
+  } else { speakerEl.textContent = ''; }
+  if(line.text) history.push({ speaker: line.speaker || '旁白', text: line.text });
+  textEl.innerHTML = ''; isTyping = true;
+  const speed = Math.max(6, 110 - settings.textSpeed);
+  let i = 0; const text = line.text || '';
+  function typeChar() {
+    if(!isTyping) return;
+    if(i < text.length) {
+      textEl.innerHTML = text.substring(0, i+1) + '<span class="cursor"></span>'; i++;
+      if(skipMode) typeChar(); else typeTimer = setTimeout(typeChar, speed);
+    } else {
+      textEl.textContent = text; isTyping = false;
+      if(autoMode) setTimeout(()=>{if(autoMode)advance()}, 2000);
+    }
+  }
+  typeChar();
+}
+
+function advance() {
+  if(isTyping) {
+    isTyping = false; clearTimeout(typeTimer);
+    const line = SCRIPT[currentIndex];
+    if(line && line.type === 'text') document.getElementById('text').textContent = line.text;
+    return;
+  }
+  currentIndex++;
+  if(currentIndex < SCRIPT.length) processLine();
+  else showEndScreen();
+}
+
+function quickSave() {
+  const data = { index: currentIndex, history: history.slice(-60) };
+  localStorage.setItem('gal_ch13_save', JSON.stringify(data));
+  const progress = JSON.parse(localStorage.getItem('gal_progress') || '{}');
+  progress[13] = { unlocked: true, completed: currentIndex >= SCRIPT.length - 5 };
+  localStorage.setItem('gal_progress', JSON.stringify(progress));
+  showToast('已存档');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('status-toast'); if(!t) return;
+  t.textContent = msg; t.classList.add('active');
+  setTimeout(()=>t.classList.remove('active'), 1800);
+}
+
+function showEndScreen() {
+  document.getElementById('end-screen').classList.add('active');
+  const progress = JSON.parse(localStorage.getItem('gal_progress') || '{}');
+  progress[13] = { unlocked: true, completed: true };
+  localStorage.setItem('gal_progress', JSON.stringify(progress));
+}
+
+function toggleAuto() {
+  autoMode = !autoMode; skipMode = false;
+  updateBtnStyle('autoBtn', autoMode); updateBtnStyle('skipBtn', false);
+  if(autoMode && !isTyping) advance();
+}
+function toggleSkip() {
+  skipMode = !skipMode; autoMode = false;
+  updateBtnStyle('skipBtn', skipMode); updateBtnStyle('autoBtn', false);
+}
+function updateBtnStyle(id, active) {
+  const btn = document.getElementById(id); if(btn) btn.style.color = active ? '#a8edea' : '#bbb';
+}
+
+function showHistory() {
+  const list = document.getElementById('history-list'); if(!list) return;
+  list.innerHTML = history.map(h =>
+    '<div class="history-item"><div class="history-speaker">' + (h.speaker || '旁白') + '</div><div class="history-text">' + h.text + '</div></div>'
+  ).join('');
+  document.getElementById('history').classList.add('active');
+}
+function hideHistory() { document.getElementById('history').classList.remove('active'); }
+function showSettings() { document.getElementById('settings').classList.add('active'); }
+function hideSettings() { document.getElementById('settings').classList.remove('active'); }
+
+function updateSetting(key, val) {
+  settings[key] = parseInt(val);
+  if(key === 'textSpeed') {
+    const label = val < 35 ? '慢' : val > 75 ? '快' : '中';
+    document.getElementById('textSpeedVal').textContent = label;
+  }
+  if(key === 'bgmVol') {
+    document.getElementById('bgmVolVal').textContent = val + '%';
+    const bgm = document.getElementById('bgm'); if(bgm) bgm.volume = val / 100;
+  }
+  if(key === 'seVol') document.getElementById('seVolVal').textContent = val + '%';
+  saveSettings();
+}
+function saveSettings() { localStorage.setItem('gal_settings', JSON.stringify(settings)); }
+function loadSettings() {
+  const s = localStorage.getItem('gal_settings');
+  if(s) { try { Object.assign(settings, JSON.parse(s)); } catch(e) {} }
+  const ts = document.getElementById('textSpeed'), bv = document.getElementById('bgmVol'), sv = document.getElementById('seVol');
+  if(ts) ts.value = settings.textSpeed; if(bv) bv.value = settings.bgmVol; if(sv) sv.value = settings.seVol;
+  updateSetting('textSpeed', settings.textSpeed); updateSetting('bgmVol', settings.bgmVol); updateSetting('seVol', settings.seVol);
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === ' ' || e.key === 'Enter') {
+    const title = document.getElementById('title-screen');
+    if(title && title.style.display !== 'none') return;
+    const end = document.getElementById('end-screen');
+    if(end && end.classList.contains('active')) return;
+    e.preventDefault(); advance();
+  }
+  if(e.key === 'Control') { if(!skipMode) toggleSkip(); }
+  if(e.key === 'a' || e.key === 'A') toggleAuto();
+  if(e.key === 's' || e.key === 'S') quickSave();
+});
+document.addEventListener('keyup', e => { if(e.key === 'Control' && skipMode) toggleSkip(); });
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.getElementById('game-root').addEventListener('click', e => e.stopPropagation());
+init();
+</script>
+</div>
+</body>
+</html>
