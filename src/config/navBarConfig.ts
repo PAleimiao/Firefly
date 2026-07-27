@@ -59,6 +59,13 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			// 相册
 			LinkPresets.Gallery,
 
+			// 看番（本地播放器）
+			{
+				name: "看番",
+				url: "/watch/",
+				icon: "material-symbols:play-circle",
+			},
+
 			// 追番
 			LinkPresets.Anime,
 
