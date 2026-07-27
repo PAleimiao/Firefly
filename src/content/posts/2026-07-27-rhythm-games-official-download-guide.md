@@ -246,12 +246,13 @@ iOS 下音游比安卓麻烦，主要问题：**国区 App Store 很多音游没
 > - **[SuperStar SMTOWN](https://www.taptap.cn/app/8764)** —— SM 旗下艺人卡牌音游
 > - **[Tone Sphere](https://www.taptap.cn/app/6950)** —— 3D 球形轨道音游，Sta 出品
 > - **[osu!droid](https://www.taptap.cn/app/7987)** —— 手机版 osu!，社区驱动
+> - **[世界计划 多彩舞台 feat.初音未来](https://www.taptap.cn/app/174953)** —— SEGA 出品，初音未来主题下落式（日服/国际服）
+> - **[OverRapid](https://www.taptap.cn/app/7081)** —— 4K/6K 搓盘高速音游，2016 年长寿作品
+> - **[东方弹幕神乐](https://www.taptap.cn/app/200873)** —— 东方 Project 官方授权音游，弹幕 + 节奏
 > 
-> 还缺链接的（需要你补充）：
-> - 世界计划 彩色舞台 feat.初音未来
-> - Cytoid
-> - OverRapid
-> - 东方弹幕神乐
+> **Cytoid** —— 开源社区音游，TapTap 无直接下载页，需从 [官网 cytoid.cn](https://cytoid.cn) 或 [GitHub](https://github.com/Cytoid) 下载
+> 
+> 还缺链接的（小众/独立音游，后续慢慢补）：
 > - 钢琴师、阳春艺曲、曲中剑、白键上的协奏曲、不可思议乐队、jubeat plus、太鼓达人Plus、永不言弃2、Mixlody、DataTide、Arellano、逆转节拍、暮色大师、Blophy
 
 *P.S. 渠道链接和上架情况可能随时间变动，如果发现链接失效或游戏换了平台，欢迎评论区提醒更新。*
