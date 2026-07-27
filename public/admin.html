@@ -869,7 +869,7 @@ async function loadAnimeList() {
 
     const data = await res.json();
     animeListSha = data.sha;
-    const content = atob(data.content.replace(/\n/g, ""));
+    const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ""))));
     animeListData = JSON.parse(content);
 
     renderAnimeList();
