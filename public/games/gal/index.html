@@ -6,215 +6,46 @@
 <title>Angel Beats! - 章节选择 - CXL避难所</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body {
-  width: 100%; min-height: 100vh; background: #060614;
-  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-  color: #fff; overflow-x: hidden;
-}
-#app {
-  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-  padding: 40px 16px 60px;
-}
-h1 {
-  font-size: 2.2rem; letter-spacing: 10px; margin-bottom: 8px;
-  background: linear-gradient(90deg, #a8edea, #fed6e3);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
+html, body { width: 100%; min-height: 100vh; background: #060614; font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; color: #fff; overflow-x: hidden; }
+#app { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 16px 60px; }
+h1 { font-size: 2.2rem; letter-spacing: 10px; margin-bottom: 8px; background: linear-gradient(90deg, #a8edea, #fed6e3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .subtitle { font-size: 0.85rem; color: #666; letter-spacing: 4px; margin-bottom: 8px; }
 .desc { font-size: 0.8rem; color: #555; margin-bottom: 35px; letter-spacing: 1px; }
-.chapter-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 14px; width: 100%; max-width: 720px;
-}
-.chapter-card {
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px; padding: 18px 12px; text-align: center; cursor: pointer;
-  transition: all 0.35s; position: relative; overflow: hidden;
-}
-.chapter-card:hover {
-  background: rgba(168,237,234,0.06); border-color: rgba(168,237,234,0.3);
-  transform: translateY(-3px);
-}
-.chapter-card.locked {
-  opacity: 0.35; cursor: not-allowed; pointer-events: none;
-}
-.chapter-card.completed::after {
-  content: "✓"; position: absolute; top: 8px; right: 10px;
-  color: #8ce99a; font-size: 0.85rem;
-}
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; width: 100%; max-width: 720px; }
+.chapter-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.35s; position: relative; overflow: hidden; text-decoration: none; color: inherit; }
+.chapter-card:hover { background: rgba(168,237,234,0.06); border-color: rgba(168,237,234,0.3); transform: translateY(-3px); }
+.chapter-card.locked { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 .chapter-num { font-size: 1.6rem; font-weight: bold; color: #a8edea; margin-bottom: 6px; }
 .chapter-title { font-size: 0.82rem; color: #bbb; letter-spacing: 1px; }
 .chapter-status { font-size: 0.7rem; color: #666; margin-top: 6px; }
-.back-btn {
-  margin-top: 40px; padding: 11px 36px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px; color: #888; font-size: 0.9rem; cursor: pointer;
-  transition: all 0.3s; letter-spacing: 2px; text-decoration: none;
-}
-.back-btn:hover { background: rgba(168,237,234,0.08); border-color: rgba(168,237,234,0.4); color: #fff; }
-.settings-btn {
-  position: fixed; bottom: 20px; right: 20px; z-index: 100;
-  width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  color: #aaa; font-size: 1.1rem; cursor: pointer; transition: all 0.3s;
-  display: flex; align-items: center; justify-content: center;
-}
-.settings-btn:hover { background: rgba(168,237,234,0.1); border-color: #a8edea; color: #fff; }
-#settings-modal {
-  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9);
-  display: none; align-items: center; justify-content: center;
-}
-#settings-modal.active { display: flex; }
-.settings-box {
-  background: rgba(14,14,24,0.98); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px; padding: 32px; width: 320px;
-}
-.settings-box h2 { font-size: 1.25rem; margin-bottom: 22px; text-align: center; letter-spacing: 3px; }
-.setting-row { display: flex; justify-content: space-between; align-items: center; margin: 16px 0; }
-.setting-row label { font-size: 0.88rem; color: #aaa; }
-.setting-row input[type="range"] { width: 120px; }
-.setting-row span { font-size: 0.78rem; color: #888; width: 46px; text-align: right; }
-.close-btn {
-  width: 100%; margin-top: 16px; padding: 11px;
-  background: rgba(168,237,234,0.1); border: 1px solid rgba(168,237,234,0.4);
-  border-radius: 10px; color: #a8edea; cursor: pointer; font-size: 0.92rem;
-}
-.progress-bar {
-  width: 100%; max-width: 720px; height: 4px; background: rgba(255,255,255,0.05);
-  border-radius: 2px; margin: 24px 0 30px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%; background: linear-gradient(90deg, #a8edea, #fed6e3);
-  border-radius: 2px; transition: width 0.6s ease;
-}
-@media (max-width: 500px) {
-  h1 { font-size: 1.6rem; letter-spacing: 5px; }
-  .chapter-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .chapter-card { padding: 14px 8px; }
-  .chapter-num { font-size: 1.3rem; }
-}
+.back-btn { margin-top: 40px; padding: 11px 36px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #aaa; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; text-decoration: none; }
+.back-btn:hover { background: rgba(168,237,234,0.1); border-color: rgba(168,237,234,0.4); color: #fff; }
+.tip { margin-top: 20px; font-size: 0.75rem; color: #444; text-align: center; }
+@media (max-width: 500px) { h1 { font-size: 1.6rem; letter-spacing: 6px; } }
 </style>
 </head>
 <body>
-
 <div id="app">
-  <div style="width:100%;max-width:720px;margin:0 auto 20px;padding:12px 18px;background:rgba(255,212,59,0.08);border:1px solid rgba(255,212,59,0.25);border-radius:12px;color:#ffd43b;font-size:0.85rem;text-align:center;letter-spacing:1px;">
-  ⚠️ 当前章节配图资源尚未完善，部分立绘/CG可能显示异常，剧情内容已完成。
-</div>
-  <h1>Angel Beats!</h1>
-  <div class="subtitle">死后世界战线</div>
-  <div class="desc">点击章节开始游戏 · 已通关章节可随时重玩</div>
-
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  <h1>ANGEL BEATS!</h1>
+  <div class="subtitle">选择章节</div>
+  <div class="desc">死后世界战线 / 13集全收录</div>
+  <div class="chapter-grid">
+    <a class="chapter-card" href="chapter1.html"><div class="chapter-num">01</div><div class="chapter-title">出发</div><div class="chapter-status">Departure</div></a>
+    <a class="chapter-card" href="chapter2.html"><div class="chapter-num">02</div><div class="chapter-title">公会</div><div class="chapter-status">Guild</div></a>
+    <a class="chapter-card" href="chapter3.html"><div class="chapter-num">03</div><div class="chapter-title">我的歌</div><div class="chapter-status">My Song</div></a>
+    <a class="chapter-card" href="chapter4.html"><div class="chapter-num">04</div><div class="chapter-title">竞技日</div><div class="chapter-status">Day Game</div></a>
+    <a class="chapter-card" href="chapter5.html"><div class="chapter-num">05</div><div class="chapter-title">最喜欢的味道</div><div class="chapter-status">Favorite Flavor</div></a>
+    <a class="chapter-card" href="chapter6.html"><div class="chapter-num">06</div><div class="chapter-title">家事</div><div class="chapter-status">Family Affair</div></a>
+    <a class="chapter-card" href="chapter7.html"><div class="chapter-num">07</div><div class="chapter-title">生存</div><div class="chapter-status">Alive</div></a>
+    <a class="chapter-card" href="chapter8.html"><div class="chapter-num">08</div><div class="chapter-title">黑暗中的舞者</div><div class="chapter-status">Dancer in the Dark</div></a>
+    <a class="chapter-card" href="chapter9.html"><div class="chapter-num">09</div><div class="chapter-title">在你的记忆中</div><div class="chapter-status">In Your Memory</div></a>
+    <a class="chapter-card" href="chapter10.html"><div class="chapter-num">10</div><div class="chapter-title">离别的日子</div><div class="chapter-status">Goodbye Days</div></a>
+    <a class="chapter-card" href="chapter11.html"><div class="chapter-num">11</div><div class="chapter-title">改变世界</div><div class="chapter-status">Change the World</div></a>
+    <a class="chapter-card" href="chapter12.html"><div class="chapter-num">12</div><div class="chapter-title">敲响天堂的大门</div><div class="chapter-status">Knockin' on heaven's door</div></a>
+    <a class="chapter-card" href="chapter13.html"><div class="chapter-num">13</div><div class="chapter-title">毕业</div><div class="chapter-status">Graduation</div></a>
   </div>
-
-  <div class="chapter-grid" id="chapterGrid"></div>
-
-  <a href="/games/" class="back-btn">返回游戏中心</a>
+  <a class="back-btn" href="../../index.html">返回避难所首页</a>
+  <div class="tip">💡 建议横屏游玩以获得最佳体验</div>
 </div>
-
-<button class="settings-btn" onclick="showSettings()" title="设置">⚙</button>
-
-<div id="settings-modal" onclick="if(event.target===this) hideSettings();">
-  <div class="settings-box">
-    <h2>全局设置</h2>
-    <div class="setting-row">
-      <label>文字速度</label>
-      <input type="range" id="textSpeed" min="10" max="100" value="50" oninput="updateSetting('textSpeed', this.value)">
-      <span id="textSpeedVal">中</span>
-    </div>
-    <div class="setting-row">
-      <label>BGM音量</label>
-      <input type="range" id="bgmVol" min="0" max="100" value="70" oninput="updateSetting('bgmVol', this.value)">
-      <span id="bgmVolVal">70%</span>
-    </div>
-    <div class="setting-row">
-      <label>音效音量</label>
-      <input type="range" id="seVol" min="0" max="100" value="80" oninput="updateSetting('seVol', this.value)">
-      <span id="seVolVal">80%</span>
-    </div>
-    <button class="close-btn" onclick="hideSettings()">关闭</button>
-  </div>
-</div>
-
-<script>
-const CHAPTERS = [
-  { id: 1, title: "死后的世界", status: "待更新" },
-  { id: 2, title: "Guild", status: "待更新" },
-  { id: 3, title: "My Song", status: "待更新" },
-  { id: 4, title: "Day Game", status: "待更新" },
-  { id: 5, title: "Favorite Flavor", status: "待更新" },
-  { id: 6, title: "Family Affair", status: "待更新" },
-  { id: 7, title: "Alive", status: "待更新" },
-  { id: 8, title: "Dancer in the Dark", status: "待更新" },
-  { id: 9, title: "In Your Memory", status: "待更新" },
-  { id: 10, title: "Goodbye Days", status: "待更新" },
-  { id: 11, title: "Change the World", status: "待更新" },
-  { id: 12, title: "Knockin' on Heaven's Door", status: "待更新" },
-  { id: 13, title: "毕业", status: "施工中" },
-];
-
-function renderChapters() {
-  const progress = JSON.parse(localStorage.getItem('gal_progress') || '{}');
-  const grid = document.getElementById('chapterGrid');
-  let completedCount = 0;
-
-  grid.innerHTML = CHAPTERS.map(ch => {
-    const chProgress = progress[ch.id];
-    const unlocked = ch.id === 13 || (chProgress && chProgress.unlocked);
-    const completed = chProgress && chProgress.completed;
-    if(completed) completedCount++;
-
-    const cls = unlocked ? (completed ? 'chapter-card completed' : 'chapter-card') : 'chapter-card locked';
-    const onclick = unlocked ? `onclick="startChapter(${ch.id})"` : '';
-    const statusText = completed ? '已通关' : (unlocked ? ch.status : '未解锁');
-
-    return `<div class="${cls}" ${onclick}>
-      <div class="chapter-num">${String(ch.id).padStart(2, '0')}</div>
-      <div class="chapter-title">${ch.title}</div>
-      <div class="chapter-status">${statusText}</div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('progressFill').style.width = Math.round((completedCount / CHAPTERS.length) * 100) + '%';
-}
-
-function startChapter(id) {
-  if(id === 13) {
-    location.href = 'chapter13.html';
-  } else {
-    alert('本章内容待更新，敬请期待！');
-  }
-}
-
-let settings = { textSpeed: 50, bgmVol: 70, seVol: 80 };
-function updateSetting(key, val) {
-  settings[key] = parseInt(val);
-  if(key === 'textSpeed') {
-    const label = val < 35 ? '慢' : val > 75 ? '快' : '中';
-    document.getElementById('textSpeedVal').textContent = label;
-  }
-  if(key === 'bgmVol') document.getElementById('bgmVolVal').textContent = val + '%';
-  if(key === 'seVol') document.getElementById('seVolVal').textContent = val + '%';
-  localStorage.setItem('gal_settings', JSON.stringify(settings));
-}
-function showSettings() { document.getElementById('settings-modal').classList.add('active'); }
-function hideSettings() { document.getElementById('settings-modal').classList.remove('active'); }
-function loadSettings() {
-  const s = localStorage.getItem('gal_settings');
-  if(s) { try { Object.assign(settings, JSON.parse(s)); } catch(e) {} }
-  document.getElementById('textSpeed').value = settings.textSpeed;
-  document.getElementById('bgmVol').value = settings.bgmVol;
-  document.getElementById('seVol').value = settings.seVol;
-  updateSetting('textSpeed', settings.textSpeed);
-  updateSetting('bgmVol', settings.bgmVol);
-  updateSetting('seVol', settings.seVol);
-}
-
-loadSettings();
-renderChapters();
-</script>
-
 </body>
 </html>
