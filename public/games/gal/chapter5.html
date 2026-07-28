@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Angel Beats! - Episode 05 最喜欢的味道</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Microsoft YaHei','PingFang SC',sans-serif; color:#fff; user-select:none; -webkit-tap-highlight-color:transparent; }
+#game-root { position:fixed; inset:0; z-index:99999; width:100vw; height:100vh; overflow:hidden; background:#000; }
+#bg-layer { position:absolute; inset:0; z-index:1; background-size:cover; background-position:center; transition:opacity 1.2s; will-change:transform; }
+#cg-layer { position:absolute; inset:0; z-index:2; background-size:contain; background-repeat:no-repeat; background-position:center; opacity:0; transition:opacity 1s; pointer-events:none; }
+#cg-layer.active { opacity:1; }
+#char-layer { position:absolute; bottom:0; left:0; right:0; z-index:3; height:78%; pointer-events:none; }
+.char { position:absolute; bottom:0; height:92%; opacity:0; transform:translateY(40px); transition:all .8s cubic-bezier(.22,1,.36,1); filter:drop-shadow(0 0 40px rgba(0,0,0,.6)); max-width:55%; object-fit:contain; }
+.char.active { opacity:1; transform:translateY(0); }
+.char.left { left:2%; }
+.char.center { left:50%; transform:translateX(-50%) translateY(40px); }
+.char.center.active { transform:translateX(-50%) translateY(0); }
+.char.right { right:2%; }
+#vignette { position:absolute; inset:0; z-index:4; background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.55) 100%); pointer-events:none; }
+#dialog-box { position:absolute; bottom:22px; left:50%; transform:translateX(-50%); width:94%; max-width:900px; z-index:10; background:rgba(0,0,0,.82); border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:18px 24px 20px; backdrop-filter:blur(16px); cursor:pointer; min-height:120px; transition:opacity .4s; }
+#dialog-box.hidden { opacity:0; pointer-events:none; }
+#speaker { font-size:1.05rem; font-weight:bold; margin-bottom:8px; border-left:3px solid; padding-left:10px; letter-spacing:1px; }
+#text { font-size:1rem; line-height:1.85; color:#eee; min-height:56px; letter-spacing:.5px; }
+#text .cursor { display:inline-block; width:2px; height:1.1em; background:currentColor; margin-left:3px; animation:blink .85s infinite; vertical-align:text-bottom; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+#top-ui { position:absolute; top:0; left:0; right:0; z-index:30; display:none; justify-content:space-between; align-items:center; padding:10px 16px; background:rgba(0,0,0,.4); }
+#top-ui.active { display:flex; }
+#top-ui button { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:5px 12px; color:#aaa; font-size:.76rem; cursor:pointer; transition:all .2s; margin-left:6px; }
+#top-ui button:hover { background:rgba(255,255,255,.14); color:#fff; }
+#chapter-title { font-size:.82rem; color:#999; letter-spacing:2px; }
+#settings { position:absolute; inset:0; z-index:40; background:rgba(0,0,0,.9); display:none; align-items:center; justify-content:center; }
+#settings.active { display:flex; }
+.settings-box { background:rgba(14,14,24,.98); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:32px; width:320px; }
+.settings-box h2 { font-size:1.25rem; margin-bottom:22px; text-align:center; letter-spacing:3px; }
+.setting-row { display:flex; justify-content:space-between; align-items:center; margin:16px 0; }
+.setting-row label { font-size:.88rem; color:#aaa; }
+.setting-row input[type=range] { width:120px; }
+.setting-row span { font-size:.78rem; color:#888; width:46px; text-align:right; }
+.close-btn { width:100%; margin-top:16px; padding:11px; background:rgba(168,237,234,.1); border:1px solid rgba(168,237,234,.4); border-radius:10px; color:#a8edea; cursor:pointer; font-size:.92rem; }
+#history { position:absolute; inset:0; z-index:40; background:rgba(0,0,0,.94); display:none; flex-direction:column; }
+#history.active { display:flex; }
+#history-header { padding:14px 18px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; justify-content:space-between; align-items:center; }
+#history-list { flex:1; overflow-y:auto; padding:18px; }
+.history-item { margin-bottom:12px; padding:12px 14px; background:rgba(255,255,255,.035); border-radius:10px; }
+.history-speaker { color:#a8edea; font-weight:bold; font-size:.82rem; margin-bottom:4px; }
+.history-text { color:#ccc; font-size:.9rem; line-height:1.6; }
+#title-screen { position:absolute; inset:0; z-index:50; background:linear-gradient(180deg,#060614 0%,#121228 45%,#080818 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#title-screen h1 { font-size:2.4rem; letter-spacing:10px; margin-bottom:8px; background:linear-gradient(90deg,#a8edea,#fed6e3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+#title-screen h2 { font-size:.85rem; color:#666; letter-spacing:5px; margin-bottom:45px; }
+.title-btn { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:13px 52px; margin:8px 0; color:#bbb; font-size:1rem; cursor:pointer; transition:all .35s; min-width:240px; text-align:center; letter-spacing:2px; }
+.title-btn:hover { background:rgba(168,237,234,.08); border-color:rgba(168,237,234,.5); color:#fff; transform:translateY(-2px); }
+#chapter-overlay { position:absolute; inset:0; z-index:45; background:#000; display:none; align-items:center; justify-content:center; }
+#chapter-overlay.active { display:flex; }
+#chapter-overlay h1 { font-size:2rem; letter-spacing:6px; text-align:center; line-height:1.8; animation:chapterFade 3s ease forwards; }
+@keyframes chapterFade { 0%{opacity:0;transform:scale(.9)} 25%{opacity:1;transform:scale(1)} 75%{opacity:1} 100%{opacity:0} }
+#status-toast { position:absolute; top:56px; left:50%; transform:translateX(-50%); z-index:50; padding:9px 24px; background:rgba(0,0,0,.85); border:1px solid rgba(168,237,234,.25); border-radius:24px; color:#a8edea; font-size:.85rem; opacity:0; transition:opacity .35s; pointer-events:none; letter-spacing:1px; }
+#status-toast.active { opacity:1; }
+#end-screen { position:absolute; inset:0; z-index:48; background:#000; display:none; flex-direction:column; align-items:center; justify-content:center; }
+#end-screen.active { display:flex; }
+#end-screen h1 { font-size:1.8rem; letter-spacing:8px; margin-bottom:16px; color:#a8edea; }
+#end-screen p { color:#888; font-size:.9rem; letter-spacing:2px; margin-bottom:20px; }
+.end-btn { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:12px 40px; color:#bbb; cursor:pointer; font-size:.95rem; transition:all .3s; letter-spacing:2px; margin:6px 0; }
+.end-btn:hover { background:rgba(168,237,234,.1); border-color:#a8edea; color:#fff; }
+
+/* 横屏提示 */
+#rotate-hint { position:fixed; inset:0; z-index:999999; background:#060614; display:none; flex-direction:column; align-items:center; justify-content:center; }
+#rotate-hint.active { display:flex; }
+#rotate-hint .phone-icon { width:60px; height:100px; border:3px solid #a8edea; border-radius:10px; position:relative; animation:rotatePhone 2s ease-in-out infinite; margin-bottom:20px; }
+#rotate-hint .phone-icon::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:40px; height:3px; background:#a8edea; }
+@keyframes rotatePhone { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(90deg)} }
+#rotate-hint p { color:#a8edea; font-size:1.1rem; letter-spacing:3px; }
+#rotate-hint span { color:#666; font-size:.8rem; margin-top:8px; }
+
+@media(max-width:600px){ #title-screen h1{font-size:1.7rem;letter-spacing:5px} .char{height:82%} #dialog-box{width:96%;padding:14px 16px 16px;bottom:14px} #text{font-size:.95rem} }
+@media(max-height:400px){ #dialog-box{bottom:10px;padding:12px 16px} #text{font-size:.9rem} }
+</style>
+</head>
+<body>
+<div id="game-root">
+
+<!-- 横屏提示 -->
+<div id="rotate-hint">
+  <div class="phone-icon"></div>
+  <p>请横屏观看</p>
+  <span>旋转设备以获得最佳体验</span>
+</div>
+
+<div id="title-screen">
+  <h1>Angel Beats!</h1>
+  <h2>Episode 05 最喜欢的味道</h2>
+  <div class="title-btn" onclick="startGame();event.stopPropagation();">开始本章</div>
+  <div class="title-btn" onclick="loadGame();event.stopPropagation();">继续游戏</div>
+  <div class="title-btn" onclick="showSettings();event.stopPropagation();">设置</div>
+  <div class="title-btn" onclick="location.href='index.html'">返回章节选择</div>
+</div>
+
+<div id="chapter-overlay"><h1 id="chapter-text"></h1></div>
+<div id="bg-layer"></div>
+<div id="cg-layer"></div>
+<div id="vignette"></div>
+<div id="char-layer"></div>
+
+<div id="dialog-box" onclick="advance()">
+  <div id="speaker"></div>
+  <div id="text"></div>
+</div>
+
+<div id="top-ui">
+  <div id="chapter-title">Episode 05 最喜欢的味道</div>
+  <div>
+    <button onclick="toggleAuto()" id="autoBtn">自动</button>
+    <button onclick="toggleSkip()" id="skipBtn">快进</button>
+    <button onclick="showHistory()">历史</button>
+    <button onclick="quickSave()">存档</button>
+    <button onclick="showSettings()">设置</button>
+  </div>
+</div>
+
+<div id="settings" onclick="if(event.target===this)hideSettings();">
+  <div class="settings-box">
+    <h2>设置</h2>
+    <div class="setting-row">
+      <label>文字速度</label>
+      <input type="range" id="textSpeed" min="10" max="100" value="50" oninput="updateSetting('textSpeed',this.value)">
+      <span id="textSpeedVal">中</span>
+    </div>
+    <div class="setting-row">
+      <label>BGM音量</label>
+      <input type="range" id="bgmVol" min="0" max="100" value="70" oninput="updateSetting('bgmVol',this.value)">
+      <span id="bgmVolVal">70%</span>
+    </div>
+    <div class="setting-row">
+      <label>音效音量</label>
+      <input type="range" id="seVol" min="0" max="100" value="80" oninput="updateSetting('seVol',this.value)">
+      <span id="seVolVal">80%</span>
+    </div>
+    <button class="close-btn" onclick="hideSettings()">关闭</button>
+  </div>
+</div>
+
+<div id="history">
+  <div id="history-header"><h3>历史记录</h3><button onclick="hideHistory()">关闭</button></div>
+  <div id="history-list"></div>
+</div>
+
+<div id="end-screen">
+  <h1>本章结束</h1>
+  <p>Episode 05 最喜欢的味道</p>
+  <div class="end-btn" onclick="location.href='index.html'">返回章节选择</div>
+  <div class="end-btn" onclick="location.reload()">再玩一次</div>
+</div>
+
+<div id="status-toast"></div>
+</div>
+<script>
+const SCRIPT = [{"type":"chapter","text":"Episode 05<br>最喜欢的味道"},{"type":"bgm","src":"assets/bgm/060.ogg"},{"type":"bg","src":"assets/backgrounds/bg_siro.png"},{"type":"wait","ms":1500},{"type":"text","speaker":"","text":"考试前夕，由理想出了一个诡异的作战。","char":"","pos":""},{"type":"char","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"我们要让天使考全校最后一名！","char":"yuri","pos":"center"},{"type":"char","char":"hinata","pos":"left"},{"type":"text","speaker":"日向秀树","text":"哈？为什么？","char":"hinata","pos":"left"},{"type":"char","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"如果她考砸了，就会被撤掉学生会长职务。","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"这样就能打击她的精神！","char":"yuri","pos":"center"},{"type":"cg","src":"assets/cg/ep05_bg011.png"},{"type":"text","speaker":"","text":"作战成员：高松、日向、大山、竹山、音无、由理。","char":"","pos":""},{"type":"text","speaker":"","text":"考试当天，回收试卷时，众人开始吸引注意。","char":"","pos":""},{"type":"cg","src":""},{"type":"char","char":"hinata","pos":"left"},{"type":"text","speaker":"日向秀树","text":"老、老师！我肚子痛！","char":"hinata","pos":"left"},{"type":"text","speaker":"","text":"……完全没人看他。","char":"","pos":""},{"type":"char","char":"ooyama","pos":"left"},{"type":"text","speaker":"大山","text":"老、老师！我喜、喜欢你！","char":"ooyama","pos":"left"},{"type":"text","speaker":"","text":"……全场沉默。","char":"","pos":""},{"type":"char","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"一群废物……看我的！","char":"yuri","pos":"center"},{"type":"cg","src":"assets/cg/ep05_bg042.png"},{"type":"text","speaker":"","text":"由理启动了Plan B——事先准备好的烟花在窗外炸开。","char":"","pos":""},{"type":"text","speaker":"","text":"全班哗然。竹山趁机调换了天使的答题卡。","char":"","pos":""},{"type":"cg","src":""},{"type":"text","speaker":"","text":"几天后，成绩公布。","char":"","pos":""},{"type":"char","char":"kanade","pos":"right"},{"type":"text","speaker":"立华奏","text":"……最后一名。","char":"kanade","pos":"right"},{"type":"text","speaker":"","text":"天使被罢免了学生会长职务。","char":"","pos":""},{"type":"char","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"作战成功！","char":"yuri","pos":"center"},{"type":"cg","src":"assets/cg/ep05_bg052.png"},{"type":"text","speaker":"","text":"然而，新的学生会长很快上任，而且更加严厉。","char":"","pos":""},{"type":"cg","src":""},{"type":"char","char":"yuri","pos":"center"},{"type":"text","speaker":"仲村由理","text":"……好像搞砸了。","char":"yuri","pos":"center"}];
+
+const CHARACTERS = {
+  yuzuru:  {name:"音无结弦", color:"#a8edea", img:"assets/characters/bs1_a1010101.png"},
+  yuzuru2: {name:"音无结弦", color:"#a8edea", img:"assets/characters/bs1_a1020101.png"},
+  kanade:  {name:"立华奏",   color:"#fed6e3", img:"assets/characters/bs1_kn010101.png"},
+  kanade2: {name:"立华奏",   color:"#fed6e3", img:"assets/characters/bs1_kn020101.png"},
+  kanade3: {name:"立华奏",   color:"#fed6e3", img:"assets/characters/bs1_kn040101.png"},
+  yuri:    {name:"仲村由理", color:"#e94560", img:"assets/characters/bs1_yr010101.png"},
+  yuri2:   {name:"仲村由理", color:"#e94560", img:"assets/characters/bs1_yr020101.png"},
+  hinata:  {name:"日向秀树", color:"#4dabf7", img:"assets/characters/bs1_hn010101.png"},
+  hinata2: {name:"日向秀树", color:"#4dabf7", img:"assets/characters/bs1_hn020101.png"},
+  yui:     {name:"由依",     color:"#ffd43b", img:"assets/characters/bs1_yi010101.png"},
+  yui2:    {name:"由依",     color:"#ffd43b", img:"assets/characters/bs1_yi020101.png"},
+  iwasawa: {name:"岩泽雅美", color:"#be4bdb", img:"assets/characters/bs1_ig010101.png"},
+  irie:    {name:"入江美雪", color:"#ffa94d", img:"assets/characters/bs1_ir010101.png"},
+  naoi:    {name:"直井文人", color:"#51cf66", img:"assets/characters/bs1_na010101.png"},
+  naoi2:   {name:"直井文人", color:"#51cf66", img:"assets/characters/bs1_na020101.png"},
+  tk:      {name:"TK",       color:"#ff6b6b", img:"assets/characters/bs1_tk010101.png"},
+  matsushita:{name:"松下护驒",color:"#8ce99a", img:"assets/characters/bs1_ms010101.png"},
+  shiina:  {name:"椎名",     color:"#fcc2d7", img:"assets/characters/bs1_sk010101.png"},
+  fujimaki:{name:"藤卷",     color:"#fab005", img:"assets/characters/bs1_fj010101.png"},
+  ooyama:  {name:"大山",     color:"#a9e34b", img:"assets/characters/bs1_oy010101.png"},
+  hisako:  {name:"久子",     color:"#ff8787", img:"assets/characters/bs1_hs010101.png"},
+  student: {name:"学生",     color:"#aaa",    img:"assets/characters/bs1_st010101.png"},
+};
+
+let idx=0, auto=false, skip=false, typing=false, history=[], settings={textSpeed:50,bgmVol:70,seVol:80};
+let bgmAudio=null, gyroEnabled=false, gyroX=0, gyroY=0;
+
+function $(id){return document.getElementById(id);}
+
+// ========== 横屏检测 ==========
+function checkOrientation(){
+  const hint=$('rotate-hint');
+  const isPortrait = window.innerHeight > window.innerWidth;
+  // 手机端才提示
+  if(isPortrait && /Mobi|Android|iPhone/i.test(navigator.userAgent)){
+    hint.classList.add('active');
+    return false;
+  }else{
+    hint.classList.remove('active');
+    return true;
+  }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', ()=>setTimeout(checkOrientation, 300));
+
+// ========== 陀螺仪 ==========
+function initGyroscope(){
+  if(!window.DeviceOrientationEvent) return;
+  // iOS 13+ 需要请求权限
+  if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+    // 用户点击开始后再请求，这里先不自动请求
+    gyroEnabled = false;
+  }else{
+    gyroEnabled = true;
+  }
+  window.addEventListener('deviceorientation', (e)=>{
+    if(!gyroEnabled) return;
+    gyroX = (e.gamma || 0) / 45; // -1 ~ 1
+    gyroY = (e.beta || 0) / 90;
+    const bg = $('bg-layer');
+    if(bg){
+      bg.style.transform = `translate(${gyroX*15}px, ${gyroY*10}px) scale(1.05)`;
+    }
+  });
+}
+function requestGyroPermission(){
+  if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+    DeviceOrientationEvent.requestPermission().then(state=>{
+      if(state==='granted'){ gyroEnabled=true; toast('陀螺仪已开启'); }
+    }).catch(()=>{});
+  }
+}
+
+function init(){
+  checkOrientation();
+  initGyroscope();
+  $('title-screen').style.display='flex';
+  $('top-ui').classList.remove('active');
+  $('dialog-box').classList.add('hidden');
+}
+
+function startGame(){
+  requestGyroPermission();
+  if(!checkOrientation()) return;
+  $('title-screen').style.display='none';
+  $('top-ui').classList.add('active');
+  $('dialog-box').classList.remove('hidden');
+  idx=0; history=[]; render();
+}
+
+function render(){
+  if(idx>=SCRIPT.length){showEnd();return;}
+  const cmd=SCRIPT[idx];
+  switch(cmd.type){
+    case 'chapter': showChapter(cmd.text); break;
+    case 'bg': $('bg-layer').style.backgroundImage='url('+cmd.src+')'; advance(); break;
+    case 'bgm': playBGM(cmd.src); advance(); break;
+    case 'wait': setTimeout(advance, cmd.ms); break;
+    case 'cg': $('cg-layer').style.backgroundImage=cmd.src?'url('+cmd.src+')':''; $('cg-layer').classList.toggle('active',!!cmd.src); advance(); break;
+    case 'char': updateChar(cmd); advance(); break;
+    case 'text': showText(cmd); break;
+  }
+}
+
+function showChapter(text){
+  $('chapter-text').innerHTML=text;
+  $('chapter-overlay').classList.add('active');
+  setTimeout(()=>{$('chapter-overlay').classList.remove('active');advance();},3000);
+}
+
+function playBGM(src){
+  if(bgmAudio){bgmAudio.pause();bgmAudio=null;}
+  if(src){bgmAudio=new Audio(src);bgmAudio.loop=true;bgmAudio.volume=settings.bgmVol/100;bgmAudio.play().catch(()=>{});}
+}
+
+function updateChar(cmd){
+  const layer=$('char-layer');
+  if(cmd.action==='hide'){
+    const el=$('char-'+cmd.pos); if(el){el.classList.remove('active'); setTimeout(()=>el&&el.remove(),800);}
+    return;
+  }
+  const ch=CHARACTERS[cmd.char];
+  if(!ch) return;
+  let el=$('char-'+cmd.pos);
+  if(!el){
+    el=document.createElement('img');
+    el.id='char-'+cmd.pos; el.className='char '+cmd.pos;
+    el.alt='';
+    layer.appendChild(el);
+  }
+  el.src=ch.img;
+  requestAnimationFrame(()=>el.classList.add('active'));
+}
+
+function showText(cmd){
+  $('speaker').textContent=cmd.speaker||'';
+  $('speaker').style.borderColor=cmd.char&&CHARACTERS[cmd.char]?CHARACTERS[cmd.char].color:'transparent';
+  const text=$('text'); text.innerHTML=''; typing=true;
+  let i=0, str=cmd.text, speed=110-settings.textSpeed;
+  if(speed<15)speed=15;
+  function type(){
+    if(!typing)return;
+    if(i<str.length){text.textContent+=str[i++]; setTimeout(type, speed);}
+    else{typing=false; text.innerHTML+='<span class="cursor"></span>'; if(auto)setTimeout(advance,1200);}
+  }
+  type();
+  if(cmd.char&&cmd.pos) updateChar({char:cmd.char,pos:cmd.pos});
+  if(cmd.speaker||cmd.text) history.push({speaker:cmd.speaker||'旁白',text:cmd.text});
+}
+
+function advance(){
+  if(typing){typing=false; const cmd=SCRIPT[idx]; if(cmd&&cmd.type==='text') $('text').textContent=cmd.text; return;}
+  idx++; if(skip){while(idx<SCRIPT.length&&SCRIPT[idx].type!=='text')idx++; skip=false; $('skipBtn').textContent='快进';}
+  render();
+}
+
+function toggleAuto(){auto=!auto; $('autoBtn').style.color=auto?'#a8edea':'#aaa'; if(auto&&idx<SCRIPT.length&&SCRIPT[idx].type==='text'&&!typing)advance();}
+function toggleSkip(){skip=!skip; $('skipBtn').textContent=skip?'停止':'快进'; if(skip)advance();}
+function showSettings(){$('settings').classList.add('active');}
+function hideSettings(){$('settings').classList.remove('active');}
+function updateSetting(k,v){settings[k]=parseInt(v); const valEl=$(k+'Val'); if(valEl) valEl.textContent=v+(k!=='textSpeed'?'%':(v<40?'慢':v<70?'中':'快')); if(k==='bgmVol'&&bgmAudio)bgmAudio.volume=v/100;}
+function showHistory(){
+  const list=$('history-list'); list.innerHTML='';
+  history.slice(-60).forEach(h=>{
+    const div=document.createElement('div'); div.className='history-item';
+    div.innerHTML='<div class="history-speaker">'+h.speaker+'</div><div class="history-text">'+h.text+'</div>';
+    list.appendChild(div);
+  });
+  $('history').classList.add('active');
+}
+function hideHistory(){$('history').classList.remove('active');}
+function quickSave(){localStorage.setItem('gal_save_'+location.pathname, JSON.stringify({idx:idx,history:history,settings:settings})); toast('已存档');}
+function loadGame(){
+  const save=localStorage.getItem('gal_save_'+location.pathname);
+  if(save){const d=JSON.parse(save); idx=d.idx; history=d.history||[]; Object.assign(settings,d.settings||{}); $('title-screen').style.display='none'; $('top-ui').classList.add('active'); $('dialog-box').classList.remove('hidden'); render(); toast('读档成功');}
+  else{toast('无存档');}
+}
+function showEnd(){$('end-screen').classList.add('active'); if(bgmAudio){bgmAudio.pause();bgmAudio=null;}}
+function toast(msg){const t=$('status-toast'); t.textContent=msg; t.classList.add('active'); setTimeout(()=>t.classList.remove('active'),2000);}
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter')advance();});
+init();
+
+</script>
+</body>
+</html>
