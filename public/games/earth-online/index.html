@@ -8,50 +8,53 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; color: #fff; }
 #canvas-container { position: fixed; inset: 0; z-index: 1; }
-#ui-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; }
+#ui-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; opacity: 0; transition: opacity 1.5s ease; }
+#ui-layer.visible { opacity: 1; }
 #ui-layer > * { pointer-events: auto; }
 
-/* 顶部标题 */
 .header { text-align: center; }
-.header h1 { font-size: 3rem; letter-spacing: 12px; background: linear-gradient(180deg, #fff 30%, #00ffc8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 40px rgba(0,255,200,0.3); }
-.header .sub { font-size: .9rem; color: #666; letter-spacing: 6px; margin-top: 6px; }
+.header h1 { font-size: 3rem; letter-spacing: 12px; background: linear-gradient(180deg, #fff 30%, #ffd700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 60px rgba(255,215,0,0.3); }
+.header .sub { font-size: .9rem; color: #888; letter-spacing: 6px; margin-top: 6px; }
 
-/* 人口计数器 */
-.population-box { text-align: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,200,0.15); border-radius: 16px; padding: 20px 40px; backdrop-filter: blur(10px); }
+.population-box { text-align: center; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,215,0,0.15); border-radius: 16px; padding: 20px 40px; backdrop-filter: blur(10px); }
 .population-box .label { font-size: .8rem; color: #888; letter-spacing: 3px; margin-bottom: 8px; }
-.population-box .number { font-size: 2.4rem; font-weight: bold; color: #00ffc8; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 0 0 20px rgba(0,255,200,0.4); }
-.population-box .trend { font-size: .75rem; color: #00ffc8; margin-top: 6px; }
+.population-box .number { font-size: 2.4rem; font-weight: bold; color: #ffd700; font-family: 'Courier New', monospace; letter-spacing: 2px; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+.population-box .trend { font-size: .75rem; color: #ffd700; margin-top: 6px; }
 
-/* 底部按钮 */
 .footer { text-align: center; }
-.start-btn { padding: 16px 64px; background: rgba(0,255,200,0.08); border: 1px solid rgba(0,255,200,0.4); border-radius: 14px; color: #00ffc8; font-size: 1.1rem; letter-spacing: 4px; cursor: pointer; transition: all .4s; position: relative; overflow: hidden; }
-.start-btn:hover { background: rgba(0,255,200,0.15); border-color: rgba(0,255,200,0.7); box-shadow: 0 0 30px rgba(0,255,200,0.2); transform: translateY(-2px); }
-.start-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,255,200,0.1), transparent); transition: left .6s; }
+.start-btn { padding: 16px 64px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.4); border-radius: 14px; color: #ffd700; font-size: 1.1rem; letter-spacing: 4px; cursor: pointer; transition: all .4s; position: relative; overflow: hidden; }
+.start-btn:hover { background: rgba(255,215,0,0.15); border-color: rgba(255,215,0,0.7); box-shadow: 0 0 30px rgba(255,215,0,0.2); transform: translateY(-2px); }
+.start-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent); transition: left .6s; }
 .start-btn:hover::before { left: 100%; }
 .back-btn { margin-top: 16px; padding: 10px 32px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #666; font-size: .85rem; text-decoration: none; display: inline-block; transition: all .3s; }
-.back-btn:hover { border-color: rgba(0,255,200,0.3); color: #aaa; }
+.back-btn:hover { border-color: rgba(255,215,0,0.3); color: #aaa; }
 
-/* 弹窗 */
 #modal { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
 #modal.active { display: flex; }
-.modal-box { background: rgba(8,8,20,0.95); border: 1px solid rgba(0,255,200,0.2); border-radius: 20px; padding: 40px 48px; max-width: 460px; width: 90%; text-align: center; animation: modalIn .5s ease; }
+.modal-box { background: rgba(8,8,20,0.95); border: 1px solid rgba(255,215,0,0.2); border-radius: 20px; padding: 40px 48px; max-width: 460px; width: 90%; text-align: center; animation: modalIn .5s ease; }
 @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 .modal-box .icon { font-size: 3rem; margin-bottom: 16px; }
-.modal-box h2 { font-size: 1.4rem; color: #00ffc8; letter-spacing: 4px; margin-bottom: 20px; }
+.modal-box h2 { font-size: 1.4rem; color: #ffd700; letter-spacing: 4px; margin-bottom: 20px; }
 .modal-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: .9rem; }
 .modal-row .key { color: #888; }
 .modal-row .val { color: #fff; font-family: 'Courier New', monospace; }
 .modal-tip { margin-top: 20px; font-size: .8rem; color: #666; line-height: 1.8; }
 .modal-tip span { color: #ff006e; }
-.modal-close { margin-top: 24px; padding: 10px 36px; background: rgba(0,255,200,0.08); border: 1px solid rgba(0,255,200,0.3); border-radius: 10px; color: #00ffc8; font-size: .9rem; cursor: pointer; transition: all .3s; }
-.modal-close:hover { background: rgba(0,255,200,0.15); }
+.modal-close { margin-top: 24px; padding: 10px 36px; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; color: #ffd700; font-size: .9rem; cursor: pointer; transition: all .3s; }
+.modal-close:hover { background: rgba(255,215,0,0.15); }
 
-/* 加载 */
-#loader { position: fixed; inset: 0; z-index: 200; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .8s; }
-#loader.hidden { opacity: 0; pointer-events: none; }
-.loader-earth { width: 60px; height: 60px; border: 2px solid rgba(0,255,200,0.2); border-top-color: #00ffc8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+#intro { position: fixed; inset: 0; z-index: 200; background: #000; display: flex; align-items: center; justify-content: center; }
+#intro.hidden { opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
+.intro-text { position: absolute; text-align: center; opacity: 0; transition: opacity .8s; }
+.intro-text.visible { opacity: 1; }
+.intro-text h2 { font-size: 2.5rem; letter-spacing: 8px; color: #ffd700; text-shadow: 0 0 40px rgba(255,215,0,0.5); }
+.intro-text p { font-size: 1rem; color: #888; margin-top: 12px; letter-spacing: 2px; }
+
+#loading { position: fixed; inset: 0; z-index: 300; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .8s; }
+#loading.hidden { opacity: 0; pointer-events: none; }
+.loading-ring { width: 50px; height: 50px; border: 2px solid rgba(255,215,0,0.2); border-top-color: #ffd700; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-#loader p { color: #666; font-size: .85rem; letter-spacing: 3px; }
+#loading p { color: #666; font-size: .85rem; letter-spacing: 3px; }
 </style>
 <script type="importmap">
 { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -59,7 +62,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 </head>
 <body>
 
-<div id="loader"><div class="loader-earth"></div><p>正在连接地球服务器...</p></div>
+<div id="loading"><div class="loading-ring"></div><p>正在连接地球服务器...</p></div>
+
+<div id="intro">
+  <div class="intro-text" id="introText">
+    <h2>EARTH ONLINE</h2>
+    <p>全球同服 · 实时在线 · 不可退出</p>
+  </div>
+</div>
 
 <div id="canvas-container"></div>
 
@@ -68,13 +78,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
     <h1>地球Online</h1>
     <div class="sub">EARTH ONLINE v2026.7.30</div>
   </div>
-
   <div class="population-box">
     <div class="label">全球在线玩家</div>
     <div class="number" id="pop-count">8,118,835,000</div>
     <div class="trend">每秒新增 +2.5 人</div>
   </div>
-
   <div class="footer">
     <button class="start-btn" id="startBtn">开始游戏</button>
     <a class="back-btn" href="../index.html">返回游戏站</a>
@@ -88,7 +96,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
     <div class="modal-row"><span class="key">出生日期</span><span class="val" id="birthDate">未知</span></div>
     <div class="modal-row"><span class="key">游戏时长</span><span class="val" id="playTime">计算中...</span></div>
     <div class="modal-row"><span class="key">当前服务器</span><span class="val">地球 · 亚服</span></div>
-    <div class="modal-row"><span class="key">玩家状态</span><span class="val" style="color:#00ffc8">在线</span></div>
+    <div class="modal-row"><span class="key">玩家状态</span><span class="val" style="color:#ffd700">在线</span></div>
     <div class="modal-row"><span class="key">角色职业</span><span class="val" id="job">随机分配中...</span></div>
     <div class="modal-tip">
       提示：本游戏<span>不支持退出</span>、<span>不支持重开</span>、<span>不支持存档</span>。<br>
@@ -110,66 +118,106 @@ function updatePop() {
 }
 setInterval(updatePop, 1000);
 
-// ========== 程序生成地球纹理 ==========
+// ========== 程序生成纹理 ==========
 function createEarthTexture() {
-  const size = 1024;
+  const size = 2048;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size / 2;
   const ctx = canvas.getContext('2d');
 
-  // 海洋
-  ctx.fillStyle = '#0a1628';
+  // 深海背景
+  ctx.fillStyle = '#061224';
   ctx.fillRect(0, 0, size, size/2);
 
-  // 大陆轮廓（简化版，用椭圆和贝塞尔曲线画主要大陆块）
-  ctx.fillStyle = '#1a3a2a';
-  ctx.strokeStyle = '#2d5a3d';
-  ctx.lineWidth = 2;
-
-  // 北美
-  ctx.beginPath();
-  ctx.ellipse(size*0.22, size*0.22, size*0.08, size*0.12, -0.3, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 南美
-  ctx.beginPath();
-  ctx.ellipse(size*0.28, size*0.42, size*0.05, size*0.1, 0.2, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 欧亚（合并）
-  ctx.beginPath();
-  ctx.ellipse(size*0.55, size*0.2, size*0.18, size*0.12, 0, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 非洲
-  ctx.beginPath();
-  ctx.ellipse(size*0.52, size*0.38, size*0.07, size*0.1, 0, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 澳洲
-  ctx.beginPath();
-  ctx.ellipse(size*0.78, size*0.42, size*0.04, size*0.03, 0, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 格陵兰
-  ctx.beginPath();
-  ctx.ellipse(size*0.35, size*0.12, size*0.025, size*0.04, 0.5, 0, Math.PI*2);
-  ctx.fill(); ctx.stroke();
-
-  // 添加一些随机"陆地细节"噪点
-  for (let i = 0; i < 300; i++) {
+  // 添加海洋深浅变化
+  for (let i = 0; i < 200; i++) {
     const x = Math.random() * size;
     const y = Math.random() * size/2;
-    const r = Math.random() * 8 + 2;
-    ctx.fillStyle = `rgba(${30+Math.random()*30}, ${60+Math.random()*40}, ${40+Math.random()*30}, ${0.3+Math.random()*0.3})`;
+    const r = Math.random() * 100 + 50;
+    ctx.fillStyle = `rgba(${8+Math.random()*8}, ${20+Math.random()*15}, ${40+Math.random()*20}, 0.15)`;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI*2);
     ctx.fill();
   }
 
+  // 大陆
+  ctx.fillStyle = '#1a3a2a';
+  ctx.strokeStyle = '#2d6a4f';
+  ctx.lineWidth = 3;
+
+  // 北美
+  ctx.beginPath();
+  ctx.ellipse(size*0.22, size*0.22, size*0.09, size*0.14, -0.3, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 南美
+  ctx.beginPath();
+  ctx.ellipse(size*0.28, size*0.44, size*0.06, size*0.12, 0.2, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 欧亚
+  ctx.beginPath();
+  ctx.ellipse(size*0.55, size*0.2, size*0.2, size*0.13, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 非洲
+  ctx.beginPath();
+  ctx.ellipse(size*0.52, size*0.4, size*0.08, size*0.12, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 澳洲
+  ctx.beginPath();
+  ctx.ellipse(size*0.78, size*0.44, size*0.045, size*0.035, 0, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 格陵兰
+  ctx.beginPath();
+  ctx.ellipse(size*0.35, size*0.11, size*0.03, size*0.05, 0.5, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 日本
+  ctx.beginPath();
+  ctx.ellipse(size*0.72, size*0.24, size*0.015, size*0.025, 0.8, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 英国
+  ctx.beginPath();
+  ctx.ellipse(size*0.46, size*0.17, size*0.012, size*0.018, 0.3, 0, Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // 陆地细节噪点
+  for (let i = 0; i < 500; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size/2;
+    const r = Math.random() * 10 + 2;
+    ctx.fillStyle = `rgba(${30+Math.random()*40}, ${80+Math.random()*60}, ${50+Math.random()*40}, ${0.2+Math.random()*0.4})`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 城市光点
+  const cities = [
+    [0.22, 0.25], [0.28, 0.28], [0.55, 0.2], [0.58, 0.22], [0.52, 0.38],
+    [0.6, 0.18], [0.48, 0.16], [0.78, 0.44], [0.35, 0.3], [0.72, 0.26]
+  ];
+  for (const [ux, uy] of cities) {
+    const x = ux * size;
+    const y = uy * size/2;
+    ctx.fillStyle = 'rgba(255,215,0,0.6)';
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,215,0,0.15)';
+    ctx.beginPath();
+    ctx.arc(x, y, 12, 0, Math.PI*2);
+    ctx.fill();
+  }
+
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 16;
   return tex;
 }
 
@@ -181,12 +229,12 @@ function createCloudTexture() {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, size, size/2);
 
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 120; i++) {
     const x = Math.random() * size;
     const y = Math.random() * size/2;
-    const w = Math.random() * 120 + 40;
-    const h = Math.random() * 30 + 10;
-    ctx.fillStyle = `rgba(255,255,255,${0.05 + Math.random()*0.1})`;
+    const w = Math.random() * 150 + 50;
+    const h = Math.random() * 40 + 15;
+    ctx.fillStyle = `rgba(255,255,255,${0.04 + Math.random()*0.08})`;
     ctx.beginPath();
     ctx.ellipse(x, y, w, h, 0, 0, Math.PI*2);
     ctx.fill();
@@ -202,40 +250,40 @@ const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 3.5;
+camera.position.z = 8;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.3;
 container.appendChild(renderer.domElement);
 
 // 地球
-const earthGeo = new THREE.SphereGeometry(1, 64, 64);
+const earthGeo = new THREE.SphereGeometry(1, 128, 128);
 const earthMat = new THREE.MeshPhongMaterial({
   map: createEarthTexture(),
-  specular: new THREE.Color(0x111111),
-  shininess: 10,
+  specular: new THREE.Color(0x222222),
+  shininess: 15,
   bumpScale: 0.02
 });
 const earth = new THREE.Mesh(earthGeo, earthMat);
 scene.add(earth);
 
 // 云层
-const cloudGeo = new THREE.SphereGeometry(1.02, 64, 64);
+const cloudGeo = new THREE.SphereGeometry(1.015, 128, 128);
 const cloudMat = new THREE.MeshPhongMaterial({
   map: createCloudTexture(),
   transparent: true,
-  opacity: 0.4,
+  opacity: 0.35,
   depthWrite: false,
   side: THREE.DoubleSide
 });
 const clouds = new THREE.Mesh(cloudGeo, cloudMat);
 scene.add(clouds);
 
-// 大气层光晕（Shader）
-const atmoGeo = new THREE.SphereGeometry(1.15, 64, 64);
+// 金色大气层
+const atmoGeo = new THREE.SphereGeometry(1.18, 128, 128);
 const atmoMat = new THREE.ShaderMaterial({
   vertexShader: `
     varying vec3 vNormal;
@@ -247,8 +295,8 @@ const atmoMat = new THREE.ShaderMaterial({
   fragmentShader: `
     varying vec3 vNormal;
     void main() {
-      float intensity = pow(0.65 - dot(vNormal, vec3(0,0,1.0)), 2.0);
-      gl_FragColor = vec4(0.0, 1.0, 0.78, 1.0) * intensity * 0.8;
+      float intensity = pow(0.6 - dot(vNormal, vec3(0,0,1.0)), 3.0);
+      gl_FragColor = vec4(1.0, 0.84, 0.0, 1.0) * intensity * 1.2;
     }
   `,
   blending: THREE.AdditiveBlending,
@@ -258,31 +306,72 @@ const atmoMat = new THREE.ShaderMaterial({
 const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
 scene.add(atmosphere);
 
-// 星空背景
+// 外光环
+const ringGeo = new THREE.RingGeometry(1.3, 1.45, 128);
+const ringMat = new THREE.MeshBasicMaterial({
+  color: 0xffd700,
+  transparent: true,
+  opacity: 0.15,
+  side: THREE.DoubleSide
+});
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = Math.PI / 2;
+scene.add(ring);
+
+// 星空
 const starsGeo = new THREE.BufferGeometry();
-const starCount = 3000;
+const starCount = 5000;
 const starPos = new Float32Array(starCount * 3);
 for (let i = 0; i < starCount * 3; i++) {
-  starPos[i] = (Math.random() - 0.5) * 80;
+  starPos[i] = (Math.random() - 0.5) * 100;
 }
 starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.015, transparent: true, opacity: 0.8 });
+const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.012, transparent: true, opacity: 0.9 });
 const stars = new THREE.Points(starsGeo, starsMat);
 scene.add(stars);
 
 // 光源
-const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+const ambientLight = new THREE.AmbientLight(0x404040, 1.2);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
+const sunLight = new THREE.DirectionalLight(0xfff5e6, 3);
 sunLight.position.set(5, 3, 5);
 scene.add(sunLight);
 
-const rimLight = new THREE.DirectionalLight(0x00ffc8, 0.8);
+const rimLight = new THREE.DirectionalLight(0xffd700, 1.2);
 rimLight.position.set(-5, -2, -3);
 scene.add(rimLight);
 
-// 鼠标交互
+const backLight = new THREE.DirectionalLight(0x4466aa, 0.5);
+backLight.position.set(0, 0, -5);
+scene.add(backLight);
+
+// ========== 开场动画 ==========
+let introPhase = 0; // 0=加载, 1=地球远处旋转, 2=推近, 3=UI显示
+let introTime = 0;
+const introText = document.getElementById('introText');
+const introDiv = document.getElementById('intro');
+const uiLayer = document.getElementById('ui-layer');
+const loadingDiv = document.getElementById('loading');
+
+// 加载完成后开始
+setTimeout(() => {
+  loadingDiv.classList.add('hidden');
+  introPhase = 1;
+  setTimeout(() => {
+    introText.classList.add('visible');
+  }, 500);
+  setTimeout(() => {
+    introPhase = 2;
+  }, 2500);
+  setTimeout(() => {
+    introPhase = 3;
+    introDiv.classList.add('hidden');
+    uiLayer.classList.add('visible');
+  }, 5000);
+}, 1200);
+
+// 鼠标
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
   mouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -290,64 +379,66 @@ document.addEventListener('mousemove', (e) => {
 });
 
 // 动画
-let time = 0;
 function animate() {
   requestAnimationFrame(animate);
-  time += 0.001;
+  introTime += 0.016;
 
-  earth.rotation.y += 0.0008;
-  clouds.rotation.y += 0.001;
-  atmosphere.rotation.y += 0.0008;
-  stars.rotation.y -= 0.0001;
+  // 开场相机运动
+  if (introPhase === 1) {
+    // 远处旋转
+    camera.position.z = 8;
+    earth.rotation.y += 0.003;
+    atmosphere.rotation.y += 0.003;
+  } else if (introPhase === 2) {
+    // 推近
+    const t = Math.min((introTime - 2.5) / 2.5, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    camera.position.z = 8 - ease * 4.5;
+    earth.rotation.y += 0.002 * (1 - ease * 0.5);
+    atmosphere.rotation.y += 0.002 * (1 - ease * 0.5);
+    // 文字淡出
+    introText.style.opacity = 1 - ease;
+  } else {
+    // 正常状态
+    earth.rotation.y += 0.0005;
+    clouds.rotation.y += 0.0008;
+    atmosphere.rotation.y += 0.0005;
+    ring.rotation.z += 0.0003;
+    stars.rotation.y -= 0.00005;
 
-  // 鼠标轻微影响相机
-  camera.position.x += (mouseX * 0.3 - camera.position.x) * 0.02;
-  camera.position.y += (mouseY * 0.2 - camera.position.y) * 0.02;
-  camera.lookAt(0, 0, 0);
+    camera.position.x += (mouseX * 0.2 - camera.position.x) * 0.03;
+    camera.position.y += (mouseY * 0.15 - camera.position.y) * 0.03;
+    camera.lookAt(0, 0, 0);
+  }
 
   renderer.render(scene, camera);
 }
 animate();
 
-// 窗口调整
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// 加载完成
-setTimeout(() => {
-  document.getElementById('loader').classList.add('hidden');
-}, 1500);
-
-// ========== 弹窗逻辑 ==========
+// ========== 弹窗 ==========
 const startBtn = document.getElementById('startBtn');
 const modal = document.getElementById('modal');
-const birthEl = document.getElementById('birthDate');
-const timeEl = document.getElementById('playTime');
-const jobEl = document.getElementById('job');
-
-const jobs = ['NPC', '主线玩家', '支线探索者', '隐藏角色', '地球OL资深用户', '随机事件触发器', '服务器蛀虫'];
+const jobs = ['NPC', '主线玩家', '支线探索者', '隐藏角色', '地球OL资深用户', '随机事件触发器', '服务器蛀虫', '版本之子'];
 
 startBtn.addEventListener('click', () => {
-  // 随机生成一个出生日期（18-35岁）
   const now = new Date();
   const birthYear = now.getFullYear() - Math.floor(Math.random() * 17 + 18);
   const birthMonth = Math.floor(Math.random() * 12 + 1);
   const birthDay = Math.floor(Math.random() * 28 + 1);
-  birthEl.textContent = `${birthYear}年${birthMonth}月${birthDay}日`;
+  document.getElementById('birthDate').textContent = `${birthYear}年${birthMonth}月${birthDay}日`;
 
-  // 计算游戏时长
   const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
-  const diffMs = now - birthDate;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24));
   const years = Math.floor(diffDays / 365);
   const days = diffDays % 365;
-  timeEl.textContent = `${years}年 ${days}天`;
-
-  // 随机职业
-  jobEl.textContent = jobs[Math.floor(Math.random() * jobs.length)];
+  document.getElementById('playTime').textContent = `${years}年 ${days}天`;
+  document.getElementById('job').textContent = jobs[Math.floor(Math.random() * jobs.length)];
 
   modal.classList.add('active');
 });
@@ -355,7 +446,6 @@ startBtn.addEventListener('click', () => {
 window.closeModal = function() {
   modal.classList.remove('active');
 };
-
 modal.addEventListener('click', (e) => {
   if (e.target === modal) closeModal();
 });
