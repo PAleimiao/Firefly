@@ -6,15 +6,17 @@ const config = {
   backgroundColor: '#050510',
   physics: {
     default: 'arcade',
-    arcade: {
-      gravity: { x: 0, y: 0 },
-      debug: false
-    }
+    arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
   scene: [BootScene, MenuScene, GameScene, HUDScene, GameOverScene],
   scale: {
     mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  render: {
+    pixelArt: false,
+    antialias: true,
+    roundPixels: false
   }
 };
 
