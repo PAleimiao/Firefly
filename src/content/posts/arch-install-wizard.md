@@ -1,7 +1,7 @@
 ---
-title: "Arch Linux 图形化安装向导：让小白也能一键装 Arch"
+title: Arch Linux 图形化安装向导：让小白也能一键装 Arch
 published: 2026-08-01
-description: "基于 Bash + Dialog 的 Arch Linux 图形化安装向导，支持自动/手动双模式，硬件自动检测，驱动全覆盖，让小白也能轻松安装 Arch。"
+description: 基于 Bash + Dialog 的 Arch Linux 图形化安装向导，支持自动/手动双模式，硬件自动检测，驱动全覆盖，让小白也能轻松安装 Arch。
 tags: [Arch Linux, Linux, 安装教程, 开源项目, Bash]
 category: 技术
 slug: arch-install-wizard
@@ -30,7 +30,7 @@ Arch Linux 被誉为最纯粹的 Linux 发行版之一，滚动更新、软件�
 - **安全机制**：双系统检测 + 蜂鸣器警报、密码二次确认、格式化二次确认
 
 > [!NOTE]
-> 这个项目完全对标 Arch 官方安装流程，官方有的功能我们都有，官方没有的我们也有。
+> 这个项目非完全对标 Arch 官方安装流程
 
 ## 为什么做这个？
 
