@@ -25,6 +25,16 @@ export const galleryConfig: GalleryConfig = {
 			date: "2026-08-02",
 			tags: ["2233", "哔哩哔哩", "B站"],
 		},
+		{
+			id: "private-2233",
+			name: "2233",
+			description: "哔哩哔哩 22娘 & 33娘 私密图集",
+			location: "哔哩哔哩",
+			date: "2026-08-02",
+			tags: ["2233", "哔哩哔哩", "B站", "私密"],
+			password: "123456",
+			passwordHint: "默认密码 123456",
+		},
 	],
 
 	// 瀑布流最小列宽(px)，浏览器根据容器宽度自动计算列数，默认 240
