@@ -9,29 +9,33 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 
 	src: {
 		// 桌面背景图片（支持单张或多张随机）
-		// 路径格式：
-		// 1. src 目录（不以 "/" 开头，自动优化）："assets/images/DesktopWallpaper/d1.avif"
-		// 2. public 目录（以 "/" 开头，不优化）："/assets/images/banner.avif"
-		// 3. 远程 URL："https://example.com/banner.jpg"
+		// 支持远程 URL
 		desktop: [
-			"assets/images/DesktopWallpaper/d1.avif",
-			"assets/images/DesktopWallpaper/d2.avif",
-			"assets/images/DesktopWallpaper/d3.avif",
-			"assets/images/DesktopWallpaper/d4.avif",
-			"assets/images/DesktopWallpaper/d5.avif",
-			"assets/images/DesktopWallpaper/d6.avif",
+			"https://pan.ecylt.top/f/RRgfM/1.png",
+			"https://pan.ecylt.top/f/eWzFx/2.png",
+			"https://pan.ecylt.top/f/lv0S6/3.png",
+			"https://pan.ecylt.top/f/E2ZF9/4.png",
+			"https://pan.ecylt.top/f/DbOsD/5.png",
+			"https://pan.ecylt.top/f/9ypTK/6.png",
+			"https://pan.ecylt.top/f/JMJuJ/7.png",
+			"https://pan.ecylt.top/f/ZoDSV/8.png",
+			"https://pan.ecylt.top/f/YZQHN/9.png",
+			"https://pan.ecylt.top/f/1LDTJ/10.png",
+			"https://pan.ecylt.top/f/zA6HW/11.png",
+			"https://pan.ecylt.top/f/AYOUl/12.png",
 		],
 		// 移动背景图片（支持单张或多张随机）
 		mobile: [
-			"assets/images/MobileWallpaper/m1.avif",
-			"assets/images/MobileWallpaper/m2.avif",
-			"assets/images/MobileWallpaper/m3.avif",
-			"assets/images/MobileWallpaper/m4.avif",
-			"assets/images/MobileWallpaper/m5.avif",
-			"assets/images/MobileWallpaper/m6.avif",
+			"https://pan.ecylt.top/f/9yaSK/1.png",
+			"https://pan.ecylt.top/f/Zo7uV/2.png",
+			"https://pan.ecylt.top/f/DbpfD/3.png",
+			"https://pan.ecylt.top/f/E2QH9/4.png",
+			"https://pan.ecylt.top/f/JMksJ/5.png",
+			"https://pan.ecylt.top/f/1LeSJ/6.png",
+			"https://pan.ecylt.top/f/YZNtN/7.png",
+			"https://pan.ecylt.top/f/zAwtW/8.png",
 		],
 		// 背景视频播放地址
-		// 支持远程视频URL，本地视频请放在 public/assets/videos/ 目录下
 		playerUrl: "https://pan.ecylt.top/f/QRYF8/video_%E3%80%8A%E5%8F%8D%E4%B9%8C%E6%89%98%E9%82%A6Pt.2%E3%80%8B%E3%80%90%E4%BA%9A%E7%BB%86%E4%BA%9A%E6%97%B7%E4%B8%96..._0.mp4",
 	},
 
@@ -97,7 +101,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 		},
 		// 壁纸轮播配置
 		carousel: {
-			enable: false,
+			enable: true,
 			interval: 5000,
 			transitionEffect: "zoom",
 		},
