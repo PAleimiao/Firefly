@@ -27,13 +27,11 @@ export const galleryConfig: GalleryConfig = {
 		},
 		{
 			id: "encrypted-album",
-			name: "加密相册",
-			description: "私人加密相册，需要密码访问",
-			location: "私人",
+			name: "图集",
+			description: "精选图集",
+			location: "网络",
 			date: "2026-08-02",
-			tags: ["加密", "私人"],
-			password: "123456",
-			passwordHint: "默认密码 123456",
+			tags: ["图集", "精选"],
 		},
 	],
 
