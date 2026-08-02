@@ -268,6 +268,80 @@ sudo cp ~/Pictures/your-wallpaper.jpg /usr/share/grub/themes/vimix/background.jp
 
 ---
 
+### 2.11 Fcitx5 输入法美化
+
+Hyprland 默认没中文输入法，**fcitx5 是 Wayland 下最稳的中文输入方案**，而且候选框也能美。
+
+#### 安装
+
+```bash
+# Arch
+sudo pacman -S fcitx5 fcitx5-configtool fcitx5-rime fcitx5-chinese-addons
+
+# 或者装拼音（rime 配置麻烦，拼音开箱即用）
+sudo pacman -S fcitx5 fcitx5-configtool fcitx5-pinyin-moegirl fcitx5-pinyin-zhwiki
+
+# Ubuntu/Debian
+sudo apt install fcitx5 fcitx5-frontend-gtk4 fcitx5-frontend-qt6 fcitx5-rime
+```
+
+#### 环境变量
+
+在 `~/.config/hypr/hyprland.conf` 里加：
+
+```ini
+env = XMODIFIERS, @im=fcitx5
+env = GTK_IM_MODULE, fcitx5
+env = QT_IM_MODULE, fcitx5
+env = SDL_IM_MODULE, fcitx5
+```
+
+#### 自启动
+
+```ini
+exec-once = fcitx5 -d
+```
+
+#### 候选框主题美化
+
+fcitx5 的候选框也能换皮，去 [GitHub - fcitx5-themes](https://github.com/search?q=fcitx5+theme&type=repositories) 搜：
+
+```bash
+# 推荐主题：Catppuccin、Nord、Dracula
+# 以 Catppuccin 为例
+git clone https://github.com/catppuccin/fcitx5.git ~/.config/fcitx5/themes/catppuccin
+
+# 然后在 fcitx5-configtool → 附加组件 → 经典用户界面 → 主题 里选择
+```
+
+常用 fcitx5 主题：
+
+| 主题名 | 风格 | 安装 |
+|--------|------|------|
+| **Catppuccin** | 柔和莫兰迪色系 | `git clone https://github.com/catppuccin/fcitx5.git` |
+| **Nord** | 北极蓝灰色调 | `git clone https://github.com/tonyfettes/fcitx5-nord.git` |
+| **Dracula** | 紫黑高对比 | `git clone https://github.com/dracula/fcitx5.git` |
+| **Material** | 谷歌 Material 风 | `git clone https://github.com/hosxy/fcitx5-material-color.git` |
+
+#### 字体与候选框大小
+
+在 `~/.config/fcitx5/conf/classicui.conf` 里调：
+
+```ini
+# 字体
+Font="JetBrains Mono 12"
+# 候选框大小
+MenuFontSize=12
+# 竖排候选
+VerticalCandidateList=True
+# 候选个数
+Number of entries=9
+```
+
+> 💡 **提示**：fcitx5 在 Wayland 下用 **Wayland 输入法前端**（`fcitx5-frontend-wayland`），比 Xwayland 下的输入延迟低很多。Arch 仓库里直接有。
+
+---
+
 ## 三、Wayland 通用美化工具
 
 不管你用 Hyprland、Sway 还是其他 Wayland 合成器，这些工具都通用：
