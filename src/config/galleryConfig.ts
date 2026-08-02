@@ -25,14 +25,6 @@ export const galleryConfig: GalleryConfig = {
 			date: "2026-08-02",
 			tags: ["2233", "哔哩哔哩", "B站"],
 		},
-		{
-			id: "encrypted-album",
-			name: "图集",
-			description: "精选图集",
-			location: "网络",
-			date: "2026-08-02",
-			tags: ["图集", "精选"],
-		},
 	],
 
 	// 瀑布流最小列宽(px)，浏览器根据容器宽度自动计算列数，默认 240
