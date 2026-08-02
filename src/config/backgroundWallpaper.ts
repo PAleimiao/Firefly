@@ -7,23 +7,23 @@ export const backgroundWallpaper: BackgroundWallpaper = {
 
 	// 移动端背景壁纸
 	mobileImages: [
-		"https://pan.ecylt.top/f/RRgfM/1.png",
-		"https://pan.ecylt.top/f/eWzFx/2.png",
-		"https://pan.ecylt.top/f/lv0S6/3.png",
+		"assets/images/DesktopWallpaper/d1.avif",
+		"assets/images/DesktopWallpaper/d2.avif",
+		"assets/images/DesktopWallpaper/d3.avif",
 	],
 
 	// 桌面端背景壁纸
 	images: [
-		"https://pan.ecylt.top/f/E2ZF9/4.png",
-		"https://pan.ecylt.top/f/DbOsD/5.png",
-		"https://pan.ecylt.top/f/9ypTK/6.png",
-		"https://pan.ecylt.top/f/JMJuJ/7.png",
-		"https://pan.ecylt.top/f/ZoDSV/8.png",
+		"assets/images/DesktopWallpaper/d1.avif",
+		"assets/images/DesktopWallpaper/d2.avif",
+		"assets/images/DesktopWallpaper/d3.avif",
+		"assets/images/DesktopWallpaper/d4.avif",
+		"assets/images/DesktopWallpaper/d5.avif",
+		"assets/images/DesktopWallpaper/d6.avif",
 	],
 
 	// 视频背景（可选，与图片背景二选一，视频优先级更高）
-	// 暂时禁用视频，使用图片轮播
-	// video: "https://pan.ecylt.top/f/QRYF8/1774274407628394.mp4",
+	video: "https://pan.ecylt.top/f/QRYF8/1774274407628394.mp4",
 
 	// 首页主标题
 	mainTitle: "Welcome to CXL",
