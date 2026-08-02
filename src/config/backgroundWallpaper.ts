@@ -23,8 +23,7 @@ export const backgroundWallpaper: BackgroundWallpaper = {
 	],
 
 	// 视频背景（可选，与图片背景二选一，视频优先级更高）
-	// 当前视频链接 404，暂时禁用
-	// video: "https://pan.ecylt.top/f/QRYF8/1774274407628394.mp4",
+	video: "https://pan.ecylt.top/f/QRYF8/video_%E3%80%8A%E5%8F%8D%E4%B9%8C%E6%89%98%E9%82%A6Pt.2%E3%80%8B%E3%80%90%E4%BA%9A%E7%BB%86%E4%BA%9A%E6%97%B7%E4%B8%96..._0.mp4",
 
 	// 首页主标题
 	mainTitle: "Welcome to CXL",
