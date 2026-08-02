@@ -187,6 +187,76 @@ gamemoderun wine 你的游戏.exe
 
 ---
 
+## 三、具体游戏安装：三条路线任你选
+
+### 路线 C：原生 Linux 游戏平台（不想折腾 Wine 的首选）
+
+如果你压根不想碰 Wine、不想配置前缀、不想调 DLL，那直接用**原生支持 Linux 的游戏平台**就完事了。很多游戏在 Linux 上是有官方客户端的，或者通过原生启动器直接跑。
+
+#### Steam
+
+Steam 原生支持 Linux，而且自带 Proton，大部分 Windows 游戏点一下就能玩：
+
+```bash
+# Arch
+sudo pacman -S steam
+
+# Ubuntu/Debian
+sudo apt install steam
+
+# Flatpak（通用，推荐）
+flatpak install flathub com.valvesoftware.Steam
+```
+
+装完登录，库里的游戏如果是原生 Linux 版直接运行；Windows 游戏 Steam 会自动调用 Proton，**基本不用你操心**。
+
+#### Epic Games / GOG Galaxy
+
+Epic 和 GOG 没有原生 Linux 客户端，但可以用 **Heroic Games Launcher** 代替：
+
+```bash
+# Arch
+yay -S heroic-games-launcher-bin
+
+# Flatpak
+flatpak install flathub com.heroicgameslauncher.hgl
+```
+
+Heroic 支持 Epic 和 GOG 账号登录，下载游戏后自动用 Wine/Proton 运行，**比你自己配 Wine 省心一百倍**。
+
+#### itch.io
+
+独立游戏天堂，itch 客户端有原生 Linux 版：
+
+```bash
+# AUR
+yay -S itch-bin
+
+# 或者去官网下载 AppImage
+wget https://itch.io/app/download?platform=linux
+```
+
+#### 各发行版应用商店
+
+很多 Linux 原生游戏直接在发行版仓库里：
+
+```bash
+# Arch 游戏仓库
+sudo pacman -Syu
+sudo pacman -S supertuxkart minetest 0ad
+
+# Ubuntu/Debian
+sudo apt install supertuxkart minetest 0ad
+
+# Flatpak 游戏（推荐，版本最新）
+flatpak install flathub org.supertuxkart.SuperTuxKraft
+flatpak install flathub net.minetest.Minetest
+```
+
+> 💡 **总结**：不想折腾 Wine 的，Steam + Heroic + Flatpak 基本覆盖 90% 的游戏需求。Windows 独占游戏再考虑 Wine/Lutris。
+
+---
+
 ## 三、具体游戏安装：两条路线任你选
 
 下面每个游戏都给两条路：**Lutris 懒人版** 和 **Wine/其他折腾版**。想省事的直接 Lutris，想折腾的往下看。
@@ -499,6 +569,133 @@ gamescope -W 1920 -H 1080 -r 144 -- %command%
 ```
 
 ---
+
+---
+
+## 番外篇一：OBS 直播与录屏
+
+玩游戏不录屏等于白玩，Linux 上 OBS 原生支持，而且**性能比 Windows 版还稳**。
+
+### 安装
+
+```bash
+# Arch
+sudo pacman -S obs-studio
+
+# Ubuntu/Debian
+sudo apt install obs-studio
+
+# Flatpak
+flatpak install flathub com.obsproject.Studio
+```
+
+### 基础配置
+
+1. **来源（Sources）** → 添加 **Game Capture** 或 **Window Capture**
+2. **设置 → 输出**：编码器选 `NVENC`（NVIDIA）或 `VA-API`（AMD/Intel），比 CPU 编码省资源
+3. **设置 → 视频**：分辨率跟显示器一致，帧率 60fps
+4. **设置 → 直播**：填入直播平台推流地址和密钥（B站/斗鱼/虎牙都有 Linux 推流教程）
+
+### Wayland 用户注意
+
+Hyprland / Sway 这些 Wayland 桌面，OBS 录屏需要装插件：
+
+```bash
+# Arch
+sudo pacman -S obs-studio obs-plugin-browser
+
+# 或者用 pipewire 捕获
+# OBS 来源里选 "PipeWire Screen Capture" 即可捕获整个屏幕
+```
+
+> ⚠️ **Wayland 下 Game Capture 可能抓不到窗口**，建议直接用 PipeWire 全屏捕获，或者切换到 X11 会话录屏。
+
+### 常用快捷键
+
+| 快捷键 | 功能 |
+|--------|------|
+| `F1` | 开始/停止录制 |
+| `F2` | 开始/停止直播 |
+| `F3` | 快速保存录像 |
+
+### 录屏文件位置
+
+默认保存在 `~/Videos` 目录下，格式为 `.mkv`，可以直接用 VLC 或 MPV 播放。
+
+> 🔥 **Pro tip**：配合 `gamemoderun` 玩游戏 + OBS 录屏，帧数基本不掉，Linux 录屏体验真的香。
+
+---
+
+## 番外篇二：写代码环境推荐
+
+既然都上 Linux 了，不整点开发环境说不过去。以下是我个人在 Arch + Hyprland 上用的配置，**即装即用，不折腾**。
+
+### IDE / 编辑器
+
+| 工具 | 用途 | 安装 |
+|------|------|------|
+| **VS Code** | 全能编辑器 | `sudo pacman -S code` |
+| **VSCodium** | VS Code 去微软版 | `sudo pacman -S vscodium` |
+| **JetBrains 全家桶** | 专业 IDE | `yay -S jetbrains-toolbox` |
+| **Neovim** | 终端编辑器 | `sudo pacman -S neovim` |
+| **Zed** | 新一代 Rust 编辑器 | `yay -S zed` |
+
+### 终端与 Shell
+
+```bash
+# 装个好看的终端
+sudo pacman -S alacritty kitty
+
+# Fish shell（自动补全爽歪歪）
+sudo pacman -S fish
+chsh -s /usr/bin/fish
+
+# Starship 提示符
+curl -sS https://starship.rs/install.sh | sh
+```
+
+### 开发工具链
+
+```bash
+# Git（必装）
+sudo pacman -S git git-lfs
+
+# Node.js + pnpm（前端开发）
+sudo pacman -S nodejs npm
+npm install -g pnpm
+
+# Python（AI/脚本）
+sudo pacman -S python python-pip
+
+# Docker（部署神器）
+sudo pacman -S docker docker-compose
+sudo systemctl enable --now docker
+
+# 数据库（本地开发）
+sudo pacman -S postgresql redis
+```
+
+### 配合 Wine 开发
+
+如果你在用 Wine 跑游戏的同时还想写代码，建议：
+
+1. **分工作区**：Hyprland 工作区 1 放 IDE，工作区 2 放游戏，工作区 3 放浏览器查文档
+2. **用 tmux 或 zellij**：终端里分屏，一边跑服务器一边看日志
+3. **MangoHud 监控**：游戏窗口左上角显示 CPU/GPU/帧数，一边玩一边观察性能瓶颈
+
+```bash
+# 开发 + 游戏双开示例
+# 工作区 1：VS Code
+hyprctl dispatch workspace 1 && code .
+
+# 工作区 2：游戏
+hyprctl dispatch workspace 2 && gamemoderun lutris
+
+# 工作区 3：终端监控
+hyprctl dispatch workspace 3 && alacritty -e btop
+```
+
+> 💡 **一句话**：Linux 写代码的体验比 Windows 爽多了，包管理器一键装环境、终端直接操作、没有各种弹窗广告干扰。上了 Linux 的船，就回不去了。
 
 ## 八、总结：一条命令检查清单
 
