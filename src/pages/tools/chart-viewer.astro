@@ -1,0 +1,697 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="谱面查看器" description="本地解析 Phira / RPE 谱面文件">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:music-note" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">谱面查看器</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+        把 Phira 谱面包（<b>.pez / .zip</b>）或谱面 <b>.json</b> 丢进来，本地解析出曲名、谱师、难度、物量、BPM 与时长，并画出音符分布时间线。支持 RPE 格式与官谱（Phira 原生）格式。
+      </p>
+
+      <!-- 本地提示 -->
+      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 mb-6 text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+        ⚠️ 解析<b>全程在你的设备本地完成，谱面文件不会上传</b>。大谱面包解压需要几秒钟属正常现象。
+      </div>
+
+      <!-- 文件拖放区 -->
+      <div id="cv-drop" class="rounded-xl border-2 border-dashed border-(--line-divider) bg-(--card-bg) px-4 py-8 mb-4 text-center cursor-pointer transition hover:border-(--primary)">
+        <Icon is:inline name="material-symbols:upload-file" class="text-[2.5rem] text-(--primary) mb-2"></Icon>
+        <div class="text-neutral-900 dark:text-neutral-100 font-medium mb-1">点击选择或把谱面文件拖到这里</div>
+        <div class="text-sm text-neutral-500 dark:text-neutral-400">支持 .pez / .zip 谱面包，或单独的谱面 .json 文件</div>
+        <input id="cv-file" type="file" accept=".json,.pez,.zip,application/json,application/zip" class="hidden" />
+      </div>
+      <div id="cv-name" class="text-sm text-neutral-500 dark:text-neutral-400 mb-4 truncate">未选择文件</div>
+      <div id="cv-status" class="text-sm text-neutral-500 dark:text-neutral-400 mb-4"></div>
+
+      <!-- 多难度选择 -->
+      <div id="cv-multi" class="hidden mb-4">
+        <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">包里发现多个谱面，选一个查看：</label>
+        <select id="cv-chart-select" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100"></select>
+      </div>
+
+      <!-- 解析结果 -->
+      <div id="cv-result" class="hidden">
+        <!-- 元数据卡片 -->
+        <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 mb-4">
+          <div class="flex items-center gap-2 mb-3">
+            <Icon is:inline name="material-symbols:info" class="text-[1.25rem] text-(--primary)"></Icon>
+            <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">谱面信息</div>
+            <span id="cv-format" class="ml-auto text-xs px-2 py-1 rounded-lg bg-(--btn-regular-bg) text-(--btn-content)"></span>
+          </div>
+          <div id="cv-meta" class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm text-neutral-700 dark:text-neutral-300"></div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 mb-4">
+          <div class="flex items-center gap-2 mb-3">
+            <Icon is:inline name="material-symbols:bar-chart" class="text-[1.25rem] text-(--primary)"></Icon>
+            <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">物量统计</div>
+          </div>
+          <div id="cv-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm text-neutral-700 dark:text-neutral-300"></div>
+        </div>
+
+        <!-- 时间线 -->
+        <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4">
+          <div class="flex items-center gap-2 mb-3">
+            <Icon is:inline name="material-symbols:timeline" class="text-[1.25rem] text-(--primary)"></Icon>
+            <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">音符时间线</div>
+            <span id="cv-time" class="ml-auto text-xs text-neutral-500 dark:text-neutral-400"></span>
+          </div>
+
+          <!-- 控制栏 -->
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <button id="cv-play" class="px-4 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">▶ 播放</button>
+            <button id="cv-rewind" class="px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">⏮ 回开头</button>
+            <label class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) cursor-pointer hover:opacity-85 transition">
+              <input id="cv-sound" type="checkbox" class="w-4 h-4" />
+              出声
+            </label>
+            <span class="w-px h-6 bg-(--line-divider) mx-1"></span>
+            <button id="cv-zoom-in" class="px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">🔍 放大</button>
+            <button id="cv-zoom-out" class="px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">缩小</button>
+            <button id="cv-zoom-fit" class="px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">适应全谱</button>
+            <span class="text-xs text-neutral-400 dark:text-neutral-500">滚轮缩放 · 拖拽平移</span>
+          </div>
+
+          <canvas id="cv-canvas" class="w-full rounded-lg touch-none cursor-grab" style="height:180px"></canvas>
+          <div id="cv-legend" class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-neutral-500 dark:text-neutral-400"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZIP 解压库（JSZip，CDN 加载，仅在浏览器本地运行） -->
+  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+    const drop = $("cv-drop");
+    const fileInput = $<HTMLInputElement>("cv-file");
+    const nameEl = $("cv-name");
+    const statusEl = $("cv-status");
+    const multiEl = $("cv-multi");
+    const chartSelect = $<HTMLSelectElement>("cv-chart-select");
+    const resultEl = $("cv-result");
+    const formatEl = $("cv-format");
+    const metaEl = $("cv-meta");
+    const statsEl = $("cv-stats");
+    const canvas = $<HTMLCanvasElement>("cv-canvas");
+    const legendEl = $("cv-legend");
+    const playBtn = $<HTMLButtonElement>("cv-play");
+    const rewindBtn = $<HTMLButtonElement>("cv-rewind");
+    const soundEl = $<HTMLInputElement>("cv-sound");
+    const zoomInBtn = $<HTMLButtonElement>("cv-zoom-in");
+    const zoomOutBtn = $<HTMLButtonElement>("cv-zoom-out");
+    const zoomFitBtn = $<HTMLButtonElement>("cv-zoom-fit");
+    const timeEl = $("cv-time");
+
+    const setStatus = (msg: string) => { statusEl.textContent = msg; };
+    const fmtTime = (s: number) => {
+      const m = Math.floor(s / 60), sec = Math.round(s - m * 60);
+      return `${m}:${String(sec).padStart(2, "0")}`;
+    };
+
+    // ---------- 类型定义 ----------
+    interface ChartCandidate {
+      label: string;
+      data: Record<string, unknown>;
+    }
+    interface NoteInfo {
+      t: number;      // 秒
+      end: number;    // 秒（hold 结束时间）
+      type: number;
+      line: number;
+    }
+    interface Analysis {
+      format: string;
+      meta: Record<string, string>;
+      notes: NoteInfo[];
+      typeNames: Record<number, string>;
+      bpmMin: number;
+      bpmMax: number;
+      duration: number;
+      lineCount: number;
+    }
+
+    const OFFICIAL_TYPES: Record<number, string> = { 1: "Tap", 2: "Drag", 3: "Hold", 4: "Flick" };
+    const RPE_TYPES: Record<number, string> = { 1: "Tap", 2: "Hold", 3: "Flick", 4: "Drag" };
+    const TYPE_COLORS: Record<string, string> = {
+      Tap: "#3b82f6", Hold: "#22c55e", Drag: "#eab308", Flick: "#ef4444", 其他: "#a855f7",
+    };
+    // 各键型打击音频率（Hz）
+    const TYPE_FREQ: Record<number, number> = { 1: 880, 2: 620, 3: 440, 4: 1180 };
+
+    // ---------- 工具函数 ----------
+    const triplet = (t: unknown): number | null => {
+      if (typeof t === "number" && Number.isFinite(t)) return t;
+      if (Array.isArray(t) && t.length === 3 && typeof t[0] === "number") {
+        const den = typeof t[2] === "number" && t[2] !== 0 ? t[2] : 1;
+        return t[0] + (typeof t[1] === "number" ? t[1] : 0) / den;
+      }
+      return null;
+    };
+
+    const getArr = (o: unknown): Record<string, unknown>[] =>
+      Array.isArray(o) ? (o as Record<string, unknown>[]) : [];
+
+    /** RPE：按 BPMList 分段把拍换算成秒 */
+    function makeBeatToSec(bpmList: { beat: number; bpm: number }[]) {
+      const ev = [...bpmList].sort((a, b) => a.beat - b.beat);
+      if (!ev.length || ev[0].beat > 0) ev.unshift({ beat: 0, bpm: 120 });
+      const acc: { beat: number; bpm: number; sec: number }[] = [];
+      let sec = 0;
+      for (let i = 0; i < ev.length; i++) {
+        if (i > 0) sec += ((ev[i].beat - ev[i - 1].beat) * 60) / ev[i - 1].bpm;
+        acc.push({ beat: ev[i].beat, bpm: ev[i].bpm, sec });
+      }
+      return (beat: number): number => {
+        let cur = acc[0];
+        for (const e of acc) {
+          if (e.beat <= beat) cur = e;
+          else break;
+        }
+        return cur.sec + ((beat - cur.beat) * 60) / cur.bpm;
+      };
+    }
+
+    // ---------- 解析：RPE ----------
+    function analyzeRPE(data: Record<string, unknown>): Analysis | null {
+      const lines = getArr(data.judgeLineList);
+      if (!lines.length) return null;
+      const meta = (data.META || {}) as Record<string, unknown>;
+      const bpmList = getArr(data.BPMList)
+        .map((b) => ({ beat: triplet(b.startTime) ?? 0, bpm: Number(b.bpm) || 120 }))
+        .filter((b) => b.bpm > 0);
+      const toSec = makeBeatToSec(bpmList);
+      const notes: NoteInfo[] = [];
+      lines.forEach((line, li) => {
+        for (const n of getArr(line.notes)) {
+          const start = triplet(n.startTime);
+          const end = triplet(n.endTime);
+          if (start === null) continue;
+          const type = Number(n.type) || 1;
+          notes.push({
+            t: toSec(start),
+            end: toSec(end !== null && end > start ? end : start),
+            type,
+            line: li,
+          });
+        }
+      });
+      if (!notes.length) return null;
+      const bpms = bpmList.map((b) => b.bpm);
+      const duration = Math.max(...notes.map((n) => n.end));
+      const metaOut: Record<string, string> = {};
+      const pick = (k: string, label: string) => {
+        const v = meta[k];
+        if (typeof v === "string" && v.trim()) metaOut[label] = v;
+      };
+      pick("name", "曲名");
+      pick("composer", "曲师");
+      pick("charter", "谱师");
+      pick("level", "难度");
+      pick("id", "曲绘/ID");
+      if (typeof meta.offset === "number") metaOut["偏移"] = `${meta.offset} ms`;
+      return {
+        format: "RPE 格式",
+        meta: metaOut,
+        notes,
+        typeNames: RPE_TYPES,
+        bpmMin: bpms.length ? Math.min(...bpms) : 0,
+        bpmMax: bpms.length ? Math.max(...bpms) : 0,
+        duration,
+        lineCount: lines.length,
+      };
+    }
+
+    // ---------- 解析：官谱 / Phira 原生 ----------
+    function analyzeOfficial(data: Record<string, unknown>): Analysis | null {
+      const lines = getArr(data.judgeLineList);
+      if (!lines.length) return null;
+      const offset = typeof data.offset === "number" ? data.offset : 0;
+      const notes: NoteInfo[] = [];
+      const bpms: number[] = [];
+      lines.forEach((line, li) => {
+        const bpm = Number(line.bpm) || 120;
+        bpms.push(bpm);
+        const beatSec = 60 / bpm;
+        for (const key of ["notesAbove", "notesBelow"] as const) {
+          for (const n of getArr(line[key])) {
+            const time = Number(n.time);
+            if (!Number.isFinite(time)) continue;
+            const hold = Number(n.holdTime) || 0;
+            notes.push({
+              t: time * beatSec - offset,
+              end: (time + hold) * beatSec - offset,
+              type: Number(n.type) || 1,
+              line: li,
+            });
+          }
+        }
+      });
+      if (!notes.length) return null;
+      const duration = Math.max(...notes.map((n) => n.end));
+      const metaOut: Record<string, string> = {};
+      if (offset) metaOut["偏移"] = `${Math.round(offset * 1000)} ms`;
+      if (data.formatVersion) metaOut["格式版本"] = String(data.formatVersion);
+      return {
+        format: "官谱 / Phira 原生格式",
+        meta: metaOut,
+        notes,
+        typeNames: OFFICIAL_TYPES,
+        bpmMin: Math.min(...bpms),
+        bpmMax: Math.max(...bpms),
+        duration,
+        lineCount: lines.length,
+      };
+    }
+
+    function analyze(data: Record<string, unknown>): Analysis | null {
+      if (data.BPMList && data.META) return analyzeRPE(data);
+      return analyzeOfficial(data) ?? analyzeRPE(data);
+    }
+
+    /** 粗解析 info.yml（key: value 行） */
+    function parseInfoYml(text: string): Record<string, string> {
+      const out: Record<string, string> = {};
+      const map: Record<string, string> = {
+        name: "曲名", song: "曲名", composer: "曲师", illustrator: "曲绘",
+        charter: "谱师", level: "难度", artist: "曲师",
+      };
+      for (const line of text.split("\n")) {
+        const m = line.match(/^([A-Za-z_]+)\s*:\s*(.+)$/);
+        if (!m) continue;
+        const label = map[m[1].toLowerCase()];
+        if (label && !out[label]) out[label] = m[2].trim().replace(/^["']|["']$/g, "");
+      }
+      return out;
+    }
+
+    // ---------- 视图状态（缩放 / 平移 / 播放 / 出声） ----------
+    let current: Analysis | null = null;
+    let viewStart = 0;
+    let viewSpan = 1;
+    let playing = false;
+    let playT = 0;
+    let rafId = 0;
+    let lastTs = 0;
+    const PAD = 10;
+
+    // 出声状态
+    let audioCtx: AudioContext | null = null;
+    let soundQueue: NoteInfo[] = [];
+    let soundIdx = 0;
+
+    function blip(type: number) {
+      if (!audioCtx) return;
+      const t0 = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "square";
+      osc.frequency.value = TYPE_FREQ[type] || 760;
+      gain.gain.setValueAtTime(0.12, t0);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.06);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.07);
+    }
+
+    function skipSoundTo(t: number) {
+      soundIdx = 0;
+      while (soundIdx < soundQueue.length && soundQueue[soundIdx].t <= t) soundIdx++;
+    }
+
+    function resetView() {
+      if (!current) return;
+      viewStart = 0;
+      viewSpan = Math.max(current.duration, 0.5);
+    }
+
+    function clampView() {
+      if (!current) return;
+      const dur = Math.max(current.duration, 0.5);
+      viewSpan = Math.min(Math.max(viewSpan, 0.25), dur);
+      viewStart = Math.min(Math.max(viewStart, 0), dur - viewSpan);
+    }
+
+    function zoomAt(factor: number, centerT: number) {
+      const newSpan = viewSpan * factor;
+      viewStart = centerT - ((centerT - viewStart) * newSpan) / viewSpan;
+      viewSpan = newSpan;
+      clampView();
+      if (current) drawCanvas(current);
+    }
+
+    function xToTime(x: number): number {
+      const w = canvas.clientWidth;
+      return viewStart + ((x - PAD) / Math.max(w - PAD * 2, 1)) * viewSpan;
+    }
+
+    // ---------- 渲染 ----------
+    function render(a: Analysis) {
+      current = a;
+      stopPlay();
+      playT = 0;
+      soundQueue = [...a.notes].sort((x, y) => x.t - y.t);
+      soundIdx = 0;
+      resetView();
+      resultEl.classList.remove("hidden");
+      formatEl.textContent = a.format;
+
+      // 元数据
+      const metaItems: [string, string][] = Object.entries(a.meta);
+      metaItems.push(["判定线数", String(a.lineCount)]);
+      metaItems.push(["时长", fmtTime(a.duration)]);
+      if (a.bpmMin > 0) {
+        metaItems.push(["BPM", a.bpmMin === a.bpmMax ? String(a.bpmMin) : `${a.bpmMin} ~ ${a.bpmMax}`]);
+      }
+      metaEl.innerHTML = metaItems
+        .map(([k, v]) => `<div><span class="text-neutral-500 dark:text-neutral-400">${k}</span><br><b>${v}</b></div>`)
+        .join("");
+
+      // 物量统计
+      const counts: Record<string, number> = {};
+      for (const n of a.notes) {
+        const name = a.typeNames[n.type] || "其他";
+        counts[name] = (counts[name] || 0) + 1;
+      }
+      const statItems: [string, string][] = [["总物量", String(a.notes.length)]];
+      for (const [name, c] of Object.entries(counts)) statItems.push([name, String(c)]);
+      const density = a.duration > 0 ? (a.notes.length / a.duration).toFixed(2) : "0";
+      statItems.push(["平均密度", `${density} 键/秒`]);
+      statsEl.innerHTML = statItems
+        .map(([k, v]) => `<div><span class="text-neutral-500 dark:text-neutral-400">${k}</span><br><b>${v}</b></div>`)
+        .join("");
+
+      // 图例
+      legendEl.innerHTML = Object.keys(counts)
+        .map((name) => `<span class="flex items-center gap-1"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TYPE_COLORS[name] || TYPE_COLORS["其他"]}"></span>${name}</span>`)
+        .join("");
+
+      drawCanvas(a);
+      setStatus(`解析完成 ✅ 共 ${a.notes.length} 个音符`);
+    }
+
+    function drawCanvas(a: Analysis) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w) return;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.scale(dpr, dpr);
+      const dark = document.documentElement.classList.contains("dark");
+      ctx.fillStyle = dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
+      ctx.fillRect(0, 0, w, h);
+
+      const toX = (t: number) => PAD + ((t - viewStart) / viewSpan) * (w - PAD * 2);
+
+      // 时间刻度（自适应步长）
+      const rawStep = viewSpan / 8;
+      const steps = [0.5, 1, 2, 5, 10, 15, 30, 60];
+      const step = steps.find((s) => s >= rawStep) || 60;
+      ctx.strokeStyle = dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+      ctx.fillStyle = dark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)";
+      ctx.font = "10px sans-serif";
+      ctx.textAlign = "center";
+      const firstTick = Math.ceil(viewStart / step) * step;
+      for (let t = firstTick; t <= viewStart + viewSpan; t += step) {
+        const x = toX(t);
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+        ctx.fillText(fmtTime(t), x, h - 4);
+      }
+
+      // 音符
+      const rows = Math.min(a.lineCount, 12);
+      const viewEnd = viewStart + viewSpan;
+      for (const n of a.notes) {
+        if (n.end < viewStart || n.t > viewEnd) continue;
+        const x = toX(n.t);
+        const row = n.line % rows;
+        const y = PAD + (rows === 1 ? (h - PAD * 2) / 2 : (row / (rows - 1)) * (h - PAD * 2));
+        const name = a.typeNames[n.type] || "其他";
+        const hit = playing && Math.abs(n.t - playT) < 0.06;
+        ctx.fillStyle = TYPE_COLORS[name] || TYPE_COLORS["其他"];
+        if (n.end - n.t > 0.15) {
+          const x2 = toX(n.end);
+          ctx.globalAlpha = hit ? 1 : 0.75;
+          ctx.fillRect(x, y - (hit ? 2.5 : 1.5), Math.max(2, x2 - x), hit ? 5 : 3);
+        } else {
+          ctx.globalAlpha = hit ? 1 : 0.85;
+          ctx.beginPath();
+          ctx.arc(x, y, hit ? 4 : 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // 播放头
+      if (playT > 0 && playT >= viewStart && playT <= viewEnd) {
+        const px = toX(playT);
+        const accent = getComputedStyle(canvas).getPropertyValue("color") || "#3b82f6";
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px, h);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+
+      timeEl.textContent = `${fmtTime(Math.min(playT, a.duration))} / ${fmtTime(a.duration)}`;
+    }
+
+    // ---------- 播放 ----------
+    function stopPlay() {
+      playing = false;
+      lastTs = 0;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
+      playBtn.textContent = "▶ 播放";
+    }
+
+    function tick(ts: number) {
+      if (!playing || !current) return;
+      if (!lastTs) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      const prevT = playT;
+      playT += dt;
+
+      // 出声：扫到音符就响，不勾就静默走谱
+      if (soundEl.checked && audioCtx && audioCtx.state === "running") {
+        let n = 0;
+        while (soundIdx < soundQueue.length && soundQueue[soundIdx].t <= playT && n < 8) {
+          if (soundQueue[soundIdx].t >= prevT) blip(soundQueue[soundIdx].type);
+          soundIdx++;
+          n++;
+        }
+        // 密集段超出上限的静默跳过
+        while (soundIdx < soundQueue.length && soundQueue[soundIdx].t <= playT) soundIdx++;
+      } else {
+        skipSoundTo(playT);
+      }
+
+      // 自动跟随：播放头保持在视口 1/4 处
+      viewStart = Math.max(0, playT - viewSpan * 0.25);
+      clampView();
+      if (playT >= current.duration) {
+        playT = current.duration;
+        stopPlay();
+        drawCanvas(current);
+        return;
+      }
+      drawCanvas(current);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (!current) return;
+      if (playing) {
+        stopPlay();
+        drawCanvas(current);
+        return;
+      }
+      if (playT >= current.duration) playT = 0;
+      // 首次播放创建音频上下文（用户手势内，浏览器允许）
+      if (!audioCtx) {
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      void audioCtx?.resume();
+      skipSoundTo(playT);
+      playing = true;
+      playBtn.textContent = "⏸ 暂停";
+      rafId = requestAnimationFrame(tick);
+    });
+
+    rewindBtn.addEventListener("click", () => {
+      if (!current) return;
+      stopPlay();
+      playT = 0;
+      soundIdx = 0;
+      resetView();
+      drawCanvas(current);
+    });
+
+    // ---------- 缩放 / 平移 ----------
+    zoomInBtn.addEventListener("click", () => zoomAt(1 / 1.6, viewStart + viewSpan / 2));
+    zoomOutBtn.addEventListener("click", () => zoomAt(1.6, viewStart + viewSpan / 2));
+    zoomFitBtn.addEventListener("click", () => { resetView(); if (current) drawCanvas(current); });
+
+    canvas.addEventListener("wheel", (e) => {
+      if (!current) return;
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 1.25 : 1 / 1.25;
+      zoomAt(factor, xToTime(e.offsetX));
+    }, { passive: false });
+
+    let dragging = false;
+    let dragX = 0;
+    let dragStartView = 0;
+    canvas.addEventListener("pointerdown", (e) => {
+      if (!current) return;
+      dragging = true;
+      dragX = e.clientX;
+      dragStartView = viewStart;
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = "grabbing";
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (!dragging || !current) return;
+      const w = canvas.clientWidth;
+      const dx = e.clientX - dragX;
+      viewStart = dragStartView - (dx / Math.max(w - PAD * 2, 1)) * viewSpan;
+      clampView();
+      drawCanvas(current);
+    });
+    const endDrag = () => {
+      dragging = false;
+      canvas.style.cursor = "grab";
+    };
+    canvas.addEventListener("pointerup", endDrag);
+    canvas.addEventListener("pointercancel", endDrag);
+
+    window.addEventListener("resize", () => { if (current) drawCanvas(current); });
+
+    // ---------- 文件处理 ----------
+    function looksLikeChart(o: unknown): o is Record<string, unknown> {
+      return !!o && typeof o === "object" && Array.isArray((o as Record<string, unknown>).judgeLineList);
+    }
+
+    async function handleFile(file: File) {
+      nameEl.textContent = file.name;
+      resultEl.classList.add("hidden");
+      multiEl.classList.add("hidden");
+      const isZip = /\.(pez|zip)$/i.test(file.name);
+      try {
+        if (!isZip) {
+          setStatus("正在读取 JSON…");
+          const text = await file.text();
+          const data = JSON.parse(text) as Record<string, unknown>;
+          const a = analyze(data);
+          if (!a) { setStatus("没认出来这是啥谱面格式（没找到有效的判定线 / 音符数据）"); return; }
+          render(a);
+          return;
+        }
+
+        // 谱面包：解压找谱面
+        const JSZip = (window as unknown as { JSZip?: { loadAsync: (b: Blob) => Promise<{ files: Record<string, { async: (t: string) => Promise<string> }> }> } }).JSZip;
+        if (!JSZip) { setStatus("解压库没加载成功，刷新页面再试"); return; }
+        setStatus("正在解压谱面包…");
+        const zip = await JSZip.loadAsync(file);
+        const candidates: ChartCandidate[] = [];
+        let extraMeta: Record<string, string> = {};
+        const names = Object.keys(zip.files);
+        for (const name of names) {
+          const lower = name.toLowerCase();
+          if (lower.endsWith(".json")) {
+            try {
+              const obj = JSON.parse(await zip.files[name].async("string")) as unknown;
+              if (looksLikeChart(obj)) {
+                candidates.push({ label: name.split("/").pop() || name, data: obj });
+              } else if (lower.includes("info")) {
+                const rec = obj as Record<string, unknown>;
+                for (const [k, label] of [["name", "曲名"], ["song", "曲名"], ["composer", "曲师"], ["charter", "谱师"], ["level", "难度"]] as const) {
+                  if (typeof rec[k] === "string" && rec[k]) extraMeta[label] = String(rec[k]);
+                }
+              }
+            } catch { /* 单个 json 解析失败就跳过 */ }
+          } else if (/info\.(yml|yaml|txt)$/i.test(lower)) {
+            try {
+              extraMeta = { ...extraMeta, ...parseInfoYml(await zip.files[name].async("string")) };
+            } catch { /* 跳过 */ }
+          }
+        }
+        if (!candidates.length) {
+          setStatus("包里没找到可识别的谱面文件（需要有含判定线数据的 .json）");
+          return;
+        }
+
+        const renderCandidate = (c: ChartCandidate) => {
+          const a = analyze(c.data);
+          if (!a) { setStatus(`${c.label}：格式没认出来`); return; }
+          for (const [k, v] of Object.entries(extraMeta)) {
+            if (!a.meta[k]) a.meta[k] = v;
+          }
+          a.meta["谱面文件"] = c.label;
+          render(a);
+        };
+
+        if (candidates.length === 1) {
+          renderCandidate(candidates[0]);
+        } else {
+          chartSelect.innerHTML = "";
+          candidates.forEach((c, i) => {
+            const opt = document.createElement("option");
+            opt.value = String(i);
+            opt.textContent = c.label;
+            chartSelect.appendChild(opt);
+          });
+          multiEl.classList.remove("hidden");
+          chartSelect.onchange = () => renderCandidate(candidates[Number(chartSelect.value)]);
+          renderCandidate(candidates[0]);
+        }
+      } catch (err) {
+        setStatus(`解析失败：${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    drop.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files?.[0];
+      if (f) void handleFile(f);
+    });
+    for (const ev of ["dragover", "dragenter"]) {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add("border-(--primary)");
+      });
+    }
+    for (const ev of ["dragleave", "drop"]) {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.remove("border-(--primary)");
+      });
+    }
+    drop.addEventListener("drop", (e) => {
+      const f = (e as DragEvent).dataTransfer?.files?.[0];
+      if (f) void handleFile(f);
+    });
+  </script>
+</MainGridLayout>
