@@ -80,6 +80,21 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
+	// 工具及其子菜单
+	links.push({
+		name: "工具",
+		url: "#",
+		icon: "material-symbols:build",
+		children: [
+			// 语音合成
+			{
+				name: "语音合成",
+				url: "/tools/tts/",
+				icon: "material-symbols:record-voice-over",
+			},
+		],
+	});
+
 	// 关于及其子菜单
 	links.push({
 		name: "关于",

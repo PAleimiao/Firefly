@@ -1,0 +1,316 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="语音合成" description="本地文字转语音与录音特征模仿工具">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:record-voice-over" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">语音合成</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+        输入文字即可朗读；还可以上传一段真人录音，在本地提取它的音高与语速特征，让合成声音模仿 Ta 的说话感觉。
+      </p>
+
+      <!-- 本地算力提示 -->
+      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 mb-6 text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+        ⚠️ 本工具的合成与分析<b>全程在你的设备本地完成，不经过任何云端服务器</b>。生成与朗读可能占用本地算力，<b>设备出现卡顿、发热均属正常现象</b>，长文本请耐心等待。
+      </div>
+
+      <div id="tts-unsupported" class="hidden rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 mb-6 text-sm text-red-600 dark:text-red-300">
+        当前浏览器不支持本地语音合成（Web Speech API），请换用最新版 Chrome / Edge / Safari 试试。
+      </div>
+
+      <!-- 文本输入 -->
+      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">要朗读的文字</label>
+      <textarea id="tts-text" rows="5" maxlength="2000" placeholder="在这里输入要合成语音的文字……"
+        class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition mb-4"></textarea>
+
+      <!-- 声音选择 -->
+      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">声音（来自你设备的本地语音库）</label>
+      <select id="tts-voice" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100 mb-4"></select>
+
+      <!-- 参数滑块 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <div>
+          <div class="flex justify-between text-sm text-neutral-700 dark:text-neutral-300 mb-1">
+            <span>语速</span><span id="tts-rate-val">1.0</span>
+          </div>
+          <input id="tts-rate" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full" />
+        </div>
+        <div>
+          <div class="flex justify-between text-sm text-neutral-700 dark:text-neutral-300 mb-1">
+            <span>音高</span><span id="tts-pitch-val">1.0</span>
+          </div>
+          <input id="tts-pitch" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full" />
+        </div>
+        <div>
+          <div class="flex justify-between text-sm text-neutral-700 dark:text-neutral-300 mb-1">
+            <span>音量</span><span id="tts-volume-val">1.0</span>
+          </div>
+          <input id="tts-volume" type="range" min="0" max="1" step="0.1" value="1" class="w-full" />
+        </div>
+      </div>
+
+      <!-- 播放控制 -->
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <button id="tts-speak" class="px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">▶ 开始朗读</button>
+        <button id="tts-stop" class="px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) font-medium hover:opacity-85 active:scale-95 transition border border-(--line-divider)">■ 停止</button>
+        <span id="tts-status" class="text-sm text-neutral-500 dark:text-neutral-400"></span>
+      </div>
+
+      <hr class="my-6 border-(--line-divider)" />
+
+      <!-- 录音特征模仿 -->
+      <div class="flex items-center gap-2 mb-2">
+        <Icon is:inline name="material-symbols:graphic-eq" class="text-[1.25rem] text-(--primary)"></Icon>
+        <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">录音特征模仿</div>
+      </div>
+      <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-3">
+        上传一段真人录音（建议 5–20 秒、尽量干净的人声），工具会在本地分析其<b>平均音高</b>与<b>语速</b>，并可一键套用到上方的合成参数。
+      </p>
+      <div class="rounded-xl border border-sky-500/40 bg-sky-500/10 px-4 py-3 mb-4 text-xs text-sky-700 dark:text-sky-300 leading-relaxed">
+        说明：纯浏览器环境无法运行真正的 AI 音色克隆（那需要大型模型和 GPU 云端算力）。这里是提取录音的音高 / 语速特征进行模仿，让朗读更接近 Ta 的说话节奏，<b>音色本身仍取决于你设备上的语音库</b>。录音只在你本地分析，不会上传。
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <label class="px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) font-medium border border-(--line-divider) cursor-pointer hover:opacity-85 transition">
+          选择录音文件
+          <input id="tts-audio" type="file" accept="audio/*" class="hidden" />
+        </label>
+        <span id="tts-audio-name" class="text-sm text-neutral-500 dark:text-neutral-400 truncate max-w-full">未选择文件</span>
+      </div>
+
+      <div id="tts-analysis" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 mb-4 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"></div>
+
+      <button id="tts-apply" class="hidden px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">✨ 应用此说话特征</button>
+    </div>
+  </div>
+
+  <script>
+    const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+    const textEl = $<HTMLTextAreaElement>("tts-text");
+    const voiceEl = $<HTMLSelectElement>("tts-voice");
+    const rateEl = $<HTMLInputElement>("tts-rate");
+    const pitchEl = $<HTMLInputElement>("tts-pitch");
+    const volumeEl = $<HTMLInputElement>("tts-volume");
+    const rateVal = $("tts-rate-val");
+    const pitchVal = $("tts-pitch-val");
+    const volumeVal = $("tts-volume-val");
+    const speakBtn = $<HTMLButtonElement>("tts-speak");
+    const stopBtn = $<HTMLButtonElement>("tts-stop");
+    const statusEl = $("tts-status");
+    const audioInput = $<HTMLInputElement>("tts-audio");
+    const audioName = $("tts-audio-name");
+    const analysisBox = $("tts-analysis");
+    const applyBtn = $<HTMLButtonElement>("tts-apply");
+
+    const supported = "speechSynthesis" in window;
+    if (!supported) {
+      $("tts-unsupported").classList.remove("hidden");
+    }
+
+    const setStatus = (msg: string) => { statusEl.textContent = msg; };
+    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+    const round1 = (v: number) => Math.round(v * 10) / 10;
+
+    // ---------- 声音列表 ----------
+    let voices: SpeechSynthesisVoice[] = [];
+    function loadVoices() {
+      if (!supported) return;
+      const vs = speechSynthesis.getVoices();
+      if (!vs.length) return;
+      voices = vs;
+      const sorted = [...vs].sort((a, b) => {
+        const az = a.lang.toLowerCase().startsWith("zh") ? 0 : 1;
+        const bz = b.lang.toLowerCase().startsWith("zh") ? 0 : 1;
+        return az - bz || a.lang.localeCompare(b.lang);
+      });
+      voiceEl.innerHTML = "";
+      for (const v of sorted) {
+        const opt = document.createElement("option");
+        opt.value = v.name;
+        opt.textContent = `${v.name}（${v.lang}）${v.localService ? "" : " · 网络"}`;
+        voiceEl.appendChild(opt);
+      }
+      const zh = sorted.findIndex((v) => v.lang.toLowerCase().startsWith("zh"));
+      voiceEl.selectedIndex = zh >= 0 ? zh : 0;
+    }
+    if (supported) {
+      loadVoices();
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    // ---------- 滑块显示 ----------
+    function updateLabels() {
+      rateVal.textContent = Number(rateEl.value).toFixed(1);
+      pitchVal.textContent = Number(pitchEl.value).toFixed(1);
+      volumeVal.textContent = Number(volumeEl.value).toFixed(1);
+    }
+    for (const el of [rateEl, pitchEl, volumeEl]) el.addEventListener("input", updateLabels);
+
+    // ---------- 播放控制 ----------
+    speakBtn.addEventListener("click", () => {
+      if (!supported) return;
+      const text = textEl.value.trim();
+      if (!text) { setStatus("先输入点文字吧～"); return; }
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = voices.find((x) => x.name === voiceEl.value);
+      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "zh-CN"; }
+      u.rate = parseFloat(rateEl.value);
+      u.pitch = parseFloat(pitchEl.value);
+      u.volume = parseFloat(volumeEl.value);
+      u.onstart = () => setStatus("正在本地合成并朗读…（设备卡顿属正常现象）");
+      u.onend = () => setStatus("朗读完成 ✅");
+      u.onerror = (e) => setStatus(`出错了：${e.error || "未知错误"}`);
+      speechSynthesis.speak(u);
+    });
+    stopBtn.addEventListener("click", () => {
+      if (!supported) return;
+      speechSynthesis.cancel();
+      setStatus("已停止");
+    });
+
+    // ---------- 录音特征分析 ----------
+    let analysisResult: { pitch: number; rate: number } | null = null;
+
+    /** 简单 4 倍抽取降采样（音高分析足够用） */
+    function downsample(data: Float32Array, factor: number): Float32Array {
+      const out = new Float32Array(Math.floor(data.length / factor));
+      for (let i = 0; i < out.length; i++) out[i] = data[i * factor];
+      return out;
+    }
+
+    /** 自相关法估算基频（Hz），返回中位数 */
+    function estimateF0(raw: Float32Array, origSr: number): number | null {
+      const factor = Math.max(1, Math.round(origSr / 11025));
+      const data = downsample(raw, factor);
+      const sr = origSr / factor;
+      const frame = 1024, hop = 512;
+      const minLag = Math.floor(sr / 500), maxLag = Math.floor(sr / 60);
+      let maxRms = 0;
+      const rmsList: number[] = [];
+      for (let i = 0; i + frame <= data.length; i += hop) {
+        let s = 0;
+        for (let j = 0; j < frame; j++) s += data[i + j] * data[i + j];
+        const rms = Math.sqrt(s / frame);
+        rmsList.push(rms);
+        if (rms > maxRms) maxRms = rms;
+      }
+      if (maxRms <= 0) return null;
+      const threshold = maxRms * 0.3;
+      const f0s: number[] = [];
+      let fi = 0;
+      for (let i = 0; i + frame <= data.length; i += hop, fi++) {
+        if (rmsList[fi] < threshold) continue;
+        let bestLag = -1, bestCorr = 0.3;
+        for (let lag = minLag; lag <= maxLag; lag++) {
+          let sum = 0, e0 = 0, e1 = 0;
+          const n = frame - lag;
+          for (let j = 0; j < n; j++) {
+            const a = data[i + j], b = data[i + j + lag];
+            sum += a * b; e0 += a * a; e1 += b * b;
+          }
+          const corr = sum / Math.sqrt(e0 * e1 + 1e-12);
+          if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
+        }
+        if (bestLag > 0) f0s.push(sr / bestLag);
+      }
+      if (!f0s.length) return null;
+      f0s.sort((a, b) => a - b);
+      return f0s[Math.floor(f0s.length / 2)];
+    }
+
+    /** 能量包络起始点法估算语速（音节/秒） */
+    function estimateSPS(data: Float32Array, sr: number): number | null {
+      const win = Math.floor(sr * 0.01);
+      const env: number[] = [];
+      let maxE = 0;
+      for (let i = 0; i + win <= data.length; i += win) {
+        let s = 0;
+        for (let j = 0; j < win; j++) s += data[i + j] * data[i + j];
+        const e = Math.sqrt(s / win);
+        env.push(e);
+        if (e > maxE) maxE = e;
+      }
+      if (maxE <= 0) return null;
+      const th = maxE * 0.25;
+      let onsets = 0, voiced = 0, inSyllable = false;
+      for (const e of env) {
+        if (e > th) {
+          voiced++;
+          if (!inSyllable) { onsets++; inSyllable = true; }
+        } else if (e < th * 0.6) {
+          inSyllable = false;
+        }
+      }
+      const voicedSec = voiced * 0.01;
+      if (voicedSec < 1 || onsets < 2) return null;
+      return onsets / voicedSec;
+    }
+
+    audioInput.addEventListener("change", async () => {
+      const file = audioInput.files?.[0];
+      if (!file) return;
+      analysisResult = null;
+      applyBtn.classList.add("hidden");
+      audioName.textContent = file.name;
+      analysisBox.classList.remove("hidden");
+      analysisBox.textContent = "正在本地分析录音…（可能需要几秒，设备卡顿属正常现象）";
+      try {
+        const buf = await file.arrayBuffer();
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AC();
+        const audio = await ctx.decodeAudioData(buf);
+        void ctx.close?.();
+        const sr = audio.sampleRate;
+        // 混合所有声道并截取前 20 秒
+        let data = new Float32Array(audio.length);
+        for (let c = 0; c < audio.numberOfChannels; c++) {
+          const ch = audio.getChannelData(c);
+          for (let i = 0; i < ch.length; i++) data[i] += ch[i] / audio.numberOfChannels;
+        }
+        const maxLen = sr * 20;
+        if (data.length > maxLen) data = data.slice(0, maxLen);
+
+        const f0 = estimateF0(data, sr);
+        const sps = estimateSPS(data, sr);
+        if (!f0 && !sps) {
+          analysisBox.textContent = "没能在录音里识别到清晰人声，换一段更干净的录音试试。";
+          return;
+        }
+        const pitchParam = f0 ? round1(clamp(f0 / 165, 0.5, 2)) : 1;
+        const rateParam = sps ? round1(clamp(sps / 4.5, 0.5, 2)) : 1;
+        analysisResult = { pitch: pitchParam, rate: rateParam };
+        const f0Text = f0
+          ? `${Math.round(f0)} Hz（${f0 < 150 ? "偏低沉" : f0 < 250 ? "中等" : "偏尖亮"}）`
+          : "未测出";
+        const spsText = sps
+          ? `${sps.toFixed(1)} 音节/秒（${sps < 3.5 ? "偏慢" : sps < 5.5 ? "中等" : "偏快"}）`
+          : "未测出";
+        analysisBox.innerHTML =
+          `分析完成：<br>· 估算音高（基频）：<b>${f0Text}</b> → 音高参数 <b>${pitchParam.toFixed(1)}</b>` +
+          `<br>· 估算语速：<b>${spsText}</b> → 语速参数 <b>${rateParam.toFixed(1)}</b>` +
+          `<br>点击下方按钮套用这两个特征，再点「开始朗读」听听效果。`;
+        applyBtn.classList.remove("hidden");
+      } catch {
+        analysisBox.textContent = "录音解码失败，可能是格式不支持，换 mp3 / wav / m4a 试试。";
+      }
+    });
+
+    applyBtn.addEventListener("click", () => {
+      if (!analysisResult) return;
+      pitchEl.value = String(analysisResult.pitch);
+      rateEl.value = String(analysisResult.rate);
+      updateLabels();
+      setStatus("已套用模仿参数，点「开始朗读」试听 🎧");
+    });
+  </script>
+</MainGridLayout>
