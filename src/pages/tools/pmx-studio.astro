@@ -1,0 +1,458 @@
+---
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="PMX 动画工坊">
+	<div class="card-base p-6 md:p-8 mb-4">
+		<div class="flex items-center gap-3 mb-2">
+			<div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white text-lg">🎭</div>
+			<h1 class="text-2xl font-bold">PMX 动画工坊</h1>
+		</div>
+		<p class="text-75 mb-4">
+			浏览器里的迷你 MMD：导入 <b>PMX 模型</b> 和 <b>VMD 动作</b>，摆骨骼、捏表情、换材质贴图，还能播放区间剪辑、配 BGM，最后一键<b>本地渲染导出视频</b>。无需安装任何软件。
+		</p>
+		<div class="rounded-lg border-l-4 border-amber-400 bg-amber-400/10 px-4 py-3 text-sm text-75">
+			⚠️ 模型与渲染<b>全程在你的设备本地完成，文件不会上传</b>。大模型加载需要几秒属正常现象。物理裙摆暂不支持。
+		</div>
+	</div>
+
+	<div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
+		<!-- 控制栏 -->
+		<div class="flex flex-col gap-4">
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">📦 素材导入</h2>
+				<label class="block text-sm text-75 mb-1">PMX 模型（可连同贴图文件一起多选）</label>
+				<input id="px-model" type="file" multiple accept=".pmx,.png,.jpg,.jpeg,.bmp,.tga,.spa,.sph,.gif" class="w-full text-sm mb-3" />
+				<label class="block text-sm text-75 mb-1">VMD 动作（可选）</label>
+				<input id="px-vmd" type="file" accept=".vmd" class="w-full text-sm mb-3" />
+				<label class="block text-sm text-75 mb-1">姿势文件 .json（可选，本工具导出的）</label>
+				<input id="px-pose" type="file" accept=".json" class="w-full text-sm mb-3" />
+				<label class="block text-sm text-75 mb-1">BGM 音乐（可选，录制时混入）</label>
+				<input id="px-bgm" type="file" accept="audio/*" class="w-full text-sm" />
+				<div id="px-status" class="text-xs text-50 mt-2">等待导入模型…</div>
+			</div>
+
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">🎬 播放 / 剪辑</h2>
+				<div class="flex gap-2 mb-2">
+					<button id="px-play" class="flex-1 px-3 py-2 rounded-lg bg-(--primary) text-white text-sm">▶ 播放</button>
+					<button id="px-stop" class="px-3 py-2 rounded-lg border-(--line-divider) border text-sm">⏹ 停止</button>
+				</div>
+				<input id="px-seek" type="range" min="0" max="100" step="0.01" value="0" class="w-full mb-2" />
+				<div class="grid grid-cols-2 gap-2 text-sm mb-2">
+					<label>区间起(秒)<input id="px-in" type="number" min="0" step="0.1" value="0" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
+					<label>区间止(秒)<input id="px-out" type="number" min="0" step="0.1" value="0" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
+				</div>
+				<label class="text-sm flex items-center gap-2 mb-2"><input id="px-loop" type="checkbox" checked /> 区间内循环</label>
+				<div class="text-xs text-50">提示：停止动画后可用骨骼/表情面板摆姿势。</div>
+			</div>
+
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">🦴 骨骼（摆姿势）</h2>
+				<select id="px-bone" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent text-sm mb-2"></select>
+				<div class="grid grid-cols-3 gap-2 text-xs mb-2">
+					<label>X°<input id="px-rx" type="range" min="-180" max="180" step="1" value="0" class="w-full" /></label>
+					<label>Y°<input id="px-ry" type="range" min="-180" max="180" step="1" value="0" class="w-full" /></label>
+					<label>Z°<input id="px-rz" type="range" min="-180" max="180" step="1" value="0" class="w-full" /></label>
+				</div>
+				<div class="flex gap-2">
+					<button id="px-pose-reset" class="flex-1 px-2 py-1 rounded border-(--line-divider) border text-xs">重置姿势</button>
+					<button id="px-pose-save" class="flex-1 px-2 py-1 rounded border-(--line-divider) border text-xs">导出姿势</button>
+				</div>
+			</div>
+
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">😊 表情（捏模型）</h2>
+				<div id="px-morphs" class="flex flex-col gap-2 max-h-56 overflow-y-auto text-xs"></div>
+			</div>
+
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">🎨 材质</h2>
+				<select id="px-mat" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent text-sm mb-2"></select>
+				<div class="flex items-center gap-2 text-sm mb-2">
+					<span>颜色</span><input id="px-mat-color" type="color" value="#ffffff" />
+				</div>
+				<label class="block text-xs text-75 mb-1">替换贴图（自行导入）</label>
+				<input id="px-mat-tex" type="file" accept="image/*" class="w-full text-xs" />
+			</div>
+
+			<div class="card-base p-4">
+				<h2 class="font-bold mb-3">🎥 场景 / 渲染</h2>
+				<div class="flex items-center gap-2 text-sm mb-3">
+					<span>背景</span><input id="px-bg" type="color" value="#1a1b26" />
+				</div>
+				<button id="px-rec" class="w-full px-3 py-2 rounded-lg bg-red-500 text-white text-sm">⏺ 开始录制（webm）</button>
+				<div id="px-rec-status" class="text-xs text-50 mt-2"></div>
+			</div>
+		</div>
+
+		<!-- 舞台 -->
+		<div class="card-base p-2 relative min-h-[420px] lg:min-h-[640px]">
+			<div id="px-stage" class="w-full h-full min-h-[420px] lg:min-h-[640px] rounded-lg overflow-hidden"></div>
+		</div>
+	</div>
+</MainGridLayout>
+
+<script is:inline type="importmap">
+{
+	"imports": {
+		"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+		"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+	}
+}
+</script>
+
+<script is:inline type="module">
+import * as THREE from "three";
+import { MMDLoader } from "three/addons/loaders/MMDLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+function $(id) { return document.getElementById(id); }
+
+const stage = $("px-stage");
+const statusEl = $("px-status");
+const recStatusEl = $("px-rec-status");
+
+// ---------- three 场景 ----------
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#1a1b26");
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+camera.position.set(0, 12, 28);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+stage.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 10, 0);
+controls.update();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.2));
+const dir = new THREE.DirectionalLight(0xffffff, 1.4);
+dir.position.set(5, 15, 8);
+scene.add(dir);
+const grid = new THREE.GridHelper(40, 40, 0x666666, 0x333333);
+scene.add(grid);
+
+function resize() {
+	const w = stage.clientWidth, h = stage.clientHeight;
+	renderer.setSize(w, h);
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+// ---------- 状态 ----------
+const fileMap = new Map(); // 文件名(小写) -> blobURL
+let mesh = null;
+let mixer = null;
+let action = null;
+let clipDuration = 0;
+let playing = false;
+let initQuat = new Map(); // 骨骼初始旋转
+let recorder = null;
+let recChunks = [];
+let audioCtx = null;
+let audioEl = null;
+let audioDest = null;
+
+const manager = new THREE.LoadingManager();
+manager.setURLModifier((url) => {
+	const name = decodeURIComponent(url.split("/").pop() || "").toLowerCase();
+	return fileMap.get(name) || url;
+});
+const loader = new MMDLoader(manager);
+
+// ---------- 模型导入 ----------
+$("px-model").addEventListener("change", (e) => {
+	const files = [...e.target.files];
+	if (!files.length) return;
+	for (const f of files) fileMap.set(f.name.toLowerCase(), URL.createObjectURL(f));
+	const pmx = files.find((f) => f.name.toLowerCase().endsWith(".pmx"));
+	if (!pmx) { statusEl.textContent = "没选到 .pmx 文件"; return; }
+	statusEl.textContent = "模型加载中…";
+	if (mesh) { scene.remove(mesh); mesh = null; }
+	stopMotion();
+	loader.load(fileMap.get(pmx.name.toLowerCase()), (m) => {
+		mesh = m;
+		scene.add(mesh);
+		initQuat = new Map(mesh.skeleton.bones.map((b) => [b.uuid, b.quaternion.clone()]));
+		buildBoneList();
+		buildMorphList();
+		buildMatList();
+		statusEl.textContent = "已加载：" + pmx.name + "（骨骼 " + mesh.skeleton.bones.length + "）";
+	}, undefined, (err) => { statusEl.textContent = "加载失败：" + err; });
+});
+
+// ---------- VMD 动作 ----------
+$("px-vmd").addEventListener("change", (e) => {
+	const f = e.target.files[0];
+	if (!f || !mesh) { statusEl.textContent = "请先导入模型"; return; }
+	statusEl.textContent = "动作加载中…";
+	loader.loadAnimation(URL.createObjectURL(f), mesh, (clip) => {
+		mixer = new THREE.AnimationMixer(mesh);
+		action = mixer.clipAction(clip);
+		action.play();
+		clipDuration = clip.duration;
+		$("px-in").value = 0;
+		$("px-out").value = clipDuration.toFixed(1);
+		$("px-seek").max = clipDuration;
+		setPlaying(true);
+		statusEl.textContent = "已加载动作：" + f.name + "（" + clipDuration.toFixed(1) + " 秒）";
+	}, undefined, (err) => { statusEl.textContent = "VMD 加载失败：" + err; });
+});
+
+function setPlaying(p) {
+	playing = p;
+	$("px-play").textContent = p ? "⏸ 暂停" : "▶ 播放";
+	if (mixer) { mixer.timeScale = p ? 1 : 0; }
+}
+function stopMotion() {
+	setPlaying(false);
+	if (mixer) { mixer.stopAllAction(); mixer = null; action = null; }
+	clipDuration = 0;
+}
+$("px-play").addEventListener("click", () => { if (mixer) setPlaying(!playing); });
+$("px-stop").addEventListener("click", () => {
+	stopMotion();
+	if (mesh && initQuat.size) {
+		for (const b of mesh.skeleton.bones) {
+			const q = initQuat.get(b.uuid);
+			if (q) b.quaternion.copy(q);
+		}
+	}
+	$("px-seek").value = 0;
+});
+$("px-seek").addEventListener("input", () => {
+	if (!action || !mixer) return;
+	const t = parseFloat($("px-seek").value);
+	action.time = t;
+	mixer.update(0);
+});
+
+// ---------- 骨骼面板 ----------
+function buildBoneList() {
+	const sel = $("px-bone");
+	sel.innerHTML = "";
+	mesh.skeleton.bones.forEach((b, i) => {
+		const op = document.createElement("option");
+		op.value = i;
+		op.textContent = b.name || ("骨骼 " + i);
+		sel.appendChild(op);
+	});
+	sel.onchange = syncBoneSliders;
+	syncBoneSliders();
+}
+function currentBone() {
+	const i = parseInt($("px-bone").value || "0", 10);
+	return mesh ? mesh.skeleton.bones[i] : null;
+}
+function syncBoneSliders() {
+	const b = currentBone();
+	if (!b) return;
+	const e = new THREE.Euler().setFromQuaternion(b.quaternion, "XYZ");
+	$("px-rx").value = Math.round(THREE.MathUtils.radToDeg(e.x));
+	$("px-ry").value = Math.round(THREE.MathUtils.radToDeg(e.y));
+	$("px-rz").value = Math.round(THREE.MathUtils.radToDeg(e.z));
+}
+["px-rx", "px-ry", "px-rz"].forEach((id) => {
+	$(id).addEventListener("input", () => {
+		const b = currentBone();
+		if (!b) return;
+		const e = new THREE.Euler(
+			THREE.MathUtils.degToRad(parseFloat($("px-rx").value)),
+			THREE.MathUtils.degToRad(parseFloat($("px-ry").value)),
+			THREE.MathUtils.degToRad(parseFloat($("px-rz").value)),
+			"XYZ"
+		);
+		b.quaternion.setFromEuler(e);
+	});
+});
+$("px-pose-reset").addEventListener("click", () => {
+	if (!mesh) return;
+	for (const b of mesh.skeleton.bones) {
+		const q = initQuat.get(b.uuid);
+		if (q) b.quaternion.copy(q);
+	}
+	if (mesh.morphTargetInfluences) mesh.morphTargetInfluences.fill(0);
+	syncBoneSliders();
+	buildMorphList();
+});
+
+// ---------- 姿势导出 / 导入 ----------
+$("px-pose-save").addEventListener("click", () => {
+	if (!mesh) return;
+	const bones = {};
+	for (const b of mesh.skeleton.bones) {
+		const init = initQuat.get(b.uuid);
+		if (init && b.name && b.quaternion.angleTo(init) > 0.001) {
+			bones[b.name] = [b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w];
+		}
+	}
+	const morphs = {};
+	if (mesh.morphTargetDictionary) {
+		for (const [name, idx] of Object.entries(mesh.morphTargetDictionary)) {
+			const v = mesh.morphTargetInfluences[idx];
+			if (v > 0.001) morphs[name] = v;
+		}
+	}
+	const blob = new Blob([JSON.stringify({ bones, morphs }, null, 1)], { type: "application/json" });
+	const a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = "pose.json";
+	a.click();
+});
+$("px-pose").addEventListener("change", async (e) => {
+	const f = e.target.files[0];
+	if (!f || !mesh) return;
+	const data = JSON.parse(await f.text());
+	for (const b of mesh.skeleton.bones) {
+		const q = data.bones && data.bones[b.name];
+		if (q) b.quaternion.set(q[0], q[1], q[2], q[3]);
+	}
+	if (data.morphs && mesh.morphTargetDictionary) {
+		for (const [name, v] of Object.entries(data.morphs)) {
+			const idx = mesh.morphTargetDictionary[name];
+			if (idx !== undefined) mesh.morphTargetInfluences[idx] = v;
+		}
+	}
+	syncBoneSliders();
+	buildMorphList();
+	statusEl.textContent = "姿势已导入";
+});
+
+// ---------- 表情面板 ----------
+function buildMorphList() {
+	const box = $("px-morphs");
+	box.innerHTML = "";
+	if (!mesh || !mesh.morphTargetInfluences) { box.textContent = "无表情"; return; }
+	const dict = mesh.morphTargetDictionary || {};
+	const entries = Object.entries(dict);
+	if (!entries.length) { box.textContent = "无表情"; return; }
+	for (const [name, idx] of entries) {
+		const row = document.createElement("label");
+		row.className = "flex items-center gap-2";
+		const span = document.createElement("span");
+		span.className = "w-20 truncate";
+		span.textContent = name;
+		const input = document.createElement("input");
+		input.type = "range";
+		input.min = 0; input.max = 1; input.step = 0.01;
+		input.value = mesh.morphTargetInfluences[idx] || 0;
+		input.className = "flex-1";
+		input.addEventListener("input", () => { mesh.morphTargetInfluences[idx] = parseFloat(input.value); });
+		row.appendChild(span);
+		row.appendChild(input);
+		box.appendChild(row);
+	}
+}
+
+// ---------- 材质面板 ----------
+function buildMatList() {
+	const sel = $("px-mat");
+	sel.innerHTML = "";
+	const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+	mats.forEach((mt, i) => {
+		const op = document.createElement("option");
+		op.value = i;
+		op.textContent = mt.name || ("材质 " + i);
+		sel.appendChild(op);
+	});
+}
+function currentMat() {
+	if (!mesh) return null;
+	const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+	return mats[parseInt($("px-mat").value || "0", 10)];
+}
+$("px-mat-color").addEventListener("input", () => {
+	const mt = currentMat();
+	if (mt && mt.color) mt.color.set($("px-mat-color").value);
+});
+$("px-mat-tex").addEventListener("change", (e) => {
+	const f = e.target.files[0];
+	const mt = currentMat();
+	if (!f || !mt) return;
+	new THREE.TextureLoader().load(URL.createObjectURL(f), (tex) => {
+		tex.colorSpace = THREE.SRGBColorSpace;
+		mt.map = tex;
+		mt.needsUpdate = true;
+	});
+});
+
+// ---------- 场景 ----------
+$("px-bg").addEventListener("input", () => scene.background.set($("px-bg").value));
+
+// ---------- BGM ----------
+$("px-bgm").addEventListener("change", (e) => {
+	const f = e.target.files[0];
+	if (!f) return;
+	if (!audioEl) {
+		audioEl = document.createElement("audio");
+		audioEl.crossOrigin = "anonymous";
+	}
+	audioEl.src = URL.createObjectURL(f);
+	statusEl.textContent = "BGM 已载入：" + f.name;
+});
+
+// ---------- 录制 ----------
+$("px-rec").addEventListener("click", () => {
+	if (recorder && recorder.state === "recording") {
+		recorder.stop();
+		if (audioEl) audioEl.pause();
+		return;
+	}
+	const stream = renderer.domElement.captureStream(30);
+	if (audioEl && audioEl.src) {
+		if (!audioCtx) {
+			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			audioDest = audioCtx.createMediaStreamDestination();
+			const src = audioCtx.createMediaElementSource(audioEl);
+			src.connect(audioDest);
+			src.connect(audioCtx.destination);
+		}
+		audioCtx.resume();
+		audioDest.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
+		audioEl.currentTime = 0;
+		audioEl.play();
+	}
+	recChunks = [];
+	recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+	recorder.ondataavailable = (ev) => { if (ev.data.size) recChunks.push(ev.data); };
+	recorder.onstop = () => {
+		const blob = new Blob(recChunks, { type: "video/webm" });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = "mmd-render.webm";
+		a.click();
+		$("px-rec").textContent = "⏺ 开始录制（webm）";
+		recStatusEl.textContent = "已导出 mmd-render.webm";
+	};
+	recorder.start();
+	$("px-rec").textContent = "⏹ 停止并导出";
+	recStatusEl.textContent = "录制中…画面内容会原样录下";
+});
+
+// ---------- 主循环 ----------
+const clock = new THREE.Clock();
+function tick() {
+	requestAnimationFrame(tick);
+	const dt = clock.getDelta();
+	if (mixer) {
+		mixer.update(dt);
+		if (action) {
+			const t = action.time;
+			$("px-seek").value = t;
+			const out = parseFloat($("px-out").value) || clipDuration;
+			const inn = parseFloat($("px-in").value) || 0;
+			if (t >= out) {
+				if ($("px-loop").checked) action.time = inn;
+				else setPlaying(false);
+			}
+			if (t < inn) action.time = inn;
+		}
+	}
+	controls.update();
+	renderer.render(scene, camera);
+}
+tick();
+</script>
