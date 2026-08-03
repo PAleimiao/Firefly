@@ -1,6 +1,20 @@
 ---
 import { Icon } from "astro-icon/components";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---<!-- Tab 标签栏 -->
+<div class="tts-tabs">
+  <div class="tts-tab active" data-tab="basic"><i class="fas fa-microphone"></i> 基础</div>
+  <div class="tts-tab" data-tab="timbre"><i class="fas fa-magic"></i> 音色</div>
+  <div class="tts-tab" data-tab="track"><i class="fas fa-sliders-h"></i> 音轨</div>
+  <div class="tts-tab" data-tab="studio"><i class="fas fa-wave-square"></i> 工作室</div>
+</div>
+
+<!-- 基础面板 -->
+<div class="tts-tab-panel active" id="tab-basic">
+  <div class="tts-card">
+    <h3 class="tts-card-title"><i class="fas fa-microphone"></i> 本地合成</h3>
+{ Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
 ---
 
 <MainGridLayout title="语音合成" description="本地文字转语音与录音特征模仿工具">
@@ -63,10 +77,12 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         <button id="tts-stop" class="px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) font-medium hover:opacity-85 active:scale-95 transition border border-(--line-divider)">■ 停止</button>
         <span id="tts-status" class="text-sm text-neutral-500 dark:text-neutral-400"></span>
       </div>
+  </div>
+</div>
 
-      <hr class="my-6 border-(--line-divider)" />
-
-      <!-- 音色增强 -->
+<!-- 音色面板 -->
+<div class="tts-tab-panel" id="tab-timbre">
+<!-- 音色增强 -->
 <div class="tts-card">
   <h3 class="tts-card-title"><i class="fas fa-magic"></i> 音色增强</h3>
   <div class="tts-row">
@@ -102,6 +118,11 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   </div>
 </div>
 
+
+</div>
+
+<!-- 音轨面板 -->
+<div class="tts-tab-panel" id="tab-track">
 <!-- 音轨控制 -->
 <div class="tts-card">
   <h3 class="tts-card-title"><i class="fas fa-sliders-h"></i> 音轨控制</h3>
@@ -130,6 +151,11 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   </div>
 </div>
 
+
+</div>
+
+<!-- 工作室面板 -->
+<div class="tts-tab-panel" id="tab-studio">
 <!-- 音频工作室 -->
 <div class="tts-card">
   <h3 class="tts-card-title"><i class="fas fa-wave-square"></i> 音频工作室</h3>
@@ -288,7 +314,9 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     </div>
   </div>
 
-  <script>
+  
+</div>
+<script>
     const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
     const textEl = $<HTMLTextAreaElement>("tts-text");
@@ -912,5 +940,17 @@ function audioBufferToWav(buffer) {
     });
 
     switchProvider("openai");
-  </script>
+  
+// Tab 切换
+document.querySelectorAll('.tts-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.tts-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tts-tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + target).classList.add('active');
+  });
+});
+
+</script>
 </MainGridLayout>
