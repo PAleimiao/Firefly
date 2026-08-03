@@ -14,7 +14,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">语音合成</div>
       </div>
       <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
-        输入文字即可朗读；还可以上传一段真人录音，在本地提取它的音高与语速特征，让合成声音模仿 Ta 的说话感觉。
+        输入文字即可朗读；还可以上传一段真人录音，在本地提取它的音高与语速特征，让合成声音模仿 Ta 的说话感觉。追求更高音质？页底可接入你自己的 OpenAI / 阿里云语音 API。
       </p>
 
       <!-- 本地算力提示 -->
@@ -89,6 +89,114 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       <div id="tts-analysis" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 mb-4 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"></div>
 
       <button id="tts-apply" class="hidden px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">✨ 应用此说话特征</button>
+
+      <hr class="my-6 border-(--line-divider)" />
+
+      <!-- 自备云端 API -->
+      <div class="flex items-center gap-2 mb-2">
+        <Icon is:inline name="material-symbols:cloud" class="text-[1.25rem] text-(--primary)"></Icon>
+        <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">自备云端 API（进阶）</div>
+      </div>
+      <p class="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-3">
+        对本地合成效果不满意？可以填入<b>你自己</b>的 OpenAI 或阿里云语音服务密钥，直接调用云端高质量合成，生成的音频还能下载。
+      </p>
+      <div class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 mb-4 text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+        🔒 密钥只保存在<b>你自己的浏览器</b>里（localStorage），本站服务器看不到、收不到、也不存储；费用由你的账号自行承担。在别人的设备上用完记得点「清除已存密钥」。
+      </div>
+
+      <!-- 服务商切换 -->
+      <div class="flex gap-2 mb-4">
+        <button data-provider="openai" class="cloud-tab px-4 py-2 rounded-xl font-medium border border-(--line-divider) transition">OpenAI TTS</button>
+        <button data-provider="aliyun" class="cloud-tab px-4 py-2 rounded-xl font-medium border border-(--line-divider) transition">阿里云语音合成</button>
+      </div>
+
+      <!-- OpenAI 配置 -->
+      <div id="cloud-openai" class="hidden flex-col gap-3 mb-4">
+        <div>
+          <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">API Key</label>
+          <input id="oai-key" type="password" placeholder="sk-..." autocomplete="off"
+            class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition" />
+        </div>
+        <div>
+          <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">接口地址（默认官方，可填中转站）</label>
+          <input id="oai-base" type="text" placeholder="https://api.openai.com/v1" autocomplete="off"
+            class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">模型</label>
+            <select id="oai-model" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100">
+              <option value="gpt-4o-mini-tts">gpt-4o-mini-tts（便宜）</option>
+              <option value="tts-1">tts-1</option>
+              <option value="tts-1-hd">tts-1-hd（高音质）</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">音色</label>
+            <select id="oai-voice" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100">
+              <option value="alloy">alloy</option>
+              <option value="ash">ash</option>
+              <option value="ballad">ballad</option>
+              <option value="coral">coral</option>
+              <option value="echo">echo</option>
+              <option value="fable">fable</option>
+              <option value="nova">nova</option>
+              <option value="onyx">onyx</option>
+              <option value="sage">sage</option>
+              <option value="shimmer">shimmer</option>
+              <option value="verse">verse</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 阿里云配置 -->
+      <div id="cloud-aliyun" class="hidden flex-col gap-3 mb-4">
+        <div>
+          <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">AppKey（智能语音交互项目）</label>
+          <input id="ali-appkey" type="text" placeholder="在阿里云控制台「智能语音交互 → 全部项目」里查看" autocomplete="off"
+            class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition" />
+        </div>
+        <div>
+          <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">访问 Token（24 小时有效，过期需重新获取）</label>
+          <input id="ali-token" type="password" placeholder="通过 CreateToken 接口或控制台获取" autocomplete="off"
+            class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition" />
+        </div>
+        <div>
+          <label class="block text-sm text-neutral-700 dark:text-neutral-300 mb-1">音色</label>
+          <select id="ali-voice" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-2.5 text-neutral-900 dark:text-neutral-100">
+            <option value="xiaoyun">小云（女声）</option>
+            <option value="xiaogang">小刚（男声）</option>
+            <option value="ruoxi">若兮（温柔女声）</option>
+            <option value="siqi">思琪（温柔女声）</option>
+            <option value="sijia">思佳（标准女声）</option>
+            <option value="xiaobei">小北（萝莉女声）</option>
+            <option value="aitong">艾彤（自然童声）</option>
+            <option value="aiwa">艾娃（童真童声）</option>
+            <option value="aixia">艾夏（自然女声）</option>
+            <option value="guijia">桂佳（甜美女声）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 密钥存储与合成按钮 -->
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300 cursor-pointer">
+          <input id="cloud-remember" type="checkbox" checked class="w-4 h-4" />
+          记住密钥（仅存本机浏览器）
+        </label>
+        <button id="cloud-clear" class="text-sm text-red-500 hover:underline">清除已存密钥</button>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <button id="cloud-synth" class="px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">☁️ 云端合成</button>
+        <span id="cloud-status" class="text-sm text-neutral-500 dark:text-neutral-400"></span>
+      </div>
+
+      <!-- 云端结果播放器 -->
+      <div id="cloud-result" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3">
+        <audio id="cloud-player" controls class="w-full mb-2"></audio>
+        <a id="cloud-download" download="tts.mp3" class="text-sm text-(--primary) hover:underline cursor-pointer">⬇ 下载这段音频（mp3）</a>
+      </div>
     </div>
   </div>
 
@@ -181,7 +289,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     // ---------- 录音特征分析 ----------
     let analysisResult: { pitch: number; rate: number } | null = null;
 
-    /** 简单 4 倍抽取降采样（音高分析足够用） */
+    /** 简单抽取降采样（音高分析足够用） */
     function downsample(data: Float32Array, factor: number): Float32Array {
       const out = new Float32Array(Math.floor(data.length / factor));
       for (let i = 0; i < out.length; i++) out[i] = data[i * factor];
@@ -312,5 +420,153 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       updateLabels();
       setStatus("已套用模仿参数，点「开始朗读」试听 🎧");
     });
+
+    // ---------- 自备云端 API ----------
+    const cloudTabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".cloud-tab"));
+    const openaiBox = $("cloud-openai");
+    const aliyunBox = $("cloud-aliyun");
+    const oaiKeyEl = $<HTMLInputElement>("oai-key");
+    const oaiBaseEl = $<HTMLInputElement>("oai-base");
+    const oaiModelEl = $<HTMLSelectElement>("oai-model");
+    const oaiVoiceEl = $<HTMLSelectElement>("oai-voice");
+    const aliAppkeyEl = $<HTMLInputElement>("ali-appkey");
+    const aliTokenEl = $<HTMLInputElement>("ali-token");
+    const aliVoiceEl = $<HTMLSelectElement>("ali-voice");
+    const rememberEl = $<HTMLInputElement>("cloud-remember");
+    const cloudBtn = $<HTMLButtonElement>("cloud-synth");
+    const cloudStatus = $("cloud-status");
+    const cloudResult = $("cloud-result");
+    const cloudPlayer = $<HTMLAudioElement>("cloud-player");
+    const cloudDownload = $<HTMLAnchorElement>("cloud-download");
+
+    let provider: "openai" | "aliyun" = "openai";
+    const LS_KEYS = ["tts_oai_key", "tts_oai_base", "tts_ali_appkey", "tts_ali_token"];
+
+    const setCloudStatus = (msg: string) => { cloudStatus.textContent = msg; };
+
+    function switchProvider(p: "openai" | "aliyun") {
+      provider = p;
+      for (const tab of cloudTabs) {
+        const active = tab.dataset.provider === p;
+        tab.classList.toggle("bg-(--primary)", active);
+        tab.classList.toggle("text-white", active);
+        tab.classList.toggle("bg-(--btn-regular-bg)", !active);
+        tab.classList.toggle("text-(--btn-content)", !active);
+      }
+      openaiBox.classList.toggle("hidden", p !== "openai");
+      openaiBox.classList.toggle("flex", p === "openai");
+      aliyunBox.classList.toggle("hidden", p !== "aliyun");
+      aliyunBox.classList.toggle("flex", p === "aliyun");
+      setCloudStatus("");
+    }
+    for (const tab of cloudTabs) {
+      tab.addEventListener("click", () => switchProvider(tab.dataset.provider as "openai" | "aliyun"));
+    }
+
+    // 载入已存密钥
+    oaiKeyEl.value = localStorage.getItem("tts_oai_key") || "";
+    oaiBaseEl.value = localStorage.getItem("tts_oai_base") || "";
+    aliAppkeyEl.value = localStorage.getItem("tts_ali_appkey") || "";
+    aliTokenEl.value = localStorage.getItem("tts_ali_token") || "";
+
+    function persistKeys() {
+      if (rememberEl.checked) {
+        localStorage.setItem("tts_oai_key", oaiKeyEl.value.trim());
+        localStorage.setItem("tts_oai_base", oaiBaseEl.value.trim());
+        localStorage.setItem("tts_ali_appkey", aliAppkeyEl.value.trim());
+        localStorage.setItem("tts_ali_token", aliTokenEl.value.trim());
+      } else {
+        for (const k of LS_KEYS) localStorage.removeItem(k);
+      }
+    }
+
+    $("cloud-clear").addEventListener("click", () => {
+      for (const k of LS_KEYS) localStorage.removeItem(k);
+      oaiKeyEl.value = ""; oaiBaseEl.value = "";
+      aliAppkeyEl.value = ""; aliTokenEl.value = "";
+      setCloudStatus("已清除本机保存的密钥");
+    });
+
+    function playBlob(blob: Blob) {
+      const url = URL.createObjectURL(blob);
+      cloudPlayer.src = url;
+      cloudDownload.href = url;
+      cloudResult.classList.remove("hidden");
+      void cloudPlayer.play().catch(() => { /* 自动播放被拦截就让用户手动点 */ });
+    }
+
+    async function synthOpenAI(text: string) {
+      const key = oaiKeyEl.value.trim();
+      if (!key) { setCloudStatus("先填你的 OpenAI API Key"); return; }
+      const base = (oaiBaseEl.value.trim() || "https://api.openai.com/v1").replace(/\/+$/, "");
+      persistKeys();
+      setCloudStatus("正在请求 OpenAI 云端合成…（费用走你自己的账号）");
+      const resp = await fetch(`${base}/audio/speech`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: oaiModelEl.value,
+          voice: oaiVoiceEl.value,
+          input: text,
+          response_format: "mp3",
+        }),
+      });
+      if (!resp.ok) {
+        const t = await resp.text();
+        throw new Error(`OpenAI 返回 HTTP ${resp.status}：${t.slice(0, 150)}`);
+      }
+      playBlob(await resp.blob());
+      setCloudStatus("合成完成 ✅ 可在线听或下载");
+    }
+
+    async function synthAliyun(text: string) {
+      const appkey = aliAppkeyEl.value.trim();
+      const token = aliTokenEl.value.trim();
+      if (!appkey || !token) { setCloudStatus("先填阿里云 AppKey 和 Token"); return; }
+      persistKeys();
+      setCloudStatus("正在请求阿里云云端合成…（费用走你自己的账号）");
+      const resp = await fetch("https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-NLS-Token": token },
+        body: JSON.stringify({
+          appkey,
+          token,
+          text,
+          voice: aliVoiceEl.value,
+          format: "mp3",
+          sample_rate: 16000,
+          volume: 50,
+          speech_rate: 0,
+          pitch_rate: 0,
+        }),
+      });
+      if (!resp.ok) {
+        const t = await resp.text();
+        throw new Error(`阿里云返回 HTTP ${resp.status}：${t.slice(0, 150)}`);
+      }
+      playBlob(await resp.blob());
+      setCloudStatus("合成完成 ✅ 可在线听或下载");
+    }
+
+    cloudBtn.addEventListener("click", async () => {
+      const text = textEl.value.trim();
+      if (!text) { setCloudStatus("先在上面输入点文字吧～"); return; }
+      cloudBtn.setAttribute("disabled", "true");
+      try {
+        if (provider === "openai") await synthOpenAI(text);
+        else await synthAliyun(text);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+          setCloudStatus("请求被浏览器拦截（对方不允许网页跨域直连），可改用自定义接口地址走中转，或换另一家试试");
+        } else {
+          setCloudStatus(msg);
+        }
+      } finally {
+        cloudBtn.removeAttribute("disabled");
+      }
+    });
+
+    switchProvider("openai");
   </script>
 </MainGridLayout>
