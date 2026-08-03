@@ -86,11 +86,47 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		url: "#",
 		icon: "material-symbols:build",
 		children: [
+			// 每日一签
+			{
+				name: "每日一签",
+				url: "/tools/daily/",
+				icon: "material-symbols:auto-awesome",
+			},
+			// 废话生成器
+			{
+				name: "废话生成器",
+				url: "/tools/nonsense/",
+				icon: "material-symbols:psychology",
+			},
 			// 语音合成
 			{
 				name: "语音合成",
 				url: "/tools/tts/",
 				icon: "material-symbols:record-voice-over",
+			},
+			// 音频转换
+			{
+				name: "音频转换",
+				url: "/tools/audio-convert/",
+				icon: "material-symbols:audio-file",
+			},
+			// 谱面查看器
+			{
+				name: "谱面查看器",
+				url: "/tools/chart-viewer/",
+				icon: "material-symbols:music-note",
+			},
+			// PMX 动画工坊
+			{
+				name: "PMX 动画工坊",
+				url: "/tools/pmx-studio/",
+				icon: "material-symbols:animation",
+			},
+			// 视频剪辑
+			{
+				name: "视频剪辑",
+				url: "/tools/video-editor/",
+				icon: "material-symbols:movie-edit",
 			},
 		],
 	});
@@ -123,7 +159,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				name: "Gitee",
 				url: "https://gitee.com/CuteLeaf/Firefly",
 				external: true,
-				icon: "fa7-brands:gitee",
+				icon: "fa7-brands:github",
 			},
 			{
 				name: "QQ交流群",
