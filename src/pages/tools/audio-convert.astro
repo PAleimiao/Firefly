@@ -1,0 +1,264 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="音频转换" description="浏览器本地音频格式转换工具">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:audio-file" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">音频转换</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+        把音频文件丢进来，在本地转成 <b>WAV</b> 或 <b>MP3</b>。配合语音合成工具使用效果更佳：合成的音频录下来，来这里一转就能随便用。
+      </p>
+
+      <!-- 本地算力提示 -->
+      <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 mb-6 text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+        ⚠️ 转换<b>全程在你的设备本地完成，文件不会上传到任何服务器</b>。大文件（比如整首歌、长录音）解码和编码会占用较多内存与时间，<b>设备卡顿、发热属正常现象</b>，请耐心等待。
+      </div>
+
+      <!-- 文件拖放区 -->
+      <div id="ac-drop" class="rounded-xl border-2 border-dashed border-(--line-divider) bg-(--card-bg) px-4 py-8 mb-4 text-center cursor-pointer transition hover:border-(--primary)">
+        <Icon is:inline name="material-symbols:upload-file" class="text-[2.5rem] text-(--primary) mb-2"></Icon>
+        <div class="text-neutral-900 dark:text-neutral-100 font-medium mb-1">点击选择或把音频文件拖到这里</div>
+        <div class="text-sm text-neutral-500 dark:text-neutral-400">支持 mp3 / wav / ogg / m4a / flac 等浏览器可解码的格式</div>
+        <input id="ac-file" type="file" accept="audio/*" class="hidden" />
+      </div>
+      <div id="ac-name" class="text-sm text-neutral-500 dark:text-neutral-400 mb-4 truncate">未选择文件</div>
+
+      <!-- 文件信息 -->
+      <div id="ac-info" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 mb-5 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"></div>
+
+      <!-- 输出选项 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">输出格式</label>
+          <select id="ac-format" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100">
+            <option value="mp3">MP3（体积小，通用）</option>
+            <option value="wav">WAV（无损，体积大）</option>
+          </select>
+        </div>
+        <div id="ac-bitrate-box">
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">MP3 码率</label>
+          <select id="ac-bitrate" class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100">
+            <option value="128">128 kbps（省空间）</option>
+            <option value="192" selected>192 kbps（均衡）</option>
+            <option value="256">256 kbps（高音质）</option>
+            <option value="320">320 kbps（最高）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 转换按钮 -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <button id="ac-go" class="px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">🔁 开始转换</button>
+        <span id="ac-status" class="text-sm text-neutral-500 dark:text-neutral-400"></span>
+      </div>
+
+      <!-- 结果 -->
+      <div id="ac-result" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3">
+        <div id="ac-result-info" class="text-sm text-neutral-700 dark:text-neutral-300 mb-2"></div>
+        <audio id="ac-player" controls class="w-full mb-2"></audio>
+        <a id="ac-download" class="text-sm text-(--primary) hover:underline cursor-pointer">⬇ 下载转换结果</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MP3 编码器（lamejs，CDN 加载，仅在浏览器本地运行） -->
+  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+
+  <script>
+    const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+    const drop = $("ac-drop");
+    const fileInput = $<HTMLInputElement>("ac-file");
+    const nameEl = $("ac-name");
+    const infoEl = $("ac-info");
+    const formatEl = $<HTMLSelectElement>("ac-format");
+    const bitrateBox = $("ac-bitrate-box");
+    const bitrateEl = $<HTMLSelectElement>("ac-bitrate");
+    const goBtn = $<HTMLButtonElement>("ac-go");
+    const statusEl = $("ac-status");
+    const resultEl = $("ac-result");
+    const resultInfo = $("ac-result-info");
+    const player = $<HTMLAudioElement>("ac-player");
+    const downloadA = $<HTMLAnchorElement>("ac-download");
+
+    let audioBuffer: AudioBuffer | null = null;
+    let baseName = "audio";
+
+    const setStatus = (msg: string) => { statusEl.textContent = msg; };
+    const fmtSize = (n: number) => n >= 1048576 ? `${(n / 1048576).toFixed(2)} MB` : `${(n / 1024).toFixed(1)} KB`;
+    const fmtTime = (s: number) => {
+      const m = Math.floor(s / 60), sec = s - m * 60;
+      return `${m}:${sec.toFixed(1).padStart(4, "0")}`;
+    };
+
+    // ---------- 文件载入 ----------
+    async function loadFile(file: File) {
+      baseName = file.name.replace(/\.[^.]+$/, "") || "audio";
+      nameEl.textContent = `${file.name}（${fmtSize(file.size)}）`;
+      infoEl.classList.add("hidden");
+      resultEl.classList.add("hidden");
+      setStatus("正在本地解码…（大文件需要几秒）");
+      try {
+        const buf = await file.arrayBuffer();
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AC();
+        audioBuffer = await ctx.decodeAudioData(buf);
+        void ctx.close?.();
+        infoEl.innerHTML =
+          `✅ 解码完成：时长 <b>${fmtTime(audioBuffer.duration)}</b> · ` +
+          `采样率 <b>${audioBuffer.sampleRate} Hz</b> · ` +
+          `<b>${audioBuffer.numberOfChannels}</b> 声道`;
+        infoEl.classList.remove("hidden");
+        setStatus("就绪，点「开始转换」");
+      } catch {
+        audioBuffer = null;
+        setStatus("解码失败：浏览器不认这个格式，换个文件试试");
+      }
+    }
+
+    drop.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files?.[0];
+      if (f) void loadFile(f);
+    });
+    for (const ev of ["dragover", "dragenter"]) {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add("border-(--primary)");
+      });
+    }
+    for (const ev of ["dragleave", "drop"]) {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.remove("border-(--primary)");
+      });
+    }
+    drop.addEventListener("drop", (e) => {
+      const f = (e as DragEvent).dataTransfer?.files?.[0];
+      if (f) void loadFile(f);
+    });
+
+    formatEl.addEventListener("change", () => {
+      bitrateBox.classList.toggle("hidden", formatEl.value !== "mp3");
+    });
+
+    // ---------- 编码：WAV ----------
+    function encodeWAV(ab: AudioBuffer): Blob {
+      const numCh = Math.min(2, ab.numberOfChannels);
+      const sr = ab.sampleRate;
+      const bytesPerSample = 2;
+      const dataLen = ab.length * numCh * bytesPerSample;
+      const buffer = new ArrayBuffer(44 + dataLen);
+      const v = new DataView(buffer);
+      const wstr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); };
+      wstr(0, "RIFF");
+      v.setUint32(4, 36 + dataLen, true);
+      wstr(8, "WAVE");
+      wstr(12, "fmt ");
+      v.setUint32(16, 16, true);
+      v.setUint16(20, 1, true); // PCM
+      v.setUint16(22, numCh, true);
+      v.setUint32(24, sr, true);
+      v.setUint32(28, sr * numCh * bytesPerSample, true);
+      v.setUint16(32, numCh * bytesPerSample, true);
+      v.setUint16(34, 16, true);
+      wstr(36, "data");
+      v.setUint32(40, dataLen, true);
+      let off = 44;
+      for (let i = 0; i < ab.length; i++) {
+        for (let c = 0; c < numCh; c++) {
+          const s = Math.max(-1, Math.min(1, ab.getChannelData(c)[i]));
+          v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+          off += 2;
+        }
+      }
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    // ---------- 编码：MP3（lamejs） ----------
+    function toInt16(f: Float32Array): Int16Array {
+      const out = new Int16Array(f.length);
+      for (let i = 0; i < f.length; i++) {
+        const s = Math.max(-1, Math.min(1, f[i]));
+        out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+      }
+      return out;
+    }
+
+    async function resampleTo44100(ab: AudioBuffer): Promise<AudioBuffer> {
+      if (ab.sampleRate === 44100) return ab;
+      const len = Math.ceil(ab.duration * 44100);
+      const off = new OfflineAudioContext(ab.numberOfChannels, len, 44100);
+      const src = off.createBufferSource();
+      src.buffer = ab;
+      src.connect(off.destination);
+      src.start();
+      return off.startRendering();
+    }
+
+    async function encodeMP3(ab: AudioBuffer, kbps: number): Promise<Blob> {
+      const lame = (window as unknown as { lamejs?: { Mp3Encoder: new (ch: number, sr: number, kbps: number) => { encodeBuffer: (l: Int16Array, r?: Int16Array) => number[]; flush: () => number[] } } }).lamejs;
+      if (!lame) throw new Error("MP3 编码器没加载成功，刷新页面再试");
+      const src = await resampleTo44100(ab);
+      const ch = Math.min(2, src.numberOfChannels);
+      const enc = new lame.Mp3Encoder(ch, 44100, kbps);
+      const left = toInt16(src.getChannelData(0));
+      const right = ch > 1 ? toInt16(src.getChannelData(1)) : null;
+      const block = 1152;
+      const parts: Uint8Array[] = [];
+      for (let i = 0; i < left.length; i += block) {
+        const l = left.subarray(i, i + block);
+        const d = ch > 1 && right
+          ? enc.encodeBuffer(l, right.subarray(i, i + block))
+          : enc.encodeBuffer(l);
+        if (d.length) parts.push(new Uint8Array(d));
+      }
+      const end = enc.flush();
+      if (end.length) parts.push(new Uint8Array(end));
+      return new Blob(parts as unknown as BlobPart[], { type: "audio/mpeg" });
+    }
+
+    // ---------- 转换流程 ----------
+    goBtn.addEventListener("click", async () => {
+      if (!audioBuffer) { setStatus("先选一个音频文件吧～"); return; }
+      goBtn.setAttribute("disabled", "true");
+      resultEl.classList.add("hidden");
+      try {
+        const fmt = formatEl.value;
+        let blob: Blob;
+        let outName: string;
+        if (fmt === "wav") {
+          setStatus("正在导出 WAV…");
+          await new Promise((r) => setTimeout(r, 30)); // 让状态先渲染出来
+          blob = encodeWAV(audioBuffer);
+          outName = `${baseName}.wav`;
+        } else {
+          setStatus("正在编码 MP3…（长音频可能需要十几秒，设备卡顿属正常）");
+          await new Promise((r) => setTimeout(r, 30));
+          blob = await encodeMP3(audioBuffer, parseInt(bitrateEl.value, 10));
+          outName = `${baseName}.mp3`;
+        }
+        const url = URL.createObjectURL(blob);
+        player.src = url;
+        downloadA.href = url;
+        downloadA.setAttribute("download", outName);
+        downloadA.textContent = `⬇ 下载 ${outName}（${fmtSize(blob.size)}）`;
+        resultInfo.innerHTML = `转换完成 ✅ 输出大小 <b>${fmtSize(blob.size)}</b>`;
+        resultEl.classList.remove("hidden");
+        setStatus("搞定 ✅");
+      } catch (err) {
+        setStatus(err instanceof Error ? err.message : String(err));
+      } finally {
+        goBtn.removeAttribute("disabled");
+      }
+    });
+  </script>
+</MainGridLayout>
