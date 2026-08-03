@@ -1,0 +1,202 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="每日一签" description="每日运势、每日一句、每日一废话">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:auto-awesome" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">每日一签</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
+        今日运势、每日一句、每日一废话，一页打包。结果由日期生成，<b>同一天怎么刷新都一样</b>，认命吧。每天 0 点自动换一签。
+      </p>
+
+      <!-- 今日运势 -->
+      <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 mb-4">
+        <div class="flex items-center gap-2 mb-3">
+          <Icon is:inline name="material-symbols:celebration" class="text-[1.25rem] text-(--primary)"></Icon>
+          <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">今日运势</div>
+          <span id="d-date" class="ml-auto text-xs text-neutral-500 dark:text-neutral-400"></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4">
+          <div class="text-2xl font-bold text-(--primary)" id="d-label"></div>
+          <div class="text-lg text-amber-400 tracking-widest" id="d-stars"></div>
+          <div class="text-sm text-neutral-500 dark:text-neutral-400">运势指数 <b id="d-score" class="text-neutral-900 dark:text-neutral-100"></b></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+          <div class="rounded-lg bg-green-500/10 border border-green-500/30 px-3 py-2.5">
+            <div class="text-sm font-bold text-green-600 dark:text-green-400 mb-1">宜</div>
+            <div id="d-yi" class="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"></div>
+          </div>
+          <div class="rounded-lg bg-red-500/10 border border-red-500/30 px-3 py-2.5">
+            <div class="text-sm font-bold text-red-600 dark:text-red-400 mb-1">忌</div>
+            <div id="d-ji" class="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"></div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-neutral-600 dark:text-neutral-400">
+          <span>幸运物：<b id="d-item" class="text-neutral-900 dark:text-neutral-100"></b></span>
+          <span>幸运色：<b id="d-color" class="text-neutral-900 dark:text-neutral-100"></b></span>
+          <span>幸运数字：<b id="d-num" class="text-neutral-900 dark:text-neutral-100"></b></span>
+        </div>
+      </div>
+
+      <!-- 每日一句 -->
+      <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 mb-4">
+        <div class="flex items-center gap-2 mb-3">
+          <Icon is:inline name="material-symbols:format-quote" class="text-[1.25rem] text-(--primary)"></Icon>
+          <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">每日一句</div>
+        </div>
+        <blockquote class="text-lg text-neutral-900 dark:text-neutral-100 leading-relaxed mb-2" id="d-quote"></blockquote>
+        <div class="text-sm text-neutral-500 dark:text-neutral-400 text-right" id="d-quote-from"></div>
+      </div>
+
+      <!-- 每日一废话 -->
+      <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4">
+        <div class="flex items-center gap-2 mb-3">
+          <Icon is:inline name="material-symbols:psychology" class="text-[1.25rem] text-(--primary)"></Icon>
+          <div class="text-xl font-bold text-neutral-900 dark:text-neutral-100">每日一废话</div>
+        </div>
+        <div class="text-base text-neutral-700 dark:text-neutral-300 leading-relaxed" id="d-nonsense"></div>
+      </div>
+
+      <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-4 text-center">纯属娱乐，认真你就输了。想要更多废话请移步「废话生成器」。</p>
+    </div>
+  </div>
+
+  <script>
+    const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+    // ---------- 语料 ----------
+    const QUOTES: [string, string][] = [
+      ["无论过去，不问将来。", "《时光代理人》"],
+      ["音无结弦之时，跃动天使之心。", "《Angel Beats!》"],
+      ["愿你有一天，能和你最重要的人重逢。", "《可塑性记忆》"],
+      ["能哭的地方，只有厕所和爸爸的怀里。", "《CLANNAD》"],
+      ["只要记住你的名字，不管你在世界的哪个地方，我一定会去见你。", "《你的名字。》"],
+      ["樱花下落的速度，是秒速五厘米。", "《秒速五厘米》"],
+      ["没有你的四月，就要来了。", "《四月是你的谎言》"],
+      ["如果结果不如你所愿，就在尘埃落定前奋力一搏。", "《夏目友人帐》"],
+      ["没有未来的未来，不是我想要的未来。", "《境界的彼方》"],
+      ["人类的赞歌，就是勇气的赞歌。", "《JOJO的奇妙冒险》"],
+      ["世界上只有一种英雄主义，就是认清生活真相后依然热爱生活。", "罗曼·罗兰"],
+      ["凡是过往，皆为序章。", "莎士比亚"],
+      ["黑夜无论怎样悠长，白昼总会到来。", "莎士比亚"],
+      ["我们都在阴沟里，但仍有人仰望星空。", "王尔德"],
+      ["念念不忘，必有回响。", "《一代宗师》"],
+      ["明天又是新的一天。", "《飘》"],
+      ["凡是不能杀死我的，使我更强大。", "尼采"],
+      ["生活不可能像你想象的那么好，但也不会像你想象的那么糟。", "莫泊桑"],
+      ["代码写得再烂，也比不写强。", "程序员自我修养"],
+      ["摸鱼一时爽，一直摸鱼一直爽。", "互联网哲学家"],
+      ["努力不一定成功，但不努力一定很轻松。", "废话文学奖得主"],
+      ["走一步看一步，实在不行就躺平。", "当代青年指南"],
+      ["生活给你柠檬，就把它榨成柠檬汁。", "西方谚语"],
+      ["天气这么好，适合出去转转。", "你窗外的世界"],
+      ["今天的我，比昨天更接近梦想一点点。", "每日一句"],
+      ["不要浪费粮食，不好吃也要吃完哦。", "干饭人语录"],
+    ];
+
+    const YI = [
+      "摸鱼", "干饭", "写博客", "推歌", "水群", "折腾系统", "重构代码", "早睡",
+      "看番", "推 Galgame", "换壁纸", "喝奶茶", "逛 B 站", "备份数据", "学习新技能",
+      "整活", "发动态", "听歌", "晒太阳", "收拾桌面", "给朋友发消息", "夸自己",
+    ];
+    const JI = [
+      "更新系统", "熬夜", "立 flag", "调试玄学 bug", "重装系统", "氪金上头",
+      "空腹喝咖啡", "跟人抬杠", "翻旧账", "卡 DDL 赶工", "深夜 emo", "看评审意见",
+      "喝隔夜奶茶", "对账", "清灰", "看邮箱", "信玄学", "深夜下单",
+    ];
+    const LUCKY_ITEMS = [
+      "机械键盘", "奶茶", "耳机", "抱枕", "手办", "充电宝", "猫", "旧 U 盘",
+      "水母灯", "鼠标垫", "快乐水", "备用电源", "一张旧专辑", "绿色的东西",
+    ];
+    const LUCKY_COLORS = [
+      "薄荷绿", "天青蓝", "奶白色", "樱花粉", "深空灰", "柠檬黄", "香芋紫", "曜石黑", "落日橙",
+    ];
+    const NONSENSE = [
+      "听君一席话，如听一席话。",
+      "但凡有点用，也不至于一点用都没有。",
+      "我上次这么觉得的时候，还是在上次。",
+      "如果你看到了这句话，那你就看到了这句话。",
+      "只要明天不来，今天就永远不会结束。",
+      "你不困难的时候，其实也没那么困难。",
+      "明天会更好，如果不会，那就后天。",
+      "睡觉能解决大部分问题，剩下的睡醒再说。",
+      "钱不是大风刮来的，但很像是大风刮走的。",
+      "早起的鸟儿有虫吃，早起的虫儿被鸟吃。",
+      "只要你不尴尬，尴尬的就是别人。",
+      "退一步海阔天空，退两步风平浪静，退三步到家了。",
+      "努力不一定有回报，但摆烂一定很舒服。",
+      "生活就像心电图，一帆风顺就说明你挂了。",
+      "船到桥头自然直，不直就掉头。",
+      "世上无难事，只要肯放弃。",
+      "不出意外的话，应该是出意外了。",
+      "事情就是这么个事情，情况就是这么个情况。",
+      "道理我都懂，可是然后呢。",
+      "今天也是充满希望的一天，如果没有希望，那就睡一觉。",
+    ];
+
+    // ---------- 日期种子随机 ----------
+    function hashStr(s: string): number {
+      let h = 2166136261;
+      for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+    function mulberry32(seed: number) {
+      return () => {
+        seed |= 0;
+        seed = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    const now = new Date();
+    const key = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    const rand = mulberry32(hashStr(key));
+
+    function pick<T>(arr: T[], n: number): T[] {
+      const c = [...arr];
+      const out: T[] = [];
+      while (out.length < n && c.length) {
+        out.push(c.splice(Math.floor(rand() * c.length), 1)[0]);
+      }
+      return out;
+    }
+
+    // ---------- 运势 ----------
+    const score = Math.floor(rand() * 101);
+    const [label, stars] =
+      score >= 85 ? ["大吉", 5] :
+      score >= 70 ? ["中吉", 4] :
+      score >= 55 ? ["小吉", 3] :
+      score >= 40 ? ["平", 2] :
+      score >= 20 ? ["小凶", 1] : ["大凶", 0];
+
+    $("d-date").textContent = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日`;
+    $("d-label").textContent = label;
+    $("d-stars").textContent = "★".repeat(stars) + "☆".repeat(5 - stars);
+    $("d-score").textContent = String(score);
+    $("d-yi").textContent = pick(YI, 3).join(" · ");
+    $("d-ji").textContent = pick(JI, 3).join(" · ");
+    $("d-item").textContent = pick(LUCKY_ITEMS, 1)[0];
+    $("d-color").textContent = pick(LUCKY_COLORS, 1)[0];
+    $("d-num").textContent = String(Math.floor(rand() * 100));
+
+    const q = QUOTES[Math.floor(rand() * QUOTES.length)];
+    $("d-quote").textContent = `「${q[0]}」`;
+    $("d-quote-from").textContent = `—— ${q[1]}`;
+
+    $("d-nonsense").textContent = NONSENSE[Math.floor(rand() * NONSENSE.length)];
+  </script>
+</MainGridLayout>
