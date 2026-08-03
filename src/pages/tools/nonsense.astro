@@ -1,0 +1,155 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="废话生成器" description="一键生成废话文学">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:psychology" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">废话生成器</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+        听君一席话，如听一席话。输入主题（或者留空随机），一键生成正宗废话文学，单抽整段随你选，复制拿去水群。
+      </p>
+
+      <div class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 mb-6 text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+        本工具生成的内容<b>没有任何实际意义</b>，这正是它的意义。
+      </div>
+
+      <!-- 主题输入 -->
+      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">主题（留空则随机）</label>
+      <input id="n-theme" type="text" maxlength="12" placeholder="比如：摸鱼 / 代码 / 干饭……"
+        class="w-full rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-3 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary) transition mb-4" />
+
+      <!-- 按钮 -->
+      <div class="flex flex-wrap items-center gap-3 mb-5">
+        <button id="n-one" class="px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">🎲 单抽一条</button>
+        <button id="n-para" class="px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition">📜 生成一段废话文学</button>
+        <button id="n-copy" class="px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">📋 复制全部</button>
+        <span id="n-status" class="text-sm text-neutral-500 dark:text-neutral-400"></span>
+      </div>
+
+      <!-- 输出 -->
+      <div id="n-output" class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 text-base text-neutral-800 dark:text-neutral-200 leading-loose">
+        <span class="text-neutral-400 dark:text-neutral-500">废话会出现在这里……</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+    const themeEl = $<HTMLInputElement>("n-theme");
+    const outputEl = $("n-output");
+    const statusEl = $("n-status");
+
+    const NOUNS = [
+      "代码", "摸鱼", "干饭", "学习", "游戏", "睡觉", "博客", "服务器",
+      "人生", "工资", "头发", "奶茶", "作业", "考试", "钱包", "手机", "猫", "DDL",
+    ];
+
+    // {X} 会被替换成主题
+    const TEMPLATES_X = [
+      "每当你{X}的时候，你就在{X}",
+      "但凡你{X}有点用，也不至于一点用都没有",
+      "{X}这个东西吧，说好也好，说不好也不好",
+      "关于{X}，我只能说懂得都懂",
+      "如果你愿意花时间去了解{X}，那你就会花时间去了解{X}",
+      "{X}不可怕，可怕的是{X}",
+      "俗话说得好：{X}的时候，就是{X}的时候",
+      "现在的{X}啊，真是越来越{X}了",
+      "据我观察，会{X}的人，一般都很会{X}",
+      "只要你不{X}，就不会{X}",
+      "你是不是在{X}？是，但又不完全是",
+      "这个{X}吧，它好就好在，它是个{X}",
+      "十年后的{X}，就是十年后的{X}",
+      "我掐指一算，你接下来要么{X}，要么不{X}",
+      "世界上没有无缘无故的{X}，只有有缘有故的{X}",
+      "{X}就像空气，有的时候你感觉不到，没有的时候你就没了",
+      "不听老人言吃亏在眼前，听了老人言照样{X}",
+      "上次我{X}的时候，还是在上次",
+      "讲道理，{X}这个事吧，它不讲道理",
+      "{X}的第一步，就是开始{X}",
+    ];
+
+    const TEMPLATES_PLAIN = [
+      "听君一席话，如听一席话",
+      "但凡这句话有点用，也不至于一点用都没有",
+      "不出意外的话，应该是出意外了",
+      "我上次这么无语的时候，还是在上次",
+      "这句话是个哲学，你仔细品",
+      "事情就是这么个事情，情况就是这么个情况",
+      "道理我都懂，可是然后呢",
+      "你别管，问就是玄学",
+      "说得很好，下次别说了",
+      "你这个观点很有观点",
+      "听完了你的发言，我就像听完了你的发言",
+      "问题到底出在哪呢？问题就出在问题上",
+    ];
+
+    const setStatus = (msg: string) => { statusEl.textContent = msg; };
+    function randOf<T>(arr: T[]): T {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function noun(): string {
+      const t = themeEl.value.trim();
+      if (t && Math.random() < 0.75) return t;
+      return randOf(NOUNS);
+    }
+
+    function oneSentence(): string {
+      const useX = Math.random() < 0.7;
+      const tpl = useX ? randOf(TEMPLATES_X) : randOf(TEMPLATES_PLAIN);
+      const n = noun();
+      return tpl.split("{X}").join(n) + "。";
+    }
+
+    function show(lines: string[]) {
+      outputEl.innerHTML = lines.map((l) => `<p>${l}</p>`).join("");
+    }
+
+    $("n-one").addEventListener("click", () => {
+      show([oneSentence()]);
+      setStatus("单抽完成 ✅");
+    });
+
+    $("n-para").addEventListener("click", () => {
+      const len = 4 + Math.floor(Math.random() * 3); // 4-6 句
+      const lines: string[] = [];
+      const used = new Set<string>();
+      let guard = 0;
+      while (lines.length < len && guard++ < 50) {
+        const s = oneSentence();
+        if (used.has(s)) continue;
+        used.add(s);
+        lines.push(s);
+      }
+      show(lines);
+      setStatus(`废话文学 × ${lines.length} 句，拿去 ✅`);
+    });
+
+    $("n-copy").addEventListener("click", async () => {
+      const ps = outputEl.querySelectorAll("p");
+      if (!ps.length) { setStatus("先生成点东西再复制吧～"); return; }
+      const text = Array.from(ps).map((p) => p.textContent || "").join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("已复制到剪贴板 ✅");
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        setStatus("已复制 ✅");
+      }
+    });
+  </script>
+</MainGridLayout>
