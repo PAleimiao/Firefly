@@ -1,238 +1,679 @@
 ---
-import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
 ---
 
-<MainGridLayout title="语音合成" description="文本转语音，支持本地浏览器语音和 Edge 在线语音">
-  <div class="card-base p-6 max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
-      <i class="fas fa-microphone-alt text-[var(--primary)]"></i>
-      语音合成
-    </h2>
-    <p class="text-sm text-[var(--text-secondary)] mb-4">输入文字，选择声音，一键朗读或下载音频。</p>
+<MainGridLayout title="语音合成工坊" description="多引擎TTS合成：本地浏览器、Edge、阿里云、OpenAI、Azure、本地API。支持多音轨混音、音色调节、GPU本地渲染。">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
 
-    <!-- 文本输入 -->
-    <div class="mb-4">
-      <label class="block text-sm font-medium mb-1">文本内容</label>
-      <textarea id="tts-text" rows="4" class="w-full p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)] resize-y focus:outline-none focus:border-[var(--primary)]" placeholder="输入要朗读的文字..."></textarea>
-    </div>
-
-    <!-- 语音源 -->
-    <div class="mb-4">
-      <label class="block text-sm font-medium mb-1">语音源</label>
-      <select id="tts-source" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]">
-        <option value="local">本地浏览器（免费，设备自带）</option>
-        <option value="edge">Edge 在线（微软，更自然）</option>
-      </select>
-    </div>
-
-    <!-- 本地语音设置 -->
-    <div id="local-settings" class="space-y-3 mb-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">声音</label>
-        <select id="tts-voice" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]"></select>
+      <!-- 页面标题 -->
+      <div class="flex items-center gap-3 mb-2">
+        <div class="h-10 w-10 rounded-xl bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <svg class="text-[1.75rem]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">语音合成工坊</div>
+          <div class="text-sm text-neutral-500 dark:text-neutral-400">多引擎 · 多音轨 · 音色随心调</div>
+        </div>
+        <button id="btn-api-config" class="ml-auto px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) hover:opacity-85 active:scale-95 transition text-sm font-medium flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L3.16 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          API配置
+        </button>
       </div>
-      <div class="grid grid-cols-3 gap-3">
-        <div>
-          <label class="block text-xs mb-1">语速 <span id="rate-val">1.0</span></label>
-          <input id="tts-rate" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+
+      <!-- API配置面板 (默认折叠) -->
+      <div id="api-config-panel" class="hidden rounded-xl border border-(--line-divider) bg-(--card-bg) px-5 py-4 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-lg font-bold text-neutral-900 dark:text-neutral-100">🔑 API密钥配置</div>
+          <div class="text-xs text-neutral-500 dark:text-neutral-400">仅保存在本地浏览器，不会上传服务器</div>
         </div>
-        <div>
-          <label class="block text-xs mb-1">音高 <span id="pitch-val">1.0</span></label>
-          <input id="tts-pitch" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">阿里云 AccessKeyId</label>
+            <input id="ak-id" type="text" placeholder="LTAI..." class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">阿里云 AccessKeySecret</label>
+            <input id="ak-secret" type="password" placeholder="********" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">阿里云 AppKey</label>
+            <input id="ak-appkey" type="text" placeholder="xxx" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">OpenAI API Key</label>
+            <input id="openai-key" type="password" placeholder="sk-..." class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Azure Speech Key</label>
+            <input id="azure-key" type="password" placeholder="********" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Azure Region</label>
+            <input id="azure-region" type="text" placeholder="southeastasia" value="southeastasia" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div class="md:col-span-2 lg:col-span-3">
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">本地API地址 (如 Piper/MMS 本地服务)</label>
+            <input id="local-api-url" type="text" placeholder="http://localhost:5000/api/tts" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">💡 本地部署Piper/MMS等TTS后填写，可调用本地GPU渲染</div>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs mb-1">音量 <span id="vol-val">1.0</span></label>
-          <input id="tts-volume" type="range" min="0" max="1" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+        <div class="flex gap-3 mt-4">
+          <button id="btn-save-api" class="px-5 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition text-sm">💾 保存到本地</button>
+          <button id="btn-clear-api" class="px-5 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) hover:opacity-85 active:scale-95 transition text-sm">🗑️ 清空</button>
         </div>
       </div>
-    </div>
 
-    <!-- Edge 语音设置 -->
-    <div id="edge-settings" class="mb-4" style="display:none">
-      <label class="block text-sm font-medium mb-1">Edge 声音</label>
-      <select id="tts-edge-voice" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]">
-        <option value="zh-CN-XiaoxiaoNeural">晓晓 — 女声（自然）</option>
-        <option value="zh-CN-YunxiNeural">云希 — 男声（自然）</option>
-        <option value="zh-CN-XiaohanNeural">晓涵 — 温柔女声</option>
-        <option value="zh-CN-XiaomengNeural">晓梦 — 知性女声</option>
-        <option value="zh-CN-XiaoyiNeural">晓伊 — 女童声</option>
-        <option value="zh-CN-YunjianNeural">云健 — 解说男声</option>
-      </select>
-    </div>
+      <!-- 全局控制栏 -->
+      <div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl border border-(--line-divider) bg-(--bg)">
+        <button id="btn-add-track" class="px-4 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition text-sm flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          添加音轨
+        </button>
+        <button id="btn-play-all" class="px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) hover:opacity-85 active:scale-95 transition text-sm flex items-center gap-2">
+          <Icon is:inline name="material-symbols:play-arrow" class="text-[1.1rem]"></Icon>
+          顺序播放
+        </button>
+        <button id="btn-merge" class="px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) hover:opacity-85 active:scale-95 transition text-sm flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" opacity=".5"/><path d="M5 5v14l11-7z"/></svg>
+          合并导出
+        </button>
+        <button id="btn-stop" class="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:opacity-85 active:scale-95 transition text-sm flex items-center gap-2 hidden">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+          停止
+        </button>
+        <div class="ml-auto text-sm text-neutral-500 dark:text-neutral-400" id="global-status">就绪 · 0 个音轨</div>
+      </div>
 
-    <!-- 按钮 -->
-    <div class="flex gap-3 mb-3">
-      <button id="tts-speak" class="flex-1 py-2.5 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 transition">
-        <i class="fas fa-play mr-1"></i> 朗读
-      </button>
-      <button id="tts-download" class="flex-1 py-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)] font-medium hover:bg-[var(--btn-hover)] transition">
-        <i class="fas fa-download mr-1"></i> 下载
-      </button>
-    </div>
+      <!-- 音轨列表 -->
+      <div id="track-list" class="space-y-4">
+        <!-- 音轨由JS动态生成 -->
+      </div>
 
-    <!-- 状态 -->
-    <div id="tts-status" class="text-sm text-[var(--text-secondary)] text-center">就绪</div>
+      <!-- 空状态 -->
+      <div id="empty-state" class="text-center py-12 text-neutral-400 dark:text-neutral-500">
+        <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <div class="text-lg">还没有音轨</div>
+        <div class="text-sm mt-1">点击上方「添加音轨」开始创作</div>
+      </div>
+
+    </div>
   </div>
 </MainGridLayout>
 
 <script>
-  // ===== 本地语音 =====
-  const textEl = document.getElementById('tts-text');
-  const voiceSel = document.getElementById('tts-voice');
-  const rateEl = document.getElementById('tts-rate');
-  const pitchEl = document.getElementById('tts-pitch');
-  const volEl = document.getElementById('tts-volume');
-  const speakBtn = document.getElementById('tts-speak');
-  const dlBtn = document.getElementById('tts-download');
-  const statusEl = document.getElementById('tts-status');
-  const sourceSel = document.getElementById('tts-source');
-  const localWrap = document.getElementById('local-settings');
-  const edgeWrap = document.getElementById('edge-settings');
+  // ==================== 全局状态 ====================
+  let tracks = [];
+  let currentAudio = null;
+  let isPlaying = false;
+  let trackIdCounter = 0;
 
-  function setStatus(s) { statusEl.textContent = s; }
+  // ==================== API配置管理 ====================
+  const API_KEYS = ['ak-id', 'ak-secret', 'ak-appkey', 'openai-key', 'azure-key', 'azure-region', 'local-api-url'];
 
-  // 加载声音列表
-  function loadVoices() {
+  function loadApiConfig() {
+    API_KEYS.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) el.value = localStorage.getItem('tts_' + k) || '';
+    });
+  }
+
+  function saveApiConfig() {
+    API_KEYS.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) localStorage.setItem('tts_' + k, el.value.trim());
+    });
+    showToast('API配置已保存到本地浏览器', 'success');
+  }
+
+  function clearApiConfig() {
+    API_KEYS.forEach(k => {
+      localStorage.removeItem('tts_' + k);
+      const el = document.getElementById(k);
+      if (el) el.value = '';
+    });
+    showToast('已清空', 'warn');
+  }
+
+  function getApiConfig() {
+    const cfg = {};
+    API_KEYS.forEach(k => {
+      cfg[k] = localStorage.getItem('tts_' + k) || '';
+    });
+    return cfg;
+  }
+
+  // ==================== Toast提示 ====================
+  function showToast(msg, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-4 py-3 rounded-xl text-sm font-medium z-50 transition-all duration-300 translate-x-full ${
+      type === 'success' ? 'bg-green-500 text-white' :
+      type === 'error' ? 'bg-red-500 text-white' :
+      type === 'warn' ? 'bg-amber-500 text-black' :
+      'bg-(--primary) text-white dark:text-black'
+    }`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.remove('translate-x-full'));
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // ==================== 语音源配置 ====================
+  const SOURCE_CONFIG = {
+    local: {
+      name: '🎙️ 本地浏览器',
+      desc: '免费 · 离线 · 设备自带',
+      hasDownload: false,
+      params: ['voice', 'rate', 'pitch', 'volume']
+    },
+    edge: {
+      name: '🌐 Edge 在线',
+      desc: '免费 · 微软 · 更自然',
+      hasDownload: true,
+      params: ['edgeVoice', 'edgeStyle', 'edgeRate', 'edgePitch']
+    },
+    aliyun: {
+      name: '🔷 阿里云',
+      desc: '需API密钥 · 超自然中文',
+      hasDownload: true,
+      params: ['aliVoice', 'aliRate', 'aliPitch', 'aliVolume', 'aliEmotion']
+    },
+    openai: {
+      name: '🤖 OpenAI',
+      desc: '需API密钥 · 英文极佳',
+      hasDownload: true,
+      params: ['oaVoice', 'oaSpeed']
+    },
+    azure: {
+      name: '🔵 Azure',
+      desc: '需API密钥 · 微软正版',
+      hasDownload: true,
+      params: ['azVoice', 'azStyle', 'azRate', 'azPitch']
+    },
+    localapi: {
+      name: '🏠 本地API',
+      desc: '本地GPU渲染 · Piper/MMS',
+      hasDownload: true,
+      params: ['lapiVoice', 'lapiRate', 'lapiParams']
+    }
+  };
+
+  // 音色选项数据
+  const EDGE_VOICES = [
+    {v:'zh-CN-XiaoxiaoNeural',n:'晓晓 — 女声(自然)'},{v:'zh-CN-YunxiNeural',n:'云希 — 男声(自然)'},
+    {v:'zh-CN-XiaohanNeural',n:'晓涵 — 温柔女声'},{v:'zh-CN-XiaomengNeural',n:'晓梦 — 知性女声'},
+    {v:'zh-CN-XiaoyiNeural',n:'晓伊 — 女童声'},{v:'zh-CN-YunjianNeural',n:'云健 — 解说男声'},
+    {v:'zh-CN-YunxiaNeural',n:'云夏 — 活泼男声'},{v:'zh-CN-YunyangNeural',n:'云扬 — 新闻男声'},
+    {v:'zh-CN-XiaochenNeural',n:'晓晨 — 成熟女声'},{v:'zh-CN-XiaoyanNeural',n:'晓颜 — 亲切女声'},
+    {v:'zh-HK-HiuMaanNeural',n:'粤语 — 晓曼'},{v:'zh-TW-HsiaoChenNeural',n:'台湾 — 晓臻'},
+    {v:'ja-JP-NanamiNeural',n:'日语 — 七海'},{v:'en-US-AriaNeural',n:'英语 — Aria'},
+    {v:'en-US-GuyNeural',n:'英语 — Guy'},{v:'ko-KR-SunHiNeural',n:'韩语 — SunHi'}
+  ];
+  const EDGE_STYLES = ['general','cheerful','sad','angry','fearful','disgusted','serious','gentle','depressed'];
+
+  const ALI_VOICES = [
+    {v:'zhixiaoning',n:'知小凝 — 知性女声'},{v:'zhixiaowan',n:'知小婉 — 温柔女声'},
+    {v:'zhixiaobei',n:'知小北 — 活泼女声'},{v:'zhixiaonan',n:'知小南 — 成熟男声'},
+    {v:'zhixiaomo',n:'知小墨 — 磁性男声'},{v:'zhixiaoyao',n:'知小瑶 — 可爱女声'},
+    {v:'zhixiaoxuan',n:'知小轩 — 阳光男声'},{v:'zhixiaotong',n:'知小童 — 萝莉女声'}
+  ];
+  const ALI_EMOTIONS = ['neutral','happy','sad','angry','fear','surprise','disgust','neutral'];
+
+  const OA_VOICES = ['alloy','echo','fable','onyx','nova','shimmer'];
+
+  const AZ_VOICES = [
+    {v:'zh-CN-XiaoxiaoNeural',n:'晓晓 — 中文女声'},{v:'zh-CN-YunxiNeural',n:'云希 — 中文男声'},
+    {v:'zh-CN-XiaohanNeural',n:'晓涵 — 中文温柔'},{v:'ja-JP-NanamiNeural',n:'七海 — 日语'},
+    {v:'en-US-AriaNeural',n:'Aria — 英语'},{v:'ko-KR-SunHiNeural',n:'SunHi — 韩语'}
+  ];
+  const AZ_STYLES = ['general','cheerful','sad','angry','fearful','disgusted','serious','gentle'];
+
+  // ==================== 音轨管理 ====================
+  function addTrack(data = null) {
+    const id = ++trackIdCounter;
+    const track = {
+      id,
+      text: data?.text || '',
+      source: data?.source || 'edge',
+      params: data?.params || getDefaultParams('edge')
+    };
+    tracks.push(track);
+    renderTrack(track);
+    updateEmptyState();
+    updateGlobalStatus();
+    return track;
+  }
+
+  function getDefaultParams(source) {
+    const defaults = {
+      local: { voice: '', rate: 1, pitch: 1, volume: 1 },
+      edge: { edgeVoice: 'zh-CN-XiaoxiaoNeural', edgeStyle: 'general', edgeRate: 0, edgePitch: 0 },
+      aliyun: { aliVoice: 'zhixiaoning', aliRate: 0, aliPitch: 0, aliVolume: 50, aliEmotion: 'neutral' },
+      openai: { oaVoice: 'alloy', oaSpeed: 1 },
+      azure: { azVoice: 'zh-CN-XiaoxiaoNeural', azStyle: 'general', azRate: 0, azPitch: 0 },
+      localapi: { lapiVoice: 'default', lapiRate: 1, lapiParams: '' }
+    };
+    return JSON.parse(JSON.stringify(defaults[source] || defaults.edge));
+  }
+
+  function removeTrack(id) {
+    tracks = tracks.filter(t => t.id !== id);
+    const el = document.getElementById(`track-${id}`);
+    if (el) el.remove();
+    updateEmptyState();
+    updateGlobalStatus();
+  }
+
+  function duplicateTrack(id) {
+    const t = tracks.find(tr => tr.id === id);
+    if (!t) return;
+    addTrack({ text: t.text, source: t.source, params: JSON.parse(JSON.stringify(t.params)) });
+  }
+
+  function moveTrack(id, dir) {
+    const idx = tracks.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= tracks.length) return;
+    [tracks[idx], tracks[newIdx]] = [tracks[newIdx], tracks[idx]];
+    // 重新渲染全部
+    document.getElementById('track-list').innerHTML = '';
+    tracks.forEach(t => renderTrack(t));
+  }
+
+  function updateTrackData(id) {
+    const t = tracks.find(tr => tr.id === id);
+    if (!t) return;
+    const el = document.getElementById(`track-${id}`);
+    t.text = el.querySelector('.track-text').value;
+    t.source = el.querySelector('.track-source').value;
+
+    // 读取各参数
+    const p = t.params;
+    const s = t.source;
+    if (s === 'local') {
+      p.voice = el.querySelector('[data-param="voice"]')?.value || '';
+      p.rate = parseFloat(el.querySelector('[data-param="rate"]')?.value || 1);
+      p.pitch = parseFloat(el.querySelector('[data-param="pitch"]')?.value || 1);
+      p.volume = parseFloat(el.querySelector('[data-param="volume"]')?.value || 1);
+    } else if (s === 'edge') {
+      p.edgeVoice = el.querySelector('[data-param="edgeVoice"]')?.value || 'zh-CN-XiaoxiaoNeural';
+      p.edgeStyle = el.querySelector('[data-param="edgeStyle"]')?.value || 'general';
+      p.edgeRate = parseInt(el.querySelector('[data-param="edgeRate"]')?.value || 0);
+      p.edgePitch = parseInt(el.querySelector('[data-param="edgePitch"]')?.value || 0);
+    } else if (s === 'aliyun') {
+      p.aliVoice = el.querySelector('[data-param="aliVoice"]')?.value || 'zhixiaoning';
+      p.aliRate = parseInt(el.querySelector('[data-param="aliRate"]')?.value || 0);
+      p.aliPitch = parseInt(el.querySelector('[data-param="aliPitch"]')?.value || 0);
+      p.aliVolume = parseInt(el.querySelector('[data-param="aliVolume"]')?.value || 50);
+      p.aliEmotion = el.querySelector('[data-param="aliEmotion"]')?.value || 'neutral';
+    } else if (s === 'openai') {
+      p.oaVoice = el.querySelector('[data-param="oaVoice"]')?.value || 'alloy';
+      p.oaSpeed = parseFloat(el.querySelector('[data-param="oaSpeed"]')?.value || 1);
+    } else if (s === 'azure') {
+      p.azVoice = el.querySelector('[data-param="azVoice"]')?.value || 'zh-CN-XiaoxiaoNeural';
+      p.azStyle = el.querySelector('[data-param="azStyle"]')?.value || 'general';
+      p.azRate = parseInt(el.querySelector('[data-param="azRate"]')?.value || 0);
+      p.azPitch = parseInt(el.querySelector('[data-param="azPitch"]')?.value || 0);
+    } else if (s === 'localapi') {
+      p.lapiVoice = el.querySelector('[data-param="lapiVoice"]')?.value || 'default';
+      p.lapiRate = parseFloat(el.querySelector('[data-param="lapiRate"]')?.value || 1);
+      p.lapiParams = el.querySelector('[data-param="lapiParams"]')?.value || '';
+    }
+  }
+
+  function renderTrack(track) {
+    const list = document.getElementById('track-list');
+    const cfg = SOURCE_CONFIG[track.source];
+
+    const div = document.createElement('div');
+    div.id = `track-${track.id}`;
+    div.className = 'rounded-xl border border-(--line-divider) bg-(--card-bg) overflow-hidden';
+
+    // 构建参数HTML
+    let paramsHtml = '';
+    if (track.source === 'local') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label>
+            <select data-param="voice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              <option value="">默认</option>
+            </select>
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-rate">${track.params.rate}</span></label><input data-param="rate" type="range" min="0.5" max="2" step="0.1" value="${track.params.rate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音高 <span class="val-pitch">${track.params.pitch}</span></label><input data-param="pitch" type="range" min="0.5" max="2" step="0.1" value="${track.params.pitch}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音量 <span class="val-volume">${track.params.volume}</span></label><input data-param="volume" type="range" min="0" max="1" step="0.1" value="${track.params.volume}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'edge') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label>
+            <select data-param="edgeVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${EDGE_VOICES.map(v => `<option value="${v.v}" ${v.v===track.params.edgeVoice?'selected':''}>${v.n}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">说话风格</label>
+            <select data-param="edgeStyle" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${EDGE_STYLES.map(s => `<option value="${s}" ${s===track.params.edgeStyle?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速偏移 <span class="val-edgeRate">${track.params.edgeRate}</span></label><input data-param="edgeRate" type="range" min="-50" max="50" step="1" value="${track.params.edgeRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调偏移 <span class="val-edgePitch">${track.params.edgePitch}</span></label><input data-param="edgePitch" type="range" min="-50" max="50" step="1" value="${track.params.edgePitch}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'aliyun') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label>
+            <select data-param="aliVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${ALI_VOICES.map(v => `<option value="${v.v}" ${v.v===track.params.aliVoice?'selected':''}>${v.n}</option>`).join('')}
+            </select>
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-aliRate">${track.params.aliRate}</span></label><input data-param="aliRate" type="range" min="-500" max="500" step="10" value="${track.params.aliRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调 <span class="val-aliPitch">${track.params.aliPitch}</span></label><input data-param="aliPitch" type="range" min="-500" max="500" step="10" value="${track.params.aliPitch}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音量 <span class="val-aliVolume">${track.params.aliVolume}</span></label><input data-param="aliVolume" type="range" min="0" max="100" step="1" value="${track.params.aliVolume}" class="w-full accent-(--primary)"></div>
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">情感</label>
+            <select data-param="aliEmotion" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${ALI_EMOTIONS.map(e => `<option value="${e}" ${e===track.params.aliEmotion?'selected':''}>${e}</option>`).join('')}
+            </select>
+          </div>
+        </div>`;
+    } else if (track.source === 'openai') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音色</label>
+            <select data-param="oaVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${OA_VOICES.map(v => `<option value="${v}" ${v===track.params.oaVoice?'selected':''}>${v}</option>`).join('')}
+            </select>
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-oaSpeed">${track.params.oaSpeed}</span></label><input data-param="oaSpeed" type="range" min="0.25" max="4" step="0.25" value="${track.params.oaSpeed}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'azure') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label>
+            <select data-param="azVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${AZ_VOICES.map(v => `<option value="${v.v}" ${v.v===track.params.azVoice?'selected':''}>${v.n}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">风格</label>
+            <select data-param="azStyle" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${AZ_STYLES.map(s => `<option value="${s}" ${s===track.params.azStyle?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-azRate">${track.params.azRate}</span></label><input data-param="azRate" type="range" min="-100" max="100" step="1" value="${track.params.azRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调 <span class="val-azPitch">${track.params.azPitch}</span></label><input data-param="azPitch" type="range" min="-100" max="100" step="1" value="${track.params.azPitch}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'localapi') {
+      paramsHtml = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音ID</label>
+            <input data-param="lapiVoice" type="text" value="${track.params.lapiVoice}" placeholder="default" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-lapiRate">${track.params.lapiRate}</span></label><input data-param="lapiRate" type="range" min="0.5" max="2" step="0.1" value="${track.params.lapiRate}" class="w-full accent-(--primary)"></div>
+          <div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">额外参数 (JSON)</label>
+            <input data-param="lapiParams" type="text" value="${track.params.lapiParams}" placeholder='{"speaker":"p225"}' class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+          </div>
+        </div>`;
+    }
+
+    div.innerHTML = `
+      <div class="px-4 py-3 bg-(--bg) border-b border-(--line-divider) flex items-center gap-2">
+        <div class="h-6 w-6 rounded-md bg-(--primary) flex items-center justify-center text-white dark:text-black text-xs font-bold">${tracks.length}</div>
+        <div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">音轨 #${track.id}</div>
+        <div class="ml-auto flex items-center gap-1">
+          <button class="track-up px-2 py-1 rounded hover:bg-(--line-divider) text-neutral-500 dark:text-neutral-400 text-xs" title="上移">↑</button>
+          <button class="track-down px-2 py-1 rounded hover:bg-(--line-divider) text-neutral-500 dark:text-neutral-400 text-xs" title="下移">↓</button>
+          <button class="track-dup px-2 py-1 rounded hover:bg-(--line-divider) text-neutral-500 dark:text-neutral-400 text-xs" title="复制">📋</button>
+          <button class="track-del px-2 py-1 rounded hover:bg-red-500/10 text-red-500 text-xs" title="删除">✕</button>
+        </div>
+      </div>
+      <div class="px-4 py-4 space-y-3">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1">
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">文本内容</label>
+            <textarea class="track-text w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 resize-y focus:outline-none focus:border-(--primary)" rows="3" placeholder="输入要合成的文字...">${track.text}</textarea>
+          </div>
+          <div class="sm:w-48">
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语音源</label>
+            <select class="track-source w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">
+              ${Object.entries(SOURCE_CONFIG).map(([k,v]) => `<option value="${k}" ${k===track.source?'selected':''}>${v.name}</option>`).join('')}
+            </select>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">${cfg.desc}</div>
+          </div>
+        </div>
+        <div class="track-params">${paramsHtml}</div>
+        <div class="flex items-center gap-2 pt-1">
+          <button class="track-play px-4 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> 试听
+          </button>
+          <button class="track-dl px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) text-sm font-medium hover:opacity-85 active:scale-95 transition flex items-center gap-1 ${cfg.hasDownload?'':'opacity-50 cursor-not-allowed'}" ${cfg.hasDownload?'':'disabled'}>
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> 下载
+          </button>
+          <span class="track-status text-xs text-neutral-500 dark:text-neutral-400 ml-auto">就绪</span>
+        </div>
+      </div>
+    `;
+
+    list.appendChild(div);
+    bindTrackEvents(div, track);
+
+    // 如果是local，加载声音列表
+    if (track.source === 'local') {
+      loadLocalVoices(div.querySelector('[data-param="voice"]'), track.params.voice);
+    }
+  }
+
+  function bindTrackEvents(el, track) {
+    // 文本和源变更
+    el.querySelector('.track-text').addEventListener('input', () => updateTrackData(track.id));
+    el.querySelector('.track-source').addEventListener('change', () => {
+      updateTrackData(track.id);
+      // 重新渲染参数区
+      const t = tracks.find(tr => tr.id === track.id);
+      t.params = getDefaultParams(t.source);
+      el.querySelector('.track-params').innerHTML = buildParamsHtml(t);
+      bindParamsEvents(el, track);
+      // 更新下载按钮状态
+      const cfg = SOURCE_CONFIG[t.source];
+      const dlBtn = el.querySelector('.track-dl');
+      dlBtn.disabled = !cfg.hasDownload;
+      dlBtn.classList.toggle('opacity-50', !cfg.hasDownload);
+      dlBtn.classList.toggle('cursor-not-allowed', !cfg.hasDownload);
+      // 如果是local，加载声音
+      if (t.source === 'local') {
+        setTimeout(() => loadLocalVoices(el.querySelector('[data-param="voice"]'), ''), 100);
+      }
+    });
+
+    bindParamsEvents(el, track);
+
+    // 按钮
+    el.querySelector('.track-del').addEventListener('click', () => removeTrack(track.id));
+    el.querySelector('.track-dup').addEventListener('click', () => duplicateTrack(track.id));
+    el.querySelector('.track-up').addEventListener('click', () => moveTrack(track.id, -1));
+    el.querySelector('.track-down').addEventListener('click', () => moveTrack(track.id, 1));
+    el.querySelector('.track-play').addEventListener('click', () => playTrack(track.id));
+    el.querySelector('.track-dl').addEventListener('click', () => downloadTrack(track.id));
+  }
+
+  function buildParamsHtml(track) {
+    const p = track.params;
+    if (track.source === 'local') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label><select data-param="voice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)"><option value="">默认</option></select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-rate">${p.rate}</span></label><input data-param="rate" type="range" min="0.5" max="2" step="0.1" value="${p.rate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音高 <span class="val-pitch">${p.pitch}</span></label><input data-param="pitch" type="range" min="0.5" max="2" step="0.1" value="${p.pitch}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音量 <span class="val-volume">${p.volume}</span></label><input data-param="volume" type="range" min="0" max="1" step="0.1" value="${p.volume}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'edge') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label><select data-param="edgeVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${EDGE_VOICES.map(v => `<option value="${v.v}" ${v.v===p.edgeVoice?'selected':''}>${v.n}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">说话风格</label><select data-param="edgeStyle" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${EDGE_STYLES.map(s => `<option value="${s}" ${s===p.edgeStyle?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速偏移 <span class="val-edgeRate">${p.edgeRate}</span></label><input data-param="edgeRate" type="range" min="-50" max="50" step="1" value="${p.edgeRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调偏移 <span class="val-edgePitch">${p.edgePitch}</span></label><input data-param="edgePitch" type="range" min="-50" max="50" step="1" value="${p.edgePitch}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'aliyun') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label><select data-param="aliVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${ALI_VOICES.map(v => `<option value="${v.v}" ${v.v===p.aliVoice?'selected':''}>${v.n}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-aliRate">${p.aliRate}</span></label><input data-param="aliRate" type="range" min="-500" max="500" step="10" value="${p.aliRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调 <span class="val-aliPitch">${p.aliPitch}</span></label><input data-param="aliPitch" type="range" min="-500" max="500" step="10" value="${p.aliPitch}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音量 <span class="val-aliVolume">${p.aliVolume}</span></label><input data-param="aliVolume" type="range" min="0" max="100" step="1" value="${p.aliVolume}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">情感</label><select data-param="aliEmotion" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${ALI_EMOTIONS.map(e => `<option value="${e}" ${e===p.aliEmotion?'selected':''}>${e}</option>`).join('')}</select></div>
+        </div>`;
+    } else if (track.source === 'openai') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音色</label><select data-param="oaVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${OA_VOICES.map(v => `<option value="${v}" ${v===p.oaVoice?'selected':''}>${v}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-oaSpeed">${p.oaSpeed}</span></label><input data-param="oaSpeed" type="range" min="0.25" max="4" step="0.25" value="${p.oaSpeed}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'azure') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音</label><select data-param="azVoice" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${AZ_VOICES.map(v => `<option value="${v.v}" ${v.v===p.azVoice?'selected':''}>${v.n}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">风格</label><select data-param="azStyle" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)">${AZ_STYLES.map(s => `<option value="${s}" ${s===p.azStyle?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-azRate">${p.azRate}</span></label><input data-param="azRate" type="range" min="-100" max="100" step="1" value="${p.azRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音调 <span class="val-azPitch">${p.azPitch}</span></label><input data-param="azPitch" type="range" min="-100" max="100" step="1" value="${p.azPitch}" class="w-full accent-(--primary)"></div>
+        </div>`;
+    } else if (track.source === 'localapi') {
+      return `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">声音ID</label><input data-param="lapiVoice" type="text" value="${p.lapiVoice}" placeholder="default" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">语速 <span class="val-lapiRate">${p.lapiRate}</span></label><input data-param="lapiRate" type="range" min="0.5" max="2" step="0.1" value="${p.lapiRate}" class="w-full accent-(--primary)"></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">额外参数 (JSON)</label><input data-param="lapiParams" type="text" value="${p.lapiParams}" placeholder='{"speaker":"p225"}' class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)"></div>
+        </div>`;
+    }
+    return '';
+  }
+
+  function bindParamsEvents(el, track) {
+    el.querySelectorAll('input[type="range"]').forEach(input => {
+      input.addEventListener('input', () => {
+        const valSpan = el.querySelector('.val-' + input.dataset.param);
+        if (valSpan) valSpan.textContent = input.value;
+        updateTrackData(track.id);
+      });
+    });
+    el.querySelectorAll('select, input[type="text"]').forEach(input => {
+      input.addEventListener('change', () => updateTrackData(track.id));
+    });
+  }
+
+  function loadLocalVoices(selectEl, selectedName) {
+    if (!selectEl) return;
     const voices = speechSynthesis.getVoices();
-    voiceSel.innerHTML = '';
+    if (!voices.length) {
+      selectEl.innerHTML = '<option value="">加载中...</option>';
+      return;
+    }
+    selectEl.innerHTML = '<option value="">默认</option>';
     const groups = {};
     voices.forEach(v => {
       const lang = v.lang.split('-')[0];
       if (!groups[lang]) groups[lang] = [];
       groups[lang].push(v);
     });
-    const order = ['zh', 'en', 'ja', 'ko'].filter(k => groups[k]).concat(Object.keys(groups).filter(k => !['zh','en','ja','ko'].includes(k)));
+    const order = ['zh','en','ja','ko'].filter(k => groups[k]).concat(Object.keys(groups).filter(k => !['zh','en','ja','ko'].includes(k)));
+    const names = {zh:'中文', en:'English', ja:'日本語', ko:'한국어'};
     order.forEach(lang => {
       const grp = document.createElement('optgroup');
-      const names = {zh:'中文', en:'English', ja:'日本語', ko:'한국어'};
       grp.label = names[lang] || lang.toUpperCase();
       groups[lang].forEach(v => {
         const opt = document.createElement('option');
         opt.value = v.name;
         opt.textContent = v.name;
-        if (v.default) opt.selected = true;
+        if (v.name === selectedName) opt.selected = true;
         grp.appendChild(opt);
       });
-      voiceSel.appendChild(grp);
+      selectEl.appendChild(grp);
     });
   }
-  speechSynthesis.onvoiceschanged = loadVoices;
-  loadVoices();
 
-  // 滑块数值显示
-  [rateEl, pitchEl, volEl].forEach(el => {
-    el.addEventListener('input', () => {
-      document.getElementById(el.id.replace('tts-','') + '-val').textContent = el.value;
-    });
-  });
+  // ==================== 播放逻辑 ====================
+  async function playTrack(id) {
+    const t = tracks.find(tr => tr.id === id);
+    if (!t || !t.text.trim()) { showToast('请输入文本', 'warn'); return; }
 
-  // 语音源切换
-  sourceSel.addEventListener('change', () => {
-    const isEdge = sourceSel.value === 'edge';
-    localWrap.style.display = isEdge ? 'none' : 'block';
-    edgeWrap.style.display = isEdge ? 'block' : 'none';
-  });
+    stopAll();
+    const el = document.getElementById(`track-${id}`);
+    const status = el.querySelector('.track-status');
+    status.textContent = '合成中...';
 
-  // 朗读
-  speakBtn.addEventListener('click', async () => {
-    const text = textEl.value.trim();
-    if (!text) { setStatus('请输入文字'); return; }
-
-    if (sourceSel.value === 'edge') {
-      // Edge 在线
-      setStatus('Edge 合成中...');
-      speakBtn.disabled = true;
-      try {
-        const audioUrl = await edgeTTS.synthesize(text, document.getElementById('tts-edge-voice').value);
-        const audio = new Audio(audioUrl);
-        audio.play();
-        setStatus('播放中...');
-        audio.onended = () => { setStatus('就绪'); speakBtn.disabled = false; };
-      } catch (err) {
-        setStatus('合成失败: ' + err.message);
-        speakBtn.disabled = false;
+    try {
+      if (t.source === 'local') {
+        await playLocal(t, status);
+      } else if (t.source === 'edge') {
+        await playEdge(t, status);
+      } else if (t.source === 'aliyun') {
+        await playAliyun(t, status);
+      } else if (t.source === 'openai') {
+        await playOpenAI(t, status);
+      } else if (t.source === 'azure') {
+        await playAzure(t, status);
+      } else if (t.source === 'localapi') {
+        await playLocalApi(t, status);
       }
-    } else {
-      // 本地
+    } catch (err) {
+      status.textContent = '失败';
+      showToast(err.message || '播放失败', 'error');
+    }
+  }
+
+  function stopAll() {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    speechSynthesis.cancel();
+    isPlaying = false;
+    document.getElementById('btn-stop').classList.add('hidden');
+    document.querySelectorAll('.track-status').forEach(s => s.textContent = '就绪');
+  }
+
+  // ----- 本地浏览器 -----
+  function playLocal(t, status) {
+    return new Promise((resolve, reject) => {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.voice = speechSynthesis.getVoices().find(v => v.name === voiceSel.value) || null;
-      u.rate = parseFloat(rateEl.value);
-      u.pitch = parseFloat(pitchEl.value);
-      u.volume = parseFloat(volEl.value);
-      u.onstart = () => setStatus('朗读中...');
-      u.onend = () => setStatus('就绪');
-      u.onerror = () => setStatus('出错了');
+      const u = new SpeechSynthesisUtterance(t.text);
+      const p = t.params;
+      u.voice = speechSynthesis.getVoices().find(v => v.name === p.voice) || null;
+      u.rate = p.rate;
+      u.pitch = p.pitch;
+      u.volume = p.volume;
+      u.onstart = () => { status.textContent = '朗读中...'; isPlaying = true; document.getElementById('btn-stop').classList.remove('hidden'); };
+      u.onend = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); resolve(); };
+      u.onerror = () => { status.textContent = '出错'; reject(new Error('朗读失败')); };
       speechSynthesis.speak(u);
-    }
-  });
+    });
+  }
 
-  // 下载（仅本地支持）
-  dlBtn.addEventListener('click', () => {
-    if (sourceSel.value === 'edge') {
-      setStatus('Edge 模式请直接点朗读，音频已生成');
-      return;
-    }
-    const text = textEl.value.trim();
-    if (!text) { setStatus('请输入文字'); return; }
-
-    // 用 AudioContext 录制本地语音输出
-    setStatus('录制中...');
-    const ctx = new AudioContext();
-    const dest = ctx.createMediaStreamDestination();
-    const recorder = new MediaRecorder(dest.stream);
-    const chunks = [];
-    recorder.ondataavailable = e => chunks.push(e.data);
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tts-' + Date.now() + '.webm';
-      a.click();
-      URL.revokeObjectURL(url);
-      setStatus('下载完成');
-    };
-
-    // 连接音频
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = speechSynthesis.getVoices().find(v => v.name === voiceSel.value) || null;
-    u.rate = parseFloat(rateEl.value);
-    u.pitch = parseFloat(pitchEl.value);
-    u.volume = parseFloat(volEl.value);
-
-    recorder.start();
-    speechSynthesis.speak(u);
-    u.onend = () => recorder.stop();
-  });
-
-  // ===== Edge-TTS =====
+  // ----- Edge TTS -----
   class EdgeTTS {
     constructor() { this.chunks = []; }
-    async synthesize(text, voice = 'zh-CN-XiaoxiaoNeural') {
+    async synthesize(text, voice = 'zh-CN-XiaoxiaoNeural', style = 'general', rate = 0, pitch = 0) {
       return new Promise((resolve, reject) => {
         this.chunks = [];
         const token = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
         const ws = new WebSocket(`wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${token}`);
-
         ws.onopen = () => {
           const config = { context: { synthesis: { audio: { metadataOptions: { sentenceBoundaryEnabled: false, wordBoundaryEnabled: false }, outputFormat: 'audio-24khz-48kbitrate-mono-mp3' } } } };
-          ws.send(`X-Timestamp:${new Date().toISOString()}
-Content-Type:application/json; charset=utf-8
-Path:speech.config
-
-${JSON.stringify(config)}`);
-          const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'><voice name='${voice}'>${text.replace(/[<>]/g, '')}</voice></speak>`;
-          ws.send(`X-Timestamp:${new Date().toISOString()}
-Content-Type:application/ssml+xml
-Path:ssml
-
-${ssml}`);
+          ws.send(`X-Timestamp:${new Date().toISOString()}\nContent-Type:application/json; charset=utf-8\nPath:speech.config\n\n${JSON.stringify(config)}`);
+          let styleStr = style && style !== 'general' ? ` style="${style}"` : '';
+          let rateStr = rate !== 0 ? ` rate="${rate > 0 ? '+' : ''}${rate}%"` : '';
+          let pitchStr = pitch !== 0 ? ` pitch="${pitch > 0 ? '+' : ''}${pitch}Hz"` : '';
+          const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'><voice name='${voice}'${styleStr}${rateStr}${pitchStr}>${text.replace(/[<>]/g, '')}</voice></speak>`;
+          ws.send(`X-Timestamp:${new Date().toISOString()}\nContent-Type:application/ssml+xml\nPath:ssml\n\n${ssml}`);
         };
-
         ws.onmessage = (e) => { if (e.data instanceof Blob) this.chunks.push(e.data); };
         ws.onclose = () => {
-          if (this.chunks.length > 0) resolve(URL.createObjectURL(new Blob(this.chunks, { type: 'audio/mpeg' })));
+          if (this.chunks.length > 0) resolve(new Blob(this.chunks, { type: 'audio/mpeg' }));
           else reject(new Error('未收到音频'));
         };
         ws.onerror = (err) => reject(err);
@@ -240,4 +681,410 @@ ${ssml}`);
     }
   }
   const edgeTTS = new EdgeTTS();
+
+  async function playEdge(t, status) {
+    const p = t.params;
+    const blob = await edgeTTS.synthesize(t.text, p.edgeVoice, p.edgeStyle, p.edgeRate, p.edgePitch);
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.play();
+    status.textContent = '播放中...';
+    isPlaying = true;
+    document.getElementById('btn-stop').classList.remove('hidden');
+    currentAudio.onended = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); };
+  }
+
+  // ----- 阿里云 -----
+  async function playAliyun(t, status) {
+    const cfg = getApiConfig();
+    if (!cfg['ak-id'] || !cfg['ak-secret'] || !cfg['ak-appkey']) {
+      throw new Error('请先配置阿里云API密钥');
+    }
+    // 阿里云语音合成REST API (极简版，通过HTTP直接调用)
+    // 由于前端签名复杂，这里使用一个简化的方案：直接调用token接口
+    status.textContent = '请求中...';
+
+    // 构建请求参数
+    const params = new URLSearchParams();
+    params.append('appkey', cfg['ak-appkey']);
+    params.append('text', t.text);
+    params.append('format', 'mp3');
+    params.append('sample_rate', '16000');
+    params.append('voice', t.params.aliVoice);
+    params.append('speech_rate', String(t.params.aliRate));
+    params.append('pitch_rate', String(t.params.aliPitch));
+    params.append('volume', String(t.params.aliVolume));
+
+    // 注意：阿里云REST API需要签名，前端直接调用有CORS和签名问题
+    // 这里提供一个替代方案：使用阿里云的NLS WebSocket接口（需要token）
+    // 但由于签名复杂，我们提示用户使用本地代理或后端
+
+    // 实际上，阿里云语音合成有直接的HTTP接口，但需要签名
+    // 为了简化，这里我们尝试直接fetch（可能会因CORS失败）
+    try {
+      const resp = await fetch('https://nls-gateway.aliyuncs.com/stream/v1/tts?' + params.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      currentAudio = new Audio(url);
+      currentAudio.play();
+      status.textContent = '播放中...';
+      isPlaying = true;
+      document.getElementById('btn-stop').classList.remove('hidden');
+      currentAudio.onended = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); };
+    } catch (e) {
+      // 如果CORS失败，提示用户
+      throw new Error('阿里云TTS需要后端代理或本地签名。建议：1)使用本地API模式调用本地部署的TTS 2)使用Edge/本地浏览器代替');
+    }
+  }
+
+  // ----- OpenAI -----
+  async function playOpenAI(t, status) {
+    const cfg = getApiConfig();
+    if (!cfg['openai-key']) throw new Error('请先配置OpenAI API Key');
+    status.textContent = '请求中...';
+    const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + cfg['openai-key'],
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'tts-1',
+        input: t.text,
+        voice: t.params.oaVoice,
+        speed: t.params.oaSpeed
+      })
+    });
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error('OpenAI Error: ' + err);
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.play();
+    status.textContent = '播放中...';
+    isPlaying = true;
+    document.getElementById('btn-stop').classList.remove('hidden');
+    currentAudio.onended = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); };
+  }
+
+  // ----- Azure -----
+  async function playAzure(t, status) {
+    const cfg = getApiConfig();
+    if (!cfg['azure-key'] || !cfg['azure-region']) throw new Error('请先配置Azure密钥和Region');
+    status.textContent = '请求中...';
+    const region = cfg['azure-region'];
+    const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN"><voice name="${t.params.azVoice}"><mstts:express-as style="${t.params.azStyle}">${t.text}</mstts:express-as></voice></speak>`;
+    const resp = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': cfg['azure-key'],
+        'Content-Type': 'application/ssml+xml',
+        'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3'
+      },
+      body: ssml
+    });
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error('Azure Error: ' + err);
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.play();
+    status.textContent = '播放中...';
+    isPlaying = true;
+    document.getElementById('btn-stop').classList.remove('hidden');
+    currentAudio.onended = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); };
+  }
+
+  // ----- 本地API -----
+  async function playLocalApi(t, status) {
+    const cfg = getApiConfig();
+    if (!cfg['local-api-url']) throw new Error('请先配置本地API地址');
+    status.textContent = '请求中...';
+    let extra = {};
+    try { extra = JSON.parse(t.params.lapiParams || '{}'); } catch(e) {}
+    const resp = await fetch(cfg['local-api-url'], {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: t.text,
+        voice: t.params.lapiVoice,
+        rate: t.params.lapiRate,
+        ...extra
+      })
+    });
+    if (!resp.ok) throw new Error('本地API错误: ' + resp.status);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    currentAudio.play();
+    status.textContent = '播放中...';
+    isPlaying = true;
+    document.getElementById('btn-stop').classList.remove('hidden');
+    currentAudio.onended = () => { status.textContent = '就绪'; isPlaying = false; document.getElementById('btn-stop').classList.add('hidden'); };
+  }
+
+  // ==================== 下载逻辑 ====================
+  async function downloadTrack(id) {
+    const t = tracks.find(tr => tr.id === id);
+    if (!t || !t.text.trim()) { showToast('请输入文本', 'warn'); return; }
+    const el = document.getElementById(`track-${id}`);
+    const status = el.querySelector('.track-status');
+    status.textContent = '下载中...';
+
+    try {
+      let blob;
+      if (t.source === 'edge') {
+        blob = await edgeTTS.synthesize(t.text, t.params.edgeVoice, t.params.edgeStyle, t.params.edgeRate, t.params.edgePitch);
+      } else if (t.source === 'openai') {
+        const cfg = getApiConfig();
+        const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + cfg['openai-key'], 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'tts-1', input: t.text, voice: t.params.oaVoice, speed: t.params.oaSpeed })
+        });
+        blob = await resp.blob();
+      } else if (t.source === 'azure') {
+        const cfg = getApiConfig();
+        const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN"><voice name="${t.params.azVoice}"><mstts:express-as style="${t.params.azStyle}">${t.text}</mstts:express-as></voice></speak>`;
+        const resp = await fetch(`https://${cfg['azure-region']}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+          method: 'POST',
+          headers: { 'Ocp-Apim-Subscription-Key': cfg['azure-key'], 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3' },
+          body: ssml
+        });
+        blob = await resp.blob();
+      } else if (t.source === 'localapi') {
+        const cfg = getApiConfig();
+        let extra = {}; try { extra = JSON.parse(t.params.lapiParams || '{}'); } catch(e) {}
+        const resp = await fetch(cfg['local-api-url'], {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: t.text, voice: t.params.lapiVoice, rate: t.params.lapiRate, ...extra })
+        });
+        blob = await resp.blob();
+      } else if (t.source === 'aliyun') {
+        showToast('阿里云下载需要后端代理，建议用Edge或OpenAI', 'warn');
+        status.textContent = '就绪';
+        return;
+      } else {
+        showToast('本地浏览器不支持直接下载音频文件', 'warn');
+        status.textContent = '就绪';
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tts-track-${t.id}-${Date.now()}.mp3`;
+      a.click();
+      URL.revokeObjectURL(url);
+      status.textContent = '下载完成';
+      showToast('下载完成', 'success');
+    } catch (err) {
+      status.textContent = '失败';
+      showToast(err.message || '下载失败', 'error');
+    }
+  }
+
+  // ==================== 合并导出 ====================
+  async function mergeAndDownload() {
+    if (!tracks.length) { showToast('没有音轨可合并', 'warn'); return; }
+    const validTracks = tracks.filter(t => t.text.trim());
+    if (!validTracks.length) { showToast('音轨文本为空', 'warn'); return; }
+
+    showToast('开始合成所有音轨...', 'info');
+    const blobs = [];
+
+    for (const t of validTracks) {
+      try {
+        let blob;
+        if (t.source === 'edge') {
+          blob = await edgeTTS.synthesize(t.text, t.params.edgeVoice, t.params.edgeStyle, t.params.edgeRate, t.params.edgePitch);
+        } else if (t.source === 'openai') {
+          const cfg = getApiConfig();
+          const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + cfg['openai-key'], 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'tts-1', input: t.text, voice: t.params.oaVoice, speed: t.params.oaSpeed })
+          });
+          blob = await resp.blob();
+        } else if (t.source === 'azure') {
+          const cfg = getApiConfig();
+          const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN"><voice name="${t.params.azVoice}"><mstts:express-as style="${t.params.azStyle}">${t.text}</mstts:express-as></voice></speak>`;
+          const resp = await fetch(`https://${cfg['azure-region']}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+            method: 'POST',
+            headers: { 'Ocp-Apim-Subscription-Key': cfg['azure-key'], 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3' },
+            body: ssml
+          });
+          blob = await resp.blob();
+        } else if (t.source === 'localapi') {
+          const cfg = getApiConfig();
+          let extra = {}; try { extra = JSON.parse(t.params.lapiParams || '{}'); } catch(e) {}
+          const resp = await fetch(cfg['local-api-url'], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: t.text, voice: t.params.lapiVoice, rate: t.params.lapiRate, ...extra })
+          });
+          blob = await resp.blob();
+        } else {
+          continue; // 跳过本地浏览器和阿里云
+        }
+        blobs.push(blob);
+      } catch (e) {
+        showToast(`音轨 #${t.id} 合成失败: ${e.message}`, 'error');
+      }
+    }
+
+    if (!blobs.length) { showToast('没有可合并的音频', 'error'); return; }
+
+    // 使用Web Audio API合并
+    showToast('合并音频中...', 'info');
+    try {
+      const ctx = new AudioContext();
+      const buffers = [];
+      for (const blob of blobs) {
+        const arr = await blob.arrayBuffer();
+        const buf = await ctx.decodeAudioData(arr);
+        buffers.push(buf);
+      }
+
+      // 计算总长度
+      let totalSamples = 0;
+      buffers.forEach(b => totalSamples += b.length);
+      const out = ctx.createBuffer(2, totalSamples, ctx.sampleRate); // 立体声
+
+      let offset = 0;
+      buffers.forEach(buf => {
+        // 混音到立体声
+        for (let ch = 0; ch < 2; ch++) {
+          const srcCh = buf.numberOfChannels > ch ? ch : 0;
+          out.getChannelData(ch).set(buf.getChannelData(srcCh), offset);
+        }
+        offset += buf.length;
+      });
+
+      // 导出WAV
+      const wavBlob = bufferToWave(out, totalSamples);
+      const url = URL.createObjectURL(wavBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tts-merged-${Date.now()}.wav`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('合并导出完成！', 'success');
+    } catch (e) {
+      showToast('合并失败: ' + e.message, 'error');
+    }
+  }
+
+  // AudioBuffer转WAV
+  function bufferToWave(abuffer, len) {
+    let numOfChan = abuffer.numberOfChannels, length = len * numOfChan * 2 + 44,
+        buffer = new ArrayBuffer(length), view = new DataView(buffer),
+        channels = [], i, sample, offset = 0, pos = 0;
+    // 写入WAV头部
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8); // file length
+    setUint32(0x45564157); // "WAVE"
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16); // length = 16
+    setUint16(1); // PCM
+    setUint16(numOfChan);
+    setUint32(abuffer.sampleRate);
+    setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint16(numOfChan * 2); // block-align
+    setUint16(16); // 16-bit
+    setUint32(0x61746164); // "data" chunk
+    setUint32(length - pos - 4); // chunk length
+
+    for(i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
+    while(pos < length) {
+      for(i = 0; i < numOfChan; i++) {
+        sample = Math.max(-1, Math.min(1, channels[i][offset])); 
+        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767)|0;
+        view.setInt16(pos, sample, true); pos += 2;
+      }
+      offset++;
+    }
+    return new Blob([buffer], { type: 'audio/wav' });
+    function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+    function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+  }
+
+  // ==================== 顺序播放 ====================
+  async function playAll() {
+    if (!tracks.length) { showToast('没有音轨', 'warn'); return; }
+    stopAll();
+    isPlaying = true;
+    document.getElementById('btn-stop').classList.remove('hidden');
+
+    for (const t of tracks) {
+      if (!isPlaying) break;
+      if (!t.text.trim()) continue;
+      await playTrack(t.id);
+      // 等待播放结束
+      await new Promise(r => {
+        const check = setInterval(() => {
+          if (!isPlaying || !currentAudio || currentAudio.ended || currentAudio.paused) {
+            clearInterval(check);
+            r();
+          }
+        }, 200);
+      });
+      await new Promise(r => setTimeout(r, 300)); // 段落间隔
+    }
+
+    isPlaying = false;
+    document.getElementById('btn-stop').classList.add('hidden');
+  }
+
+  // ==================== UI状态更新 ====================
+  function updateEmptyState() {
+    const empty = document.getElementById('empty-state');
+    if (tracks.length === 0) empty.classList.remove('hidden');
+    else empty.classList.add('hidden');
+  }
+
+  function updateGlobalStatus() {
+    const valid = tracks.filter(t => t.text.trim()).length;
+    document.getElementById('global-status').textContent = `就绪 · ${tracks.length} 个音轨 · ${valid} 段有文本`;
+  }
+
+  // ==================== 事件绑定 ====================
+  document.addEventListener('DOMContentLoaded', () => {
+    loadApiConfig();
+
+    // API配置面板
+    document.getElementById('btn-api-config').addEventListener('click', () => {
+      const panel = document.getElementById('api-config-panel');
+      panel.classList.toggle('hidden');
+    });
+    document.getElementById('btn-save-api').addEventListener('click', saveApiConfig);
+    document.getElementById('btn-clear-api').addEventListener('click', clearApiConfig);
+
+    // 全局控制
+    document.getElementById('btn-add-track').addEventListener('click', () => addTrack());
+    document.getElementById('btn-play-all').addEventListener('click', playAll);
+    document.getElementById('btn-merge').addEventListener('click', mergeAndDownload);
+    document.getElementById('btn-stop').addEventListener('click', stopAll);
+
+    // 监听voices变化
+    speechSynthesis.onvoiceschanged = () => {
+      document.querySelectorAll('[data-param="voice"]').forEach(sel => {
+        const trackId = parseInt(sel.closest('[id^="track-"]').id.replace('track-',''));
+        const t = tracks.find(tr => tr.id === trackId);
+        if (t) loadLocalVoices(sel, t.params.voice);
+      });
+    };
+
+    // 初始添加一个音轨
+    addTrack();
+  });
 </script>
