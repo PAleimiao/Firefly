@@ -2,391 +2,710 @@
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 ---
 
-<MainGridLayout title="视频剪辑">
-	<div class="card-base p-6 md:p-8 mb-4">
-		<div class="flex items-center gap-3 mb-2">
-			<div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white text-lg">🎬</div>
-			<h1 class="text-2xl font-bold">在线视频剪辑</h1>
-		</div>
-		<p class="text-75 mb-4">
-			纯浏览器的视频剪辑：多段素材拼接、裁剪入点出点、滤镜特效、文字水印、贴纸贴图、淡黑转场、音量调节，最后一键<b>本地合成导出 webm</b>。
-		</p>
-		<div class="rounded-lg border-l-4 border-amber-400 bg-amber-400/10 px-4 py-3 text-sm text-75">
-			⚠️ 剪辑与合成<b>全程在你的设备本地完成，视频不会上传</b>。导出为 1280×720 webm，时长 = 各片段裁剪后总和。
-		</div>
-	</div>
+<MainGridLayout title="视频剪辑工坊" description="纯浏览器视频剪辑：多段素材拼接、裁剪入点出点、滤镜特效、文字水印、贴纸贴图、淡入淡出转场、音量调节，本地合成导出视频。无需上传服务器。">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
 
-	<div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4">
-		<div class="flex flex-col gap-4">
-			<div class="card-base p-4">
-				<h2 class="font-bold mb-3">📹 素材导入</h2>
-				<input id="ve-add" type="file" accept="video/*" multiple class="w-full text-sm mb-3" />
-				<div id="ve-clips" class="flex flex-col gap-3"></div>
-			</div>
+      <!-- 标题栏 -->
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <div class="h-10 w-10 rounded-xl bg-(--primary) flex items-center justify-center text-white dark:text-black/70 text-xl shrink-0">🎬</div>
+        <div>
+          <div class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">视频剪辑工坊</div>
+          <div class="text-sm text-neutral-500 dark:text-neutral-400">纯浏览器剪辑 · 本地合成 · 无需上传</div>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <span id="ve-status" class="text-xs px-3 py-1.5 rounded-full bg-(--bg) border border-(--line-divider) text-neutral-500 dark:text-neutral-400">等待导入素材…</span>
+        </div>
+      </div>
 
-			<div class="card-base p-4">
-				<h2 class="font-bold mb-3">✍️ 文字水印</h2>
-				<div class="grid grid-cols-2 gap-2 text-sm mb-2">
-					<input id="ve-t-text" placeholder="文字内容" class="col-span-2 border-(--line-divider) border rounded px-2 py-1 bg-transparent" />
-					<label>起(秒)<input id="ve-t-in" type="number" min="0" step="0.1" value="0" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>止(秒)<input id="ve-t-out" type="number" min="0" step="0.1" value="3" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>X%<input id="ve-t-x" type="number" min="0" max="100" value="50" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>Y%<input id="ve-t-y" type="number" min="0" max="100" value="90" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>字号<input id="ve-t-size" type="number" min="10" max="200" value="42" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>颜色<input id="ve-t-color" type="color" value="#ffffff" class="w-full h-8 bg-transparent" /></label>
-				</div>
-				<button id="ve-t-add" class="w-full px-3 py-2 rounded-lg border-(--line-divider) border text-sm mb-2">＋ 添加文字</button>
-				<div id="ve-texts" class="flex flex-col gap-1 text-xs"></div>
-			</div>
+      <!-- 警告提示 -->
+      <div class="rounded-xl border-l-4 border-amber-400 bg-amber-400/10 px-4 py-3 text-sm text-neutral-700 dark:text-neutral-300 mb-4">
+        ⚠️ <b>纯本地处理</b>：视频剪辑与合成全程在你的设备上完成，素材不会上传服务器。导出格式为 webm，时长 = 各片段裁剪后总和。
+      </div>
 
-			<div class="card-base p-4">
-				<h2 class="font-bold mb-3">🖼️ 贴纸 / 贴图（自行导入）</h2>
-				<input id="ve-i-file" type="file" accept="image/*" class="w-full text-sm mb-2" />
-				<div class="grid grid-cols-2 gap-2 text-sm mb-2">
-					<label>起(秒)<input id="ve-i-in" type="number" min="0" step="0.1" value="0" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>止(秒)<input id="ve-i-out" type="number" min="0" step="0.1" value="3" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>X%<input id="ve-i-x" type="number" min="0" max="100" value="85" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label>Y%<input id="ve-i-y" type="number" min="0" max="100" value="15" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-					<label class="col-span-2">宽度%<input id="ve-i-w" type="number" min="1" max="100" value="15" class="w-full border-(--line-divider) border rounded px-2 py-1 bg-transparent" /></label>
-				</div>
-				<button id="ve-i-add" class="w-full px-3 py-2 rounded-lg border-(--line-divider) border text-sm mb-2">＋ 添加贴纸</button>
-				<div id="ve-imgs" class="flex flex-col gap-1 text-xs"></div>
-			</div>
+      <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4">
+        <!-- 左侧控制面板 -->
+        <div class="flex flex-col gap-3 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
 
-			<div class="card-base p-4">
-				<h2 class="font-bold mb-3">⚙️ 全局</h2>
-				<label class="text-sm flex items-center gap-2 mb-3"><input id="ve-fade" type="checkbox" checked /> 片段间淡黑转场（0.4s）</label>
-				<button id="ve-preview" class="w-full px-3 py-2 rounded-lg bg-(--primary) text-white text-sm mb-2">▶ 预览合成</button>
-				<button id="ve-export" class="w-full px-3 py-2 rounded-lg bg-red-500 text-white text-sm">⬇ 导出 webm</button>
-				<div id="ve-status" class="text-xs text-50 mt-2">先导入视频素材</div>
-			</div>
-		</div>
+          <!-- 素材导入 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">📹</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">素材导入</div>
+            </div>
+            <label class="flex items-center gap-2 px-3 py-3 rounded-xl bg-(--bg) border border-(--line-divider) border-dashed cursor-pointer hover:border-(--primary) transition group mb-3">
+              <svg class="w-5 h-5 text-neutral-400 group-hover:text-(--primary) transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span class="text-sm text-neutral-500 dark:text-neutral-400">点击选择视频素材（可多选）</span>
+              <input id="ve-add" type="file" accept="video/*" multiple class="hidden" />
+            </label>
+            <div id="ve-clips" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1"></div>
+          </div>
 
-		<div class="card-base p-2">
-			<canvas id="ve-canvas" width="1280" height="720" class="w-full rounded-lg bg-black"></canvas>
-			<div class="text-xs text-50 mt-2 px-2">合成分辨率 1280×720 · 画面自适应裁剪填满（cover）</div>
-		</div>
-	</div>
+          <!-- 片段编辑 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">✂️</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">片段编辑</div>
+            </div>
+            <div id="ve-clip-edit" class="text-sm text-neutral-500 dark:text-neutral-400 text-center py-4">
+              点击上方素材列表中的片段进行编辑
+            </div>
+          </div>
+
+          <!-- 滤镜特效 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">🎨</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">滤镜特效</div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <button data-filter="none" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition active">原图</button>
+              <button data-filter="grayscale" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">黑白</button>
+              <button data-filter="sepia" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">复古</button>
+              <button data-filter="blur" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">模糊</button>
+              <button data-filter="brightness" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">明亮</button>
+              <button data-filter="contrast" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">高对比</button>
+              <button data-filter="saturate" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">鲜艳</button>
+              <button data-filter="invert" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">反色</button>
+              <button data-filter="hue-rotate" class="filter-btn px-2 py-2 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">色相</button>
+            </div>
+            <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300 cursor-pointer mb-2">
+              <input id="ve-fade" type="checkbox" checked class="accent-(--primary) w-4 h-4" />
+              <span>片段间淡入淡出转场 (0.4s)</span>
+            </label>
+          </div>
+
+          <!-- 文字水印 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">✍️</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">文字水印</div>
+            </div>
+            <div class="space-y-2">
+              <input id="ve-t-text" placeholder="输入文字内容…" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-(--primary)" />
+              <div class="grid grid-cols-2 gap-2">
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">起点(秒)</label><input id="ve-t-in" type="number" min="0" step="0.1" value="0" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">终点(秒)</label><input id="ve-t-out" type="number" min="0" step="0.1" value="3" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">X位置(%)</label><input id="ve-t-x" type="number" min="0" max="100" value="50" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Y位置(%)</label><input id="ve-t-y" type="number" min="0" max="100" value="90" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">字号(px)</label><input id="ve-t-size" type="number" min="8" max="200" value="24" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-neutral-500 dark:text-neutral-400">颜色</span>
+                <input id="ve-t-color" type="color" value="#ffffff" class="w-10 h-8 rounded cursor-pointer border-0 bg-transparent" />
+                <span class="text-xs text-neutral-500 dark:text-neutral-400">描边</span>
+                <input id="ve-t-stroke" type="checkbox" checked class="accent-(--primary) w-4 h-4" />
+              </div>
+              <button id="ve-t-add" class="w-full px-3 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">➕ 添加文字</button>
+            </div>
+            <div id="ve-texts" class="flex flex-col gap-1 mt-2 max-h-32 overflow-y-auto"></div>
+          </div>
+
+          <!-- 贴纸贴图 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">🖼️</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">贴纸贴图</div>
+            </div>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 px-3 py-2 rounded-lg bg-(--bg) border border-(--line-divider) border-dashed cursor-pointer hover:border-(--primary) transition group">
+                <svg class="w-4 h-4 text-neutral-400 group-hover:text-(--primary) transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-xs text-neutral-500 dark:text-neutral-400">选择图片</span>
+                <input id="ve-i-file" type="file" accept="image/*" class="hidden" />
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">起点(秒)</label><input id="ve-i-in" type="number" min="0" step="0.1" value="0" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">终点(秒)</label><input id="ve-i-out" type="number" min="0" step="0.1" value="3" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">X(%)</label><input id="ve-i-x" type="number" min="0" max="100" value="85" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Y(%)</label><input id="ve-i-y" type="number" min="0" max="100" value="15" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+                <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">宽度(%)</label><input id="ve-i-w" type="number" min="1" max="100" value="15" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+              </div>
+              <button id="ve-i-add" class="w-full px-3 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">➕ 添加贴纸</button>
+            </div>
+            <div id="ve-imgs" class="flex flex-col gap-1 mt-2 max-h-32 overflow-y-auto"></div>
+          </div>
+
+          <!-- 导出设置 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-lg">💾</span>
+              <div class="font-bold text-neutral-900 dark:text-neutral-100">导出设置</div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">分辨率</label><select id="ve-res" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)"><option value="720">1280×720 (HD)</option><option value="1080" selected>1920×1080 (FHD)</option><option value="480">854×480 (SD)</option></select></div>
+              <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">帧率</label><select id="ve-fps" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)"><option value="30" selected>30fps</option><option value="60">60fps</option><option value="24">24fps</option></select></div>
+            </div>
+            <div class="flex gap-2">
+              <button id="ve-preview" class="flex-1 px-3 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) text-sm font-medium hover:opacity-85 active:scale-95 transition flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                预览合成
+              </button>
+              <button id="ve-export" class="flex-1 px-3 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition flex items-center justify-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                导出视频
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 右侧预览 + 时间轴 -->
+        <div class="flex flex-col gap-3">
+          <!-- 预览画布 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-2 relative flex-1 min-h-[300px] lg:min-h-[400px] flex items-center justify-center">
+            <canvas id="ve-canvas" class="max-w-full max-h-full rounded-lg bg-neutral-900"></canvas>
+            <div id="ve-preview-overlay" class="absolute inset-0 flex items-center justify-center bg-neutral-900/60 rounded-lg hidden">
+              <div class="text-center">
+                <div class="w-10 h-10 border-2 border-(--primary) border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <div class="text-sm text-neutral-300" id="ve-preview-text">预览中…</div>
+              </div>
+            </div>
+            <div id="ve-empty" class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center text-neutral-500 dark:text-neutral-400">
+                <svg class="w-16 h-16 mx-auto mb-3 opacity-30" fill="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <div class="text-lg">暂无素材</div>
+                <div class="text-sm mt-1">在左侧导入视频开始剪辑</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 时间轴 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) p-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-sm font-bold text-neutral-900 dark:text-neutral-100">⏱️ 时间轴</div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" id="ve-timeline-info">0 段 · 0.0s</div>
+            </div>
+            <div id="ve-timeline" class="flex items-center gap-1 overflow-x-auto pb-2 min-h-[60px]">
+              <div class="text-xs text-neutral-500 dark:text-neutral-400 w-full text-center py-4">导入素材后显示时间轴</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </MainGridLayout>
 
 <script is:inline>
-(function () {
-	function $(id) { return document.getElementById(id); }
+(function() {
+  function $(id) { return document.getElementById(id); }
 
-	const W = 1280, H = 720;
-	const canvas = $("ve-canvas");
-	const ctx = canvas.getContext("2d");
-	const statusEl = $("ve-status");
+  const canvas = $("ve-canvas");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const statusEl = $("ve-status");
+  const previewOverlay = $("ve-preview-overlay");
+  const previewText = $("ve-preview-text");
+  const emptyEl = $("ve-empty");
+  const timelineEl = $("ve-timeline");
+  const timelineInfo = $("ve-timeline-info");
 
-	const FILTERS = {
-		none: { name: "原片", css: "none" },
-		vivid: { name: "鲜明", css: "saturate(1.5) contrast(1.12)" },
-		film: { name: "胶片", css: "sepia(0.32) contrast(1.06) brightness(1.03) saturate(1.1)" },
-		bw: { name: "黑白", css: "grayscale(1) contrast(1.1)" },
-		retro: { name: "复古", css: "sepia(0.6) contrast(0.92) brightness(0.98)" },
-		cold: { name: "冷调", css: "saturate(1.05) brightness(1.02) hue-rotate(-12deg)" },
-		warm: { name: "暖阳", css: "sepia(0.22) saturate(1.35) brightness(1.05)" },
-	};
+  let W = 1920, H = 1080;
+  let clips = [];
+  let texts = [];
+  let imgs = [];
+  let busy = false;
+  let stopFlag = false;
+  let selectedClipIndex = -1;
+  let currentFilter = "none";
+  let audioCtx = null;
+  let mediaDest = null;
+  let pendingImg = null;
 
-	let clips = []; // {id,name,url,el,dur,in,out,filter,vol,gain}
-	let texts = []; // {text,in,out,x,y,size,color}
-	let imgs = [];  // {img,name,in,out,x,y,w}
-	let seq = 0;
-	let busy = false;
-	let stopFlag = false;
+  const FILTERS = {
+    none: { css: "none", name: "原图" },
+    grayscale: { css: "grayscale(100%)", name: "黑白" },
+    sepia: { css: "sepia(100%)", name: "复古" },
+    blur: { css: "blur(4px)", name: "模糊" },
+    brightness: { css: "brightness(1.4)", name: "明亮" },
+    contrast: { css: "contrast(1.5)", name: "高对比" },
+    saturate: { css: "saturate(2)", name: "鲜艳" },
+    invert: { css: "invert(100%)", name: "反色" },
+    "hue-rotate": { css: "hue-rotate(90deg)", name: "色相" }
+  };
 
-	let audioCtx = null;
-	let mediaDest = null;
+  // 滤镜按钮
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filter-btn").forEach(b => {
+        b.classList.remove("active", "border-(--primary)", "text-(--primary)");
+      });
+      btn.classList.add("active", "border-(--primary)", "text-(--primary)");
+      currentFilter = btn.dataset.filter;
+      // 更新选中片段的滤镜
+      if (selectedClipIndex >= 0 && clips[selectedClipIndex]) {
+        clips[selectedClipIndex].filter = currentFilter;
+        renderClips();
+      }
+    });
+  });
 
-	function ensureAudio(el) {
-		if (!audioCtx) {
-			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			mediaDest = audioCtx.createMediaStreamDestination();
-		}
-		if (!el._veGain) {
-			const src = audioCtx.createMediaElementSource(el);
-			const gain = audioCtx.createGain();
-			src.connect(gain);
-			gain.connect(audioCtx.destination);
-			gain.connect(mediaDest);
-			el._veGain = gain;
-		}
-		return el._veGain;
-	}
+  // 设置默认选中
+  document.querySelector('[data-filter="none"]').classList.add("border-(--primary)", "text-(--primary)");
 
-	// ---------- 素材列表 ----------
-	$("ve-add").addEventListener("change", (e) => {
-		for (const f of e.target.files) {
-			const url = URL.createObjectURL(f);
-			const el = document.createElement("video");
-			el.src = url;
-			el.crossOrigin = "anonymous";
-			el.playsInline = true;
-			el.muted = false;
-			el.preload = "auto";
-			el.onloadedmetadata = () => {
-				clips.push({ id: ++seq, name: f.name, url, el, dur: el.duration, in: 0, out: el.duration, filter: "none", vol: 1 });
-				renderClips();
-				statusEl.textContent = "共 " + clips.length + " 段素材，总时长 " + totalDur().toFixed(1) + " 秒";
-			};
-		}
-		e.target.value = "";
-	});
+  function setResolution() {
+    const res = $("ve-res").value;
+    if (res === "720") { W = 1280; H = 720; }
+    else if (res === "1080") { W = 1920; H = 1080; }
+    else { W = 854; H = 480; }
+    canvas.width = W; canvas.height = H;
+    // 保持显示比例
+    const container = canvas.parentElement;
+    const ratio = W / H;
+    const cw = container.clientWidth - 16;
+    const ch = container.clientHeight - 16;
+    if (cw / ch > ratio) {
+      canvas.style.height = ch + "px";
+      canvas.style.width = (ch * ratio) + "px";
+    } else {
+      canvas.style.width = cw + "px";
+      canvas.style.height = (cw / ratio) + "px";
+    }
+  }
 
-	function totalDur() {
-		return clips.reduce((s, c) => s + Math.max(0, c.out - c.in), 0);
-	}
+  // 监听分辨率变化
+  $("ve-res").addEventListener("change", setResolution);
+  setResolution();
 
-	function renderClips() {
-		const box = $("ve-clips");
-		box.innerHTML = "";
-		clips.forEach((c, i) => {
-			const div = document.createElement("div");
-			div.className = "border-(--line-divider) border rounded-lg p-2 text-xs";
-			const title = document.createElement("div");
-			title.className = "font-bold mb-1 truncate";
-			title.textContent = (i + 1) + ". " + c.name + "（" + c.dur.toFixed(1) + "s）";
-			div.appendChild(title);
+  // 窗口大小变化时重新调整
+  new ResizeObserver(() => {
+    if (canvas.width) setResolution();
+  }).observe(canvas.parentElement);
 
-			const grid = document.createElement("div");
-			grid.className = "grid grid-cols-2 gap-1 mb-1";
-			grid.appendChild(numInput("入点", c.in, 0, c.dur, 0.1, (v) => { c.in = Math.min(v, c.out); }));
-			grid.appendChild(numInput("出点", c.out, 0, c.dur, 0.1, (v) => { c.out = Math.max(v, c.in); }));
-			div.appendChild(grid);
+  // ---------- 素材导入 ----------
+  $("ve-add").addEventListener("change", (e) => {
+    const files = [...e.target.files];
+    if (!files.length) return;
 
-			const row = document.createElement("div");
-			row.className = "flex gap-1 items-center";
-			const sel = document.createElement("select");
-			sel.className = "flex-1 border-(--line-divider) border rounded px-1 py-0.5 bg-transparent";
-			for (const [k, f] of Object.entries(FILTERS)) {
-				const op = document.createElement("option");
-				op.value = k;
-				op.textContent = f.name;
-				if (c.filter === k) op.selected = true;
-				sel.appendChild(op);
-			}
-			sel.onchange = () => { c.filter = sel.value; };
-			row.appendChild(sel);
+    let loaded = 0;
+    files.forEach((f) => {
+      const url = URL.createObjectURL(f);
+      const video = document.createElement("video");
+      video.src = url;
+      video.muted = true;
+      video.preload = "metadata";
+      video.addEventListener("loadedmetadata", () => {
+        clips.push({
+          el: video,
+          name: f.name,
+          url: url,
+          in: 0,
+          out: video.duration,
+          vol: 1,
+          filter: "none"
+        });
+        loaded++;
+        if (loaded === files.length) {
+          renderClips();
+          renderTimeline();
+          emptyEl.classList.add("hidden");
+          statusEl.textContent = `已导入 ${clips.length} 段素材 · 总时长 ${totalDur().toFixed(1)}s`;
+        }
+      });
+    });
+  });
 
-			const vol = document.createElement("input");
-			vol.type = "range";
-			vol.min = 0; vol.max = 1; vol.step = 0.05; vol.value = c.vol;
-			vol.title = "音量";
-			vol.className = "w-16";
-			vol.oninput = () => { c.vol = parseFloat(vol.value); };
-			row.appendChild(vol);
+  // ---------- 片段列表渲染 ----------
+  function renderClips() {
+    const box = $("ve-clips");
+    box.innerHTML = "";
+    if (!clips.length) {
+      box.innerHTML = '<div class="text-xs text-neutral-500 dark:text-neutral-400 text-center py-2">暂无素材</div>';
+      return;
+    }
 
-			row.appendChild(miniBtn("↑", () => { if (i > 0) { [clips[i - 1], clips[i]] = [clips[i], clips[i - 1]]; renderClips(); } }));
-			row.appendChild(miniBtn("↓", () => { if (i < clips.length - 1) { [clips[i + 1], clips[i]] = [clips[i], clips[i + 1]]; renderClips(); } }));
-			row.appendChild(miniBtn("✕", () => { clips.splice(i, 1); renderClips(); }));
-			div.appendChild(row);
-			box.appendChild(div);
-		});
-	}
+    clips.forEach((c, i) => {
+      const row = document.createElement("div");
+      const isSelected = i === selectedClipIndex;
+      row.className = `flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${
+        isSelected 
+          ? 'border-(--primary) bg-(--primary)/5' 
+          : 'border-(--line-divider) hover:border-(--primary)/50'
+      }`;
+      row.innerHTML = `
+        <span class="text-xs font-mono text-neutral-400 w-5">${i+1}</span>
+        <span class="text-sm truncate flex-1 text-neutral-700 dark:text-neutral-300">${c.name}</span>
+        <span class="text-xs text-neutral-500 dark:text-neutral-400 font-mono">${c.in.toFixed(1)}-${c.out.toFixed(1)}s</span>
+        <span class="text-xs px-1.5 py-0.5 rounded bg-(--bg) text-neutral-500 dark:text-neutral-400">${FILTERS[c.filter]?.name || '原图'}</span>
+        <button class="ve-del-clip px-1.5 py-0.5 rounded hover:bg-red-500/10 text-red-500 text-xs" title="删除">✕</button>
+      `;
+      row.addEventListener("click", (e) => {
+        if (e.target.closest(".ve-del-clip")) return;
+        selectedClipIndex = i;
+        renderClips();
+        renderClipEditor(c);
+        // 更新滤镜按钮
+        currentFilter = c.filter;
+        document.querySelectorAll(".filter-btn").forEach(b => {
+          b.classList.remove("active", "border-(--primary)", "text-(--primary)");
+          if (b.dataset.filter === c.filter) {
+            b.classList.add("active", "border-(--primary)", "text-(--primary)");
+          }
+        });
+      });
+      row.querySelector(".ve-del-clip").addEventListener("click", () => {
+        clips.splice(i, 1);
+        if (selectedClipIndex === i) { selectedClipIndex = -1; $("ve-clip-edit").innerHTML = "点击上方素材列表中的片段进行编辑"; }
+        else if (selectedClipIndex > i) selectedClipIndex--;
+        renderClips();
+        renderTimeline();
+        statusEl.textContent = clips.length ? `已导入 ${clips.length} 段 · 总时长 ${totalDur().toFixed(1)}s` : "等待导入素材…";
+        if (!clips.length) emptyEl.classList.remove("hidden");
+      });
+      box.appendChild(row);
+    });
+  }
 
-	function numInput(label, val, min, max, step, cb) {
-		const l = document.createElement("label");
-		l.textContent = label;
-		const inp = document.createElement("input");
-		inp.type = "number";
-		inp.min = min; inp.max = max; inp.step = step; inp.value = val;
-		inp.className = "w-full border-(--line-divider) border rounded px-1 py-0.5 bg-transparent";
-		inp.onchange = () => cb(parseFloat(inp.value) || 0);
-		l.appendChild(inp);
-		return l;
-	}
-	function miniBtn(t, cb) {
-		const b = document.createElement("button");
-		b.textContent = t;
-		b.className = "px-2 py-0.5 rounded border-(--line-divider) border";
-		b.onclick = cb;
-		return b;
-	}
+  // ---------- 片段编辑器 ----------
+  function renderClipEditor(c) {
+    const box = $("ve-clip-edit");
+    box.innerHTML = `
+      <div class="space-y-3">
+        <div class="text-sm font-medium text-neutral-900 dark:text-neutral-100">${c.name}</div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">入点(秒) · 最大 ${c.el.duration.toFixed(1)}s</label><input id="ve-clip-in" type="number" min="0" max="${c.el.duration}" step="0.1" value="${c.in.toFixed(1)}" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">出点(秒)</label><input id="ve-clip-out" type="number" min="0" max="${c.el.duration}" step="0.1" value="${c.out.toFixed(1)}" class="w-full rounded-lg bg-(--bg) border border-(--line-divider) px-2 py-1.5 text-sm focus:outline-none focus:border-(--primary)" /></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">音量 <span id="ve-clip-vol-val">${Math.round(c.vol*100)}%</span></label><input id="ve-clip-vol" type="range" min="0" max="2" step="0.1" value="${c.vol}" class="w-full accent-(--primary)" /></div>
+          <div><label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">当前滤镜</label><div class="text-sm text-neutral-700 dark:text-neutral-300 py-1.5">${FILTERS[c.filter]?.name || '原图'}</div></div>
+        </div>
+        <div class="flex gap-2">
+          <button id="ve-clip-up" class="px-3 py-1.5 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition" ${selectedClipIndex<=0?'disabled':''}>↑ 上移</button>
+          <button id="ve-clip-down" class="px-3 py-1.5 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition" ${selectedClipIndex>=clips.length-1?'disabled':''}>↓ 下移</button>
+          <button id="ve-clip-split" class="px-3 py-1.5 rounded-lg bg-(--bg) border border-(--line-divider) text-xs hover:border-(--primary) transition">✂️ 在播放头分割</button>
+        </div>
+      </div>
+    `;
 
-	// ---------- 文字 ----------
-	$("ve-t-add").addEventListener("click", () => {
-		const t = $("ve-t-text").value.trim();
-		if (!t) return;
-		texts.push({
-			text: t,
-			in: parseFloat($("ve-t-in").value) || 0,
-			out: parseFloat($("ve-t-out").value) || 3,
-			x: parseFloat($("ve-t-x").value) || 50,
-			y: parseFloat($("ve-t-y").value) || 90,
-			size: parseFloat($("ve-t-size").value) || 42,
-			color: $("ve-t-color").value,
-		});
-		renderTexts();
-	});
-	function renderTexts() {
-		const box = $("ve-texts");
-		box.innerHTML = "";
-		texts.forEach((t, i) => {
-			const row = document.createElement("div");
-			row.className = "flex justify-between items-center border-(--line-divider) border rounded px-2 py-1";
-			const s = document.createElement("span");
-			s.className = "truncate";
-			s.textContent = t.text + "（" + t.in + "-" + t.out + "s）";
-			row.appendChild(s);
-			row.appendChild(miniBtn("✕", () => { texts.splice(i, 1); renderTexts(); }));
-			box.appendChild(row);
-		});
-	}
+    $("ve-clip-in").addEventListener("change", () => {
+      c.in = Math.max(0, Math.min(parseFloat($("ve-clip-in").value) || 0, c.out - 0.1));
+      $("ve-clip-in").value = c.in.toFixed(1);
+      renderClips();
+      renderTimeline();
+      statusEl.textContent = `已导入 ${clips.length} 段 · 总时长 ${totalDur().toFixed(1)}s`;
+    });
+    $("ve-clip-out").addEventListener("change", () => {
+      c.out = Math.min(c.el.duration, Math.max(parseFloat($("ve-clip-out").value) || 0, c.in + 0.1));
+      $("ve-clip-out").value = c.out.toFixed(1);
+      renderClips();
+      renderTimeline();
+      statusEl.textContent = `已导入 ${clips.length} 段 · 总时长 ${totalDur().toFixed(1)}s`;
+    });
+    $("ve-clip-vol").addEventListener("input", () => {
+      c.vol = parseFloat($("ve-clip-vol").value);
+      $("ve-clip-vol-val").textContent = Math.round(c.vol * 100) + "%";
+    });
+    $("ve-clip-up").addEventListener("click", () => {
+      if (selectedClipIndex <= 0) return;
+      [clips[selectedClipIndex], clips[selectedClipIndex-1]] = [clips[selectedClipIndex-1], clips[selectedClipIndex]];
+      selectedClipIndex--;
+      renderClips();
+      renderTimeline();
+      renderClipEditor(clips[selectedClipIndex]);
+    });
+    $("ve-clip-down").addEventListener("click", () => {
+      if (selectedClipIndex >= clips.length - 1) return;
+      [clips[selectedClipIndex], clips[selectedClipIndex+1]] = [clips[selectedClipIndex+1], clips[selectedClipIndex]];
+      selectedClipIndex++;
+      renderClips();
+      renderTimeline();
+      renderClipEditor(clips[selectedClipIndex]);
+    });
+  }
 
-	// ---------- 贴纸 ----------
-	let pendingImg = null;
-	$("ve-i-file").addEventListener("change", (e) => {
-		const f = e.target.files[0];
-		if (!f) return;
-		const img = new Image();
-		img.onload = () => { pendingImg = { img, name: f.name }; statusEl.textContent = "贴纸已选：" + f.name + "，点「添加贴纸」"; };
-		img.src = URL.createObjectURL(f);
-	});
-	$("ve-i-add").addEventListener("click", () => {
-		if (!pendingImg) return;
-		imgs.push({
-			img: pendingImg.img,
-			name: pendingImg.name,
-			in: parseFloat($("ve-i-in").value) || 0,
-			out: parseFloat($("ve-i-out").value) || 3,
-			x: parseFloat($("ve-i-x").value) || 85,
-			y: parseFloat($("ve-i-y").value) || 15,
-			w: parseFloat($("ve-i-w").value) || 15,
-		});
-		pendingImg = null;
-		renderImgs();
-	});
-	function renderImgs() {
-		const box = $("ve-imgs");
-		box.innerHTML = "";
-		imgs.forEach((t, i) => {
-			const row = document.createElement("div");
-			row.className = "flex justify-between items-center border-(--line-divider) border rounded px-2 py-1";
-			const s = document.createElement("span");
-			s.className = "truncate";
-			s.textContent = t.name + "（" + t.in + "-" + t.out + "s）";
-			row.appendChild(s);
-			row.appendChild(miniBtn("✕", () => { imgs.splice(i, 1); renderImgs(); }));
-			box.appendChild(row);
-		});
-	}
+  // ---------- 时间轴渲染 ----------
+  function renderTimeline() {
+    if (!clips.length) {
+      timelineEl.innerHTML = '<div class="text-xs text-neutral-500 dark:text-neutral-400 w-full text-center py-4">导入素材后显示时间轴</div>';
+      timelineInfo.textContent = "0 段 · 0.0s";
+      return;
+    }
 
-	// ---------- 合成播放 ----------
-	function drawCover(video) {
-		const vw = video.videoWidth, vh = video.videoHeight;
-		if (!vw || !vh) return;
-		const s = Math.max(W / vw, H / vh);
-		const dw = vw * s, dh = vh * s;
-		ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh);
-	}
+    timelineEl.innerHTML = "";
+    const total = totalDur();
+    const scale = Math.max(2, 300 / total); // 像素/秒
 
-	function drawOverlays(t) {
-		ctx.filter = "none";
-		for (const o of texts) {
-			if (t < o.in || t > o.out) continue;
-			ctx.font = "bold " + o.size + "px sans-serif";
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
-			ctx.lineWidth = Math.max(2, o.size / 12);
-			ctx.strokeStyle = "rgba(0,0,0,0.7)";
-			ctx.strokeText(o.text, (o.x / 100) * W, (o.y / 100) * H);
-			ctx.fillStyle = o.color;
-			ctx.fillText(o.text, (o.x / 100) * W, (o.y / 100) * H);
-		}
-		for (const o of imgs) {
-			if (t < o.in || t > o.out) continue;
-			const w = (o.w / 100) * W;
-			const h = (w / o.img.width) * o.img.height;
-			ctx.drawImage(o.img, (o.x / 100) * W - w / 2, (o.y / 100) * H - h / 2, w, h);
-		}
-	}
+    clips.forEach((c, i) => {
+      const dur = c.out - c.in;
+      const width = Math.max(40, dur * scale);
+      const isSelected = i === selectedClipIndex;
 
-	async function playComposition(recording) {
-		if (!clips.length) { statusEl.textContent = "没有素材"; return false; }
-		if (busy) return false;
-		busy = true;
-		stopFlag = false;
-		if (audioCtx) await audioCtx.resume();
+      const seg = document.createElement("div");
+      seg.className = `shrink-0 rounded-lg border p-2 cursor-pointer transition ${
+        isSelected ? 'border-(--primary) bg-(--primary)/5' : 'border-(--line-divider) hover:border-(--primary)/50'
+      }`;
+      seg.style.width = width + "px";
+      seg.innerHTML = `
+        <div class="text-xs truncate text-neutral-700 dark:text-neutral-300 mb-1">${i+1}. ${c.name}</div>
+        <div class="text-xs text-neutral-500 dark:text-neutral-400 font-mono">${dur.toFixed(1)}s</div>
+        <div class="w-full h-1 rounded-full bg-(--line-divider) mt-1 overflow-hidden">
+          <div class="h-full bg-(--primary) rounded-full" style="width: ${(dur/total)*100}%"></div>
+        </div>
+      `;
+      seg.addEventListener("click", () => {
+        selectedClipIndex = i;
+        renderClips();
+        renderClipEditor(c);
+        renderTimeline();
+      });
+      timelineEl.appendChild(seg);
+    });
 
-		let recorder = null;
-		const chunks = [];
-		if (recording) {
-			const stream = canvas.captureStream(30);
-			if (mediaDest) mediaDest.stream.getAudioTracks().forEach((tr) => stream.addTrack(tr));
-			recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-			recorder.ondataavailable = (ev) => { if (ev.data.size) chunks.push(ev.data); };
-			recorder.start();
-		}
+    timelineInfo.textContent = `${clips.length} 段 · ${total.toFixed(1)}s`;
+  }
 
-		const fade = $("ve-fade").checked ? 0.4 : 0;
-		let compT = 0;
-		const total = totalDur();
+  function totalDur() {
+    return clips.reduce((sum, c) => sum + (c.out - c.in), 0);
+  }
 
-		for (const c of clips) {
-			if (stopFlag) break;
-			const el = c.el;
-			const gain = ensureAudio(el);
-			clips.forEach((o) => { if (o.el._veGain) o.el._veGain.gain.value = 0; });
-			gain.gain.value = c.vol;
-			el.currentTime = c.in;
-			try { await el.play(); } catch (e) { /* 忽略自动播放限制 */ }
-			const segDur = c.out - c.in;
-			const segStart = compT;
+  // ---------- 文字水印 ----------
+  $("ve-t-add").addEventListener("click", () => {
+    const text = $("ve-t-text").value.trim();
+    if (!text) return;
+    texts.push({
+      text,
+      in: parseFloat($("ve-t-in").value) || 0,
+      out: parseFloat($("ve-t-out").value) || 3,
+      x: parseFloat($("ve-t-x").value) || 50,
+      y: parseFloat($("ve-t-y").value) || 90,
+      size: parseInt($("ve-t-size").value) || 24,
+      color: $("ve-t-color").value,
+      stroke: $("ve-t-stroke").checked
+    });
+    $("ve-t-text").value = "";
+    renderTexts();
+  });
 
-			await new Promise((resolve) => {
-				function frame() {
-					if (stopFlag) { resolve(); return; }
-					const local = el.currentTime - c.in;
-					const t = segStart + local;
-					ctx.filter = FILTERS[c.filter].css;
-					drawCover(el);
-					ctx.filter = "none";
-					if (fade > 0) {
-						const aIn = Math.min(1, local / fade);
-						const aOut = Math.min(1, (segDur - local) / fade);
-						const a = 1 - Math.min(aIn, aOut);
-						if (a > 0) {
-							ctx.fillStyle = "rgba(0,0,0," + Math.min(1, a) + ")";
-							ctx.fillRect(0, 0, W, H);
-						}
-					}
-					drawOverlays(t);
-					statusEl.textContent = (recording ? "导出中 " : "预览中 ") + Math.min(100, (t / total) * 100).toFixed(0) + "%";
-					if (el.currentTime >= c.out || el.ended) { resolve(); return; }
-					requestAnimationFrame(frame);
-				}
-				frame();
-			});
-			el.pause();
-			compT += segDur;
-		}
+  function renderTexts() {
+    const box = $("ve-texts");
+    box.innerHTML = "";
+    texts.forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "flex justify-between items-center px-2 py-1.5 rounded-lg bg-(--bg) border border-(--line-divider) text-xs";
+      row.innerHTML = `
+        <span class="truncate text-neutral-700 dark:text-neutral-300">${t.text} (${t.in.toFixed(1)}-${t.out.toFixed(1)}s)</span>
+        <button class="ve-del-text px-1.5 py-0.5 rounded hover:bg-red-500/10 text-red-500" title="删除">✕</button>
+      `;
+      row.querySelector(".ve-del-text").addEventListener("click", () => { texts.splice(i, 1); renderTexts(); });
+      box.appendChild(row);
+    });
+  }
 
-		clips.forEach((o) => { if (o.el._veGain) o.el._veGain.gain.value = 0; });
+  // ---------- 贴纸 ----------
+  $("ve-i-file").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const img = new Image();
+    img.onload = () => { pendingImg = { img, name: f.name }; statusEl.textContent = "贴纸已选: " + f.name + "，点击添加"; };
+    img.src = URL.createObjectURL(f);
+  });
+  $("ve-i-add").addEventListener("click", () => {
+    if (!pendingImg) return;
+    imgs.push({
+      img: pendingImg.img,
+      name: pendingImg.name,
+      in: parseFloat($("ve-i-in").value) || 0,
+      out: parseFloat($("ve-i-out").value) || 3,
+      x: parseFloat($("ve-i-x").value) || 85,
+      y: parseFloat($("ve-i-y").value) || 15,
+      w: parseFloat($("ve-i-w").value) || 15,
+    });
+    pendingImg = null;
+    statusEl.textContent = `已导入 ${clips.length} 段 · 总时长 ${totalDur().toFixed(1)}s`;
+    renderImgs();
+  });
+  function renderImgs() {
+    const box = $("ve-imgs");
+    box.innerHTML = "";
+    imgs.forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "flex justify-between items-center px-2 py-1.5 rounded-lg bg-(--bg) border border-(--line-divider) text-xs";
+      row.innerHTML = `
+        <span class="truncate text-neutral-700 dark:text-neutral-300">${t.name} (${t.in.toFixed(1)}-${t.out.toFixed(1)}s)</span>
+        <button class="ve-del-img px-1.5 py-0.5 rounded hover:bg-red-500/10 text-red-500" title="删除">✕</button>
+      `;
+      row.querySelector(".ve-del-img").addEventListener("click", () => { imgs.splice(i, 1); renderImgs(); });
+      box.appendChild(row);
+    });
+  }
 
-		if (recording && recorder) {
-			await new Promise((r) => { recorder.onstop = r; recorder.stop(); });
-			const blob = new Blob(chunks, { type: "video/webm" });
-			const a = document.createElement("a");
-			a.href = URL.createObjectURL(blob);
-			a.download = "edited.webm";
-			a.click();
-			statusEl.textContent = "已导出 edited.webm（" + (blob.size / 1048576).toFixed(1) + " MB）";
-		} else {
-			statusEl.textContent = stopFlag ? "已停止" : "预览完成";
-		}
-		busy = false;
-		return true;
-	}
+  // ---------- 音频处理 ----------
+  function ensureAudio(video) {
+    if (!video._veGain) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        mediaDest = audioCtx.createMediaStreamDestination();
+      }
+      const src = audioCtx.createMediaElementSource(video);
+      const gain = audioCtx.createGain();
+      src.connect(gain);
+      gain.connect(audioCtx.destination);
+      gain.connect(mediaDest);
+      video._veGain = gain;
+      video._veSrc = src;
+    }
+    return video._veGain;
+  }
 
-	$("ve-preview").addEventListener("click", () => {
-		if (busy) { stopFlag = true; return; }
-		$("ve-preview").textContent = "⏹ 停止";
-		playComposition(false).finally(() => { $("ve-preview").textContent = "▶ 预览合成"; });
-	});
-	$("ve-export").addEventListener("click", () => {
-		if (busy) return;
-		statusEl.textContent = "导出中，请勿切换标签页…";
-		playComposition(true);
-	});
+  // ---------- 绘制函数 ----------
+  function drawCover(video) {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) return;
+    const s = Math.max(W / vw, H / vh);
+    const dw = vw * s, dh = vh * s;
+    ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  }
+
+  function drawOverlays(t) {
+    ctx.filter = "none";
+    for (const o of texts) {
+      if (t < o.in || t > o.out) continue;
+      ctx.font = "bold " + o.size + "px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      if (o.stroke) {
+        ctx.lineWidth = Math.max(2, o.size / 12);
+        ctx.strokeStyle = "rgba(0,0,0,0.7)";
+        ctx.strokeText(o.text, (o.x / 100) * W, (o.y / 100) * H);
+      }
+      ctx.fillStyle = o.color;
+      ctx.fillText(o.text, (o.x / 100) * W, (o.y / 100) * H);
+    }
+    for (const o of imgs) {
+      if (t < o.in || t > o.out) continue;
+      const w = (o.w / 100) * W;
+      const h = (w / o.img.width) * o.img.height;
+      ctx.drawImage(o.img, (o.x / 100) * W - w / 2, (o.y / 100) * H - h / 2, w, h);
+    }
+  }
+
+  // ---------- 合成播放 ----------
+  async function playComposition(recording) {
+    if (!clips.length) { statusEl.textContent = "没有素材"; return false; }
+    if (busy) return false;
+    busy = true;
+    stopFlag = false;
+    if (audioCtx) await audioCtx.resume();
+
+    const fps = parseInt($("ve-fps").value) || 30;
+    const frameInterval = 1000 / fps;
+
+    let recorder = null;
+    const chunks = [];
+    if (recording) {
+      const stream = canvas.captureStream(fps);
+      if (mediaDest) mediaDest.stream.getAudioTracks().forEach((tr) => stream.addTrack(tr));
+      const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") 
+        ? "video/webm;codecs=vp9" 
+        : MediaRecorder.isTypeSupported("video/webm;codecs=vp8") 
+        ? "video/webm;codecs=vp8" 
+        : "video/webm";
+      recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8000000 });
+      recorder.ondataavailable = (ev) => { if (ev.data.size) chunks.push(ev.data); };
+      recorder.start();
+    }
+
+    const fade = $("ve-fade").checked ? 0.4 : 0;
+    let compT = 0;
+    const total = totalDur();
+
+    previewOverlay.classList.remove("hidden");
+
+    for (const c of clips) {
+      if (stopFlag) break;
+      const el = c.el;
+      const gain = ensureAudio(el);
+
+      // 静音其他片段
+      clips.forEach((o) => { if (o.el._veGain) o.el._veGain.gain.value = 0; });
+      gain.gain.value = c.vol;
+
+      el.currentTime = c.in;
+      try { await el.play(); } catch (e) { /* 忽略自动播放限制 */ }
+
+      const segDur = c.out - c.in;
+      const segStart = compT;
+
+      await new Promise((resolve) => {
+        let lastFrame = 0;
+        function frame() {
+          if (stopFlag) { resolve(); return; }
+          const now = performance.now();
+          if (now - lastFrame < frameInterval) {
+            requestAnimationFrame(frame);
+            return;
+          }
+          lastFrame = now;
+
+          const local = el.currentTime - c.in;
+          const t = segStart + local;
+
+          // 应用滤镜
+          ctx.filter = FILTERS[c.filter]?.css || "none";
+          drawCover(el);
+          ctx.filter = "none";
+
+          // 淡入淡出
+          if (fade > 0) {
+            const aIn = Math.min(1, local / fade);
+            const aOut = Math.min(1, (segDur - local) / fade);
+            const a = 1 - Math.min(aIn, aOut);
+            if (a > 0) {
+              ctx.fillStyle = "rgba(0,0,0," + Math.min(1, a) + ")";
+              ctx.fillRect(0, 0, W, H);
+            }
+          }
+
+          drawOverlays(t);
+
+          const pct = Math.min(100, (t / total) * 100);
+          previewText.textContent = (recording ? "导出中 " : "预览中 ") + pct.toFixed(0) + "%";
+          statusEl.textContent = (recording ? "导出中 " : "预览中 ") + pct.toFixed(0) + "%";
+
+          if (el.currentTime >= c.out || el.ended) { resolve(); return; }
+          requestAnimationFrame(frame);
+        }
+        frame();
+      });
+
+      el.pause();
+      compT += segDur;
+    }
+
+    clips.forEach((o) => { if (o.el._veGain) o.el._veGain.gain.value = 0; });
+
+    previewOverlay.classList.add("hidden");
+
+    if (recording && recorder) {
+      await new Promise((r) => { recorder.onstop = r; recorder.stop(); });
+      const blob = new Blob(chunks, { type: "video/webm" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "edited-" + Date.now() + ".webm";
+      a.click();
+      statusEl.textContent = "✅ 已导出 " + (blob.size / 1048576).toFixed(1) + " MB";
+    } else {
+      statusEl.textContent = stopFlag ? "已停止" : "预览完成";
+    }
+    busy = false;
+    return true;
+  }
+
+  $("ve-preview").addEventListener("click", () => {
+    if (busy) { stopFlag = true; return; }
+    $("ve-preview").innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> 停止';
+    playComposition(false).finally(() => {
+      $("ve-preview").innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> 预览合成';
+    });
+  });
+
+  $("ve-export").addEventListener("click", () => {
+    if (busy) return;
+    statusEl.textContent = "导出中，请勿切换标签页…";
+    playComposition(true);
+  });
 })();
 </script>
