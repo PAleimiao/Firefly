@@ -1,0 +1,243 @@
+---
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="语音合成" description="文本转语音，支持本地浏览器语音和 Edge 在线语音">
+  <div class="card-base p-6 max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+      <i class="fas fa-microphone-alt text-[var(--primary)]"></i>
+      语音合成
+    </h2>
+    <p class="text-sm text-[var(--text-secondary)] mb-4">输入文字，选择声音，一键朗读或下载音频。</p>
+
+    <!-- 文本输入 -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1">文本内容</label>
+      <textarea id="tts-text" rows="4" class="w-full p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)] resize-y focus:outline-none focus:border-[var(--primary)]" placeholder="输入要朗读的文字..."></textarea>
+    </div>
+
+    <!-- 语音源 -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium mb-1">语音源</label>
+      <select id="tts-source" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]">
+        <option value="local">本地浏览器（免费，设备自带）</option>
+        <option value="edge">Edge 在线（微软，更自然）</option>
+      </select>
+    </div>
+
+    <!-- 本地语音设置 -->
+    <div id="local-settings" class="space-y-3 mb-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">声音</label>
+        <select id="tts-voice" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]"></select>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs mb-1">语速 <span id="rate-val">1.0</span></label>
+          <input id="tts-rate" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+        </div>
+        <div>
+          <label class="block text-xs mb-1">音高 <span id="pitch-val">1.0</span></label>
+          <input id="tts-pitch" type="range" min="0.5" max="2" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+        </div>
+        <div>
+          <label class="block text-xs mb-1">音量 <span id="vol-val">1.0</span></label>
+          <input id="tts-volume" type="range" min="0" max="1" step="0.1" value="1" class="w-full accent-[var(--primary)]">
+        </div>
+      </div>
+    </div>
+
+    <!-- Edge 语音设置 -->
+    <div id="edge-settings" class="mb-4" style="display:none">
+      <label class="block text-sm font-medium mb-1">Edge 声音</label>
+      <select id="tts-edge-voice" class="w-full p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)]">
+        <option value="zh-CN-XiaoxiaoNeural">晓晓 — 女声（自然）</option>
+        <option value="zh-CN-YunxiNeural">云希 — 男声（自然）</option>
+        <option value="zh-CN-XiaohanNeural">晓涵 — 温柔女声</option>
+        <option value="zh-CN-XiaomengNeural">晓梦 — 知性女声</option>
+        <option value="zh-CN-XiaoyiNeural">晓伊 — 女童声</option>
+        <option value="zh-CN-YunjianNeural">云健 — 解说男声</option>
+      </select>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="flex gap-3 mb-3">
+      <button id="tts-speak" class="flex-1 py-2.5 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 transition">
+        <i class="fas fa-play mr-1"></i> 朗读
+      </button>
+      <button id="tts-download" class="flex-1 py-2.5 rounded-lg bg-[var(--card-bg)] border border-[var(--line-divider)] text-[var(--text-main)] font-medium hover:bg-[var(--btn-hover)] transition">
+        <i class="fas fa-download mr-1"></i> 下载
+      </button>
+    </div>
+
+    <!-- 状态 -->
+    <div id="tts-status" class="text-sm text-[var(--text-secondary)] text-center">就绪</div>
+  </div>
+</MainGridLayout>
+
+<script>
+  // ===== 本地语音 =====
+  const textEl = document.getElementById('tts-text');
+  const voiceSel = document.getElementById('tts-voice');
+  const rateEl = document.getElementById('tts-rate');
+  const pitchEl = document.getElementById('tts-pitch');
+  const volEl = document.getElementById('tts-volume');
+  const speakBtn = document.getElementById('tts-speak');
+  const dlBtn = document.getElementById('tts-download');
+  const statusEl = document.getElementById('tts-status');
+  const sourceSel = document.getElementById('tts-source');
+  const localWrap = document.getElementById('local-settings');
+  const edgeWrap = document.getElementById('edge-settings');
+
+  function setStatus(s) { statusEl.textContent = s; }
+
+  // 加载声音列表
+  function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    voiceSel.innerHTML = '';
+    const groups = {};
+    voices.forEach(v => {
+      const lang = v.lang.split('-')[0];
+      if (!groups[lang]) groups[lang] = [];
+      groups[lang].push(v);
+    });
+    const order = ['zh', 'en', 'ja', 'ko'].filter(k => groups[k]).concat(Object.keys(groups).filter(k => !['zh','en','ja','ko'].includes(k)));
+    order.forEach(lang => {
+      const grp = document.createElement('optgroup');
+      const names = {zh:'中文', en:'English', ja:'日本語', ko:'한국어'};
+      grp.label = names[lang] || lang.toUpperCase();
+      groups[lang].forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name;
+        if (v.default) opt.selected = true;
+        grp.appendChild(opt);
+      });
+      voiceSel.appendChild(grp);
+    });
+  }
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+
+  // 滑块数值显示
+  [rateEl, pitchEl, volEl].forEach(el => {
+    el.addEventListener('input', () => {
+      document.getElementById(el.id.replace('tts-','') + '-val').textContent = el.value;
+    });
+  });
+
+  // 语音源切换
+  sourceSel.addEventListener('change', () => {
+    const isEdge = sourceSel.value === 'edge';
+    localWrap.style.display = isEdge ? 'none' : 'block';
+    edgeWrap.style.display = isEdge ? 'block' : 'none';
+  });
+
+  // 朗读
+  speakBtn.addEventListener('click', async () => {
+    const text = textEl.value.trim();
+    if (!text) { setStatus('请输入文字'); return; }
+
+    if (sourceSel.value === 'edge') {
+      // Edge 在线
+      setStatus('Edge 合成中...');
+      speakBtn.disabled = true;
+      try {
+        const audioUrl = await edgeTTS.synthesize(text, document.getElementById('tts-edge-voice').value);
+        const audio = new Audio(audioUrl);
+        audio.play();
+        setStatus('播放中...');
+        audio.onended = () => { setStatus('就绪'); speakBtn.disabled = false; };
+      } catch (err) {
+        setStatus('合成失败: ' + err.message);
+        speakBtn.disabled = false;
+      }
+    } else {
+      // 本地
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = speechSynthesis.getVoices().find(v => v.name === voiceSel.value) || null;
+      u.rate = parseFloat(rateEl.value);
+      u.pitch = parseFloat(pitchEl.value);
+      u.volume = parseFloat(volEl.value);
+      u.onstart = () => setStatus('朗读中...');
+      u.onend = () => setStatus('就绪');
+      u.onerror = () => setStatus('出错了');
+      speechSynthesis.speak(u);
+    }
+  });
+
+  // 下载（仅本地支持）
+  dlBtn.addEventListener('click', () => {
+    if (sourceSel.value === 'edge') {
+      setStatus('Edge 模式请直接点朗读，音频已生成');
+      return;
+    }
+    const text = textEl.value.trim();
+    if (!text) { setStatus('请输入文字'); return; }
+
+    // 用 AudioContext 录制本地语音输出
+    setStatus('录制中...');
+    const ctx = new AudioContext();
+    const dest = ctx.createMediaStreamDestination();
+    const recorder = new MediaRecorder(dest.stream);
+    const chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tts-' + Date.now() + '.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('下载完成');
+    };
+
+    // 连接音频
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = speechSynthesis.getVoices().find(v => v.name === voiceSel.value) || null;
+    u.rate = parseFloat(rateEl.value);
+    u.pitch = parseFloat(pitchEl.value);
+    u.volume = parseFloat(volEl.value);
+
+    recorder.start();
+    speechSynthesis.speak(u);
+    u.onend = () => recorder.stop();
+  });
+
+  // ===== Edge-TTS =====
+  class EdgeTTS {
+    constructor() { this.chunks = []; }
+    async synthesize(text, voice = 'zh-CN-XiaoxiaoNeural') {
+      return new Promise((resolve, reject) => {
+        this.chunks = [];
+        const token = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
+        const ws = new WebSocket(`wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${token}`);
+
+        ws.onopen = () => {
+          const config = { context: { synthesis: { audio: { metadataOptions: { sentenceBoundaryEnabled: false, wordBoundaryEnabled: false }, outputFormat: 'audio-24khz-48kbitrate-mono-mp3' } } } };
+          ws.send(`X-Timestamp:${new Date().toISOString()}
+Content-Type:application/json; charset=utf-8
+Path:speech.config
+
+${JSON.stringify(config)}`);
+          const ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'><voice name='${voice}'>${text.replace(/[<>]/g, '')}</voice></speak>`;
+          ws.send(`X-Timestamp:${new Date().toISOString()}
+Content-Type:application/ssml+xml
+Path:ssml
+
+${ssml}`);
+        };
+
+        ws.onmessage = (e) => { if (e.data instanceof Blob) this.chunks.push(e.data); };
+        ws.onclose = () => {
+          if (this.chunks.length > 0) resolve(URL.createObjectURL(new Blob(this.chunks, { type: 'audio/mpeg' })));
+          else reject(new Error('未收到音频'));
+        };
+        ws.onerror = (err) => reject(err);
+      });
+    }
+  }
+  const edgeTTS = new EdgeTTS();
+</script>
