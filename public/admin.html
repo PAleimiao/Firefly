@@ -903,6 +903,12 @@ addEpisode();
     <h3 id="edit-anime-title" style="margin-bottom: 15px;"></h3>
     <input type="hidden" id="edit-anime-idx">
 
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label>英文标识 (slug) <span style="color: #e74c3c;">*</span></label>
+      <input type="text" id="edit-anime-slug" placeholder="如: watashi-koibito" style="width: 100%; padding: 10px; background: #0d0d0d; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 14px;" />
+      <p style="color: #888; font-size: 12px; margin-top: 4px;">⚠️ 只能用小写字母、数字、横线，不能重复。修改后旧链接会失效！</p>
+    </div>
+
     <div id="edit-episodes-list"></div>
 
     <button type="button" onclick="addEditEpisode()" style="background: #444; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 10px 0;">
@@ -1009,6 +1015,7 @@ function editAnime(idx) {
   const anime = animeListData[idx];
   document.getElementById("edit-anime-title").textContent = "编辑: " + anime.title;
   document.getElementById("edit-anime-idx").value = idx;
+  document.getElementById("edit-anime-slug").value = anime.slug || "";
   document.getElementById("anime-edit-area").style.display = "block";
 
   const list = document.getElementById("edit-episodes-list");
@@ -1054,6 +1061,23 @@ function deleteAnime(idx) {
 async function saveAnimeChanges() {
   if (currentEditIdx < 0) return;
 
+  // 验证并保存slug
+  const newSlug = document.getElementById("edit-anime-slug").value.trim().toLowerCase();
+  if (!newSlug) {
+    alert("英文标识 (slug) 不能为空");
+    return;
+  }
+  if (!/^[a-z0-9-]+$/.test(newSlug)) {
+    alert("英文标识只能包含小写字母、数字和横线");
+    return;
+  }
+  // 检查是否与其他番剧重复
+  const dupIdx = animeListData.findIndex((a, i) => i !== currentEditIdx && a.slug === newSlug);
+  if (dupIdx !== -1) {
+    alert("英文标识已被其他番剧使用: " + animeListData[dupIdx].title);
+    return;
+  }
+
   const titles = document.querySelectorAll(".edit-ep-title");
   const urls = document.querySelectorAll(".edit-ep-url");
   const newEps = [];
@@ -1071,6 +1095,7 @@ async function saveAnimeChanges() {
     return;
   }
 
+  animeListData[currentEditIdx].slug = newSlug;
   animeListData[currentEditIdx].episodes = newEps;
   await saveAnimeListToGitHub();
 }
