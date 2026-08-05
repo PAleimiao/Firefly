@@ -1,78 +1,237 @@
 ---
-import { Icon } from "astro-icon/components";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 ---
 
-<MainGridLayout title="404 - 页面走丢了" description="你要找的页面不存在，但它可能去避难所躲起来了。">
-  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-[500px]">
-    <div class="card-base z-10 px-6 sm:px-9 py-12 sm:py-16 relative w-full flex flex-col items-center justify-center text-center">
+<MainGridLayout title="404 - 页面迷失在虚空" description="你要找的页面不存在，它可能迷失在数据虚空里了。">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-[600px]">
+    <div class="card-base z-10 relative w-full flex flex-col items-center justify-center text-center overflow-hidden" style="min-height: 600px;">
 
-      <!-- 404 大号数字 -->
-      <div class="text-8xl sm:text-9xl font-black text-(--primary) opacity-15 mb-2 select-none" style="line-height: 1;">
-        404
+      <!-- Canvas 粒子背景 -->
+      <canvas id="err-canvas" class="absolute inset-0 w-full h-full opacity-20 pointer-events-none"></canvas>
+
+      <!-- 故障效果 404 -->
+      <div class="relative mb-6 select-none" style="animation: float 6s ease-in-out infinite;">
+        <div class="glitch text-8xl sm:text-9xl font-black tracking-tighter" data-text="404">
+          404
+        </div>
       </div>
 
       <!-- 图标 -->
-      <div class="mb-4 -mt-8">
-        <div class="h-16 w-16 rounded-2xl bg-(--primary)/10 flex items-center justify-center">
-          <Icon is:inline name="material-symbols:travel-explore" class="text-[2.5rem] text-(--primary)"></Icon>
+      <div class="mb-5 relative">
+        <div class="h-14 w-14 rounded-2xl bg-(--primary)/10 flex items-center justify-center" style="animation: pulse-glow 3s ease-in-out infinite;">
+          <svg class="w-8 h-8 text-(--primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
         </div>
       </div>
 
       <!-- 标题 -->
-      <div class="text-2xl sm:text-3xl font-bold mb-3 text-neutral-900 dark:text-neutral-100">
-        页面走丢了 🤷
-      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold mb-3 text-neutral-900 dark:text-neutral-100 relative z-10">
+        页面迷失在虚空了
+      </h1>
 
       <!-- 描述 -->
-      <p class="text-base text-neutral-500 dark:text-neutral-400 mb-8 max-w-md leading-relaxed">
-        你要找的页面不存在，但它可能去避难所躲起来了。<br>
-        或者……被Kimi3搞崩了？😂
+      <p class="text-base text-neutral-500 dark:text-neutral-400 mb-6 max-w-md leading-relaxed relative z-10 px-4">
+        你要找的页面不存在，它可能去避难所躲起来了，<br class="hidden sm:block">
+        或者被Kimi3搞崩了，或者被黑洞吞了……🌌
       </p>
 
+      <!-- 搜索框 -->
+      <div class="relative w-full max-w-sm mb-6 px-4 z-10">
+        <input 
+          id="err-search" 
+          type="text" 
+          placeholder="搜索避难所…" 
+          class="w-full rounded-xl bg-(--bg) border border-(--line-divider) pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-(--primary) transition"
+        />
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <div id="err-results" class="absolute top-full left-0 right-0 mt-1 bg-(--card-bg) border border-(--line-divider) rounded-xl overflow-hidden hidden shadow-lg z-20"></div>
+      </div>
+
       <!-- 按钮组 -->
-      <div class="flex flex-wrap items-center justify-center gap-3">
-        <a 
-          href="/"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition text-sm"
-        >
-          <Icon is:inline name="material-symbols:home" class="text-[1.1rem]"></Icon>
-          返回避难所首页
+      <div class="flex flex-wrap items-center justify-center gap-3 relative z-10 px-4">
+        <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--primary) text-white dark:text-black/70 font-medium hover:opacity-85 active:scale-95 transition text-sm">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          返回避难所
         </a>
-        <a 
-          href="/watch/"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) font-medium hover:opacity-85 active:scale-95 transition text-sm"
-        >
-          <Icon is:inline name="material-symbols:tv" class="text-[1.1rem]"></Icon>
+        <a href="/watch/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) font-medium hover:opacity-85 active:scale-95 transition text-sm">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21 6h-7.59l3.29-3.29L16 2l-4 4-4-4-.71.71L10.59 6H3c-1.1 0-2 .89-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 14H3V8h18v12zM9 10v8l7-4z"/></svg>
           去看番
         </a>
-        <a 
-          href="/tools/"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) font-medium hover:opacity-85 active:scale-95 transition text-sm"
-        >
-          <Icon is:inline name="material-symbols:construction" class="text-[1.1rem]"></Icon>
+        <a href="/tools/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) font-medium hover:opacity-85 active:scale-95 transition text-sm">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.4-6.9-2-2-5-2.4-7.4-1.3L9 6 6 3 1.6 7.4C.4 9.8.9 12.8 2.9 14.8c1.9 1.9 4.6 2.3 6.9 1.4l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
           去工坊
+        </a>
+        <a href="/posts/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) border border-(--line-divider) font-medium hover:opacity-85 active:scale-95 transition text-sm">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          读文章
         </a>
       </div>
 
-      <!-- 装饰 -->
-      <div class="absolute top-4 left-4 opacity-5">
-        <Icon is:inline name="material-symbols:sentiment-dissatisfied" class="text-[3rem] text-(--primary)"></Icon>
-      </div>
-      <div class="absolute bottom-4 right-4 opacity-5">
-        <Icon is:inline name="material-symbols:broken-image" class="text-[3rem] text-(--primary)"></Icon>
+      <!-- 终端风格装饰文字 -->
+      <div class="mt-8 font-mono text-xs text-neutral-400 dark:text-neutral-600 relative z-10 select-none">
+        <span class="text-(--primary)">$</span> curl -I https://cxl--package.top<span id="err-path" class="text-neutral-500 dark:text-neutral-500"></span>
+        <br>
+        <span class="text-red-500">HTTP/1.1 404 Not Found</span>
+        <br>
+        <span class="text-neutral-400">Content-Type: text/html; charset=utf-8</span>
+        <br>
+        <span class="text-neutral-400">X-Powered-By: Firefly + 避难所</span>
       </div>
 
     </div>
   </div>
 </MainGridLayout>
 
+<script is:inline>
+  // 显示当前路径
+  document.getElementById("err-path").textContent = window.location.pathname;
+
+  // 搜索功能
+  const links = [
+    { href: "/", text: "避难所首页" },
+    { href: "/posts/", text: "文章列表" },
+    { href: "/watch/", text: "看番" },
+    { href: "/tools/", text: "工具工坊" },
+    { href: "/tools/tts/", text: "语音合成" },
+    { href: "/tools/nonsense/", text: "废话生成器" },
+    { href: "/tools/daily/", text: "每日一签" },
+    { href: "/about/", text: "关于我" },
+    { href: "/friends/", text: "友链" },
+    { href: "/guestbook/", text: "留言板" },
+    { href: "/album/", text: "相册" },
+    { href: "/bangumi/", text: "番组计划" },
+  ];
+
+  const input = document.getElementById("err-search");
+  const results = document.getElementById("err-results");
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { results.classList.add("hidden"); return; }
+    const matched = links.filter(l => l.text.toLowerCase().includes(q) || l.href.toLowerCase().includes(q));
+    if (!matched.length) { results.classList.add("hidden"); return; }
+    results.innerHTML = matched.map(l => `<a href="${l.href}" class="block px-4 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-(--primary)/10 hover:text-(--primary) transition">${l.text}</a>`).join("");
+    results.classList.remove("hidden");
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const q = input.value.trim().toLowerCase();
+      const matched = links.filter(l => l.text.toLowerCase().includes(q));
+      if (matched.length) window.location.href = matched[0].href;
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#err-search") && !e.target.closest("#err-results")) {
+      results.classList.add("hidden");
+    }
+  });
+
+  // Canvas 粒子背景
+  (function() {
+    const canvas = document.getElementById("err-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let W, H;
+    const particles = [];
+    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      W = rect.width; H = rect.height;
+      canvas.width = W; canvas.height = H;
+    }
+    resize();
+    new ResizeObserver(resize).observe(canvas.parentElement);
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        speed: 0.3 + Math.random() * 0.8,
+        char: chars[Math.floor(Math.random() * chars.length)],
+        size: 10 + Math.random() * 14,
+        opacity: 0.1 + Math.random() * 0.3
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      const isDark = document.documentElement.classList.contains("dark");
+      ctx.fillStyle = isDark ? "#a3e6c7" : "#0d9488";
+
+      for (const p of particles) {
+        ctx.globalAlpha = p.opacity;
+        ctx.font = p.size + "px monospace";
+        ctx.fillText(p.char, p.x, p.y);
+        p.y += p.speed;
+        if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+</script>
+
 <style>
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
   }
-  .card-base {
-    animation: fadeInUp 0.5s ease-out;
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.3); }
+    50% { box-shadow: 0 0 20px 4px rgba(var(--primary-rgb), 0.1); }
+  }
+
+  .glitch {
+    position: relative;
+    color: var(--primary);
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch::before {
+    animation: glitch-1 2s infinite linear alternate-reverse;
+    color: #ff6b6b;
+    z-index: -1;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  }
+
+  .glitch::after {
+    animation: glitch-2 3s infinite linear alternate-reverse;
+    color: #4ecdc4;
+    z-index: -2;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  }
+
+  @keyframes glitch-1 {
+    0% { transform: translate(0); }
+    20% { transform: translate(-3px, 2px); }
+    40% { transform: translate(3px, -2px); }
+    60% { transform: translate(-2px, 1px); }
+    80% { transform: translate(2px, -1px); }
+    100% { transform: translate(0); }
+  }
+
+  @keyframes glitch-2 {
+    0% { transform: translate(0); }
+    20% { transform: translate(3px, -2px); }
+    40% { transform: translate(-3px, 2px); }
+    60% { transform: translate(2px, -1px); }
+    80% { transform: translate(-2px, 1px); }
+    100% { transform: translate(0); }
   }
 </style>
