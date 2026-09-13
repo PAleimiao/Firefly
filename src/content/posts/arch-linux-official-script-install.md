@@ -197,6 +197,83 @@ reboot
 
 记得拔掉 U 盘！
 
+## (ﾉ◕ヮ◕)ﾉArch Linux 装完中文乱码？（额外）
+
+装完 Arch 后，终端里中文全变成 `0`、方块，或者连 `pacman -S` 都报 “找不到包名”，这种情况大概率不是字体没装，而是 `locale` 还停留在老的 `zh_CN.GBK`。Arch 里真正该用的是 `zh_CN.UTF-8`，不然终端就会把中文按错误编码去解析，结果自然就是一堆乱码。
+
+## (´･ω･`) 先说结论：你只要做这几步就行
+
+### 第一步：装中文字体（别跳过）
+
+```bash
+sudo pacman -S noto-fonts-cjk wqy-zenhei wqy-microhei
+```
+
+这些字体装上后，终端和桌面环境的中文显示会正常很多，至少不再是方块。
+
+### 第二步：修正 locale
+
+先看一下当前 locale：
+
+```bash
+locale
+```
+
+如果你看到的是类似下面这种：
+
+```bash
+LANG=zh_CN.GBK
+LC_CTYPE=zh_CN.GBK
+```
+
+那就说明配置错了。把它改成 UTF-8：
+
+```bash
+sudo nano /etc/locale.gen
+```
+
+把这一行前面的注释去掉：
+
+```bash
+zh_CN.UTF-8 UTF-8
+```
+
+然后保存退出：
+
+```bash
+sudo locale-gen
+sudo localectl set-locale LANG=zh_CN.UTF-8
+```
+
+如果你还想写进配置文件里，顺手执行：
+
+```bash
+echo 'LANG=zh_CN.UTF-8' | sudo tee /etc/locale.conf
+```
+
+### 第三步：重启或重新加载环境
+
+```bash
+reboot
+```
+
+重启后再看一眼：
+
+```bash
+locale
+```
+
+应该就变成：
+
+```bash
+LANG=zh_CN.UTF-8
+```
+
+这样终端里的中文就能正常显示了，`pacman` 也能正常识别包名。
+
+> [!TIP]
+> 这类问题最常见的原因就是把 `zh_CN.GBK` 当成了中文默认编码。Arch 的主流做法是 `UTF-8`，所以你只要把 locale 改成 `zh_CN.UTF-8`，基本就会一键修好。
+
 ## (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ 装完干啥？
 
 如果你选了桌面环境，进去就是图形界面了。
