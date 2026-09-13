@@ -23,31 +23,42 @@ export const friendsPageConfig: FriendsPageConfig = {
 // 友链配置
 export const friendsConfig: FriendLink[] = [
 	{
-		title: "chill with you",
+		title: "二次元论坛",
 		imgurl:
-			"https://pan.ecylt.top/f/0lAFr/OIP-C.webp",
-		desc: "生活不可能像你想象的那么好，但也不会像你想象的那么糟。",
-		siteurl: "https://blog.cuteleaf.cn",
-		tags: ["Blog"],
+			"https://pan.ecylt.top/f/qjlh0/www.ecylt.top-icon.jpeg",
+		desc: "叮咚！欢迎来到异世界大陆！",
+		siteurl: "https://www.ecylt.top/",
+		tags: ["world"],
 		weight: 10, // 权重，数字越大排序越靠前
 		enabled: true, // 是否启用
 	},
 	{
-		title: "Firefly Docs",
-		imgurl: "https://docs-firefly.cuteleaf.cn/logo.png",
-		desc: "Firefly主题模板文档",
-		siteurl: "https://docs-firefly.cuteleaf.cn",
-		tags: ["Docs"],
+		title: "WZH Docs",
+		imgurl: "https://pan.ecylt.top/f/5vZSN/blog.ecylt.top-icon.ico",
+		desc: "WZH团队 - 网络区域避风港 | 技术创新与发展",
+		siteurl: "https://blog.ecylt.top/",
+		tags: ["blog"],
 		weight: 9,
 		enabled: true,
 	},
+	
 	{
-		title: "Astro",
-		imgurl: "https://avatars.githubusercontent.com/u/44914786?v=4&s=640",
-		desc: "The web framework for content-driven websites. ⭐️ Star to support our work!",
-		siteurl: "https://github.com/withastro/astro",
-		tags: ["Framework"],
+		title: "云安",
+		imgurl: "https://pan.ecylt.top/f/rj2iy/pan.ecylt.top-icon.ico",
+		desc: "云安-实惠且安全的云存储服务",
+		siteurl: "https://pan.ecylt.top/",
+		tags: ["pan"],
 		weight: 8,
+		enabled: true,
+	},
+
+	{
+		title: "二次元工具箱",
+		imgurl: "https://pan.ecylt.top/f/rj2iy/www.ecylt.top-icon.jpeg",
+		desc: "二次元工具箱 - 按下F启动穿越！ - 二次元工具箱",
+		siteurl: "https://tools.ecylt.top/",
+		tags: ["tools"],
+		weight: 7,
 		enabled: true,
 	},
 ];
