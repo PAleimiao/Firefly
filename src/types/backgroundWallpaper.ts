@@ -14,6 +14,9 @@ export type BackgroundWallpaperConfig = {
 	common?: {
 		dimOpacity?: number; // 横幅文字遮罩暗度，0-1之间，值越大越暗，默认0.15
 		playerMode?: "order" | "random"; // 多视频播放模式："order" 顺序循环（默认），"random" 随机切换
+		postInfo?: {
+			mode?: string; // 文章横幅信息展示模式
+		};
 		homeText?: {
 			enable: boolean; // 是否在首页显示自定义文字（全局开关）
 			switchable?: boolean; // 是否允许用户通过控制面板切换横幅标题显示

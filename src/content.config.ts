@@ -2,7 +2,7 @@ import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
-const postsCollection = defineCollection({
+const postsCollection: any = defineCollection({
 	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
 	schema: z.object({
 		title: z.string(),
@@ -31,19 +31,19 @@ const postsCollection = defineCollection({
 	}),
 });
 
-const specCollection = defineCollection({
+const specCollection: any = defineCollection({
 	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/spec" }),
 	schema: z.object({}),
 });
 
-const dynamicCollection = defineCollection({
+const dynamicCollection: any = defineCollection({
 	loader: glob({ pattern: "**/*.md", base: "./src/content/dynamic" }),
 	schema: z.object({
 		published: z.date(),
 	}),
 });
 
-export const collections = {
+export const collections: Record<string, any> = {
 	dynamic: dynamicCollection,
 	posts: postsCollection,
 	spec: specCollection,

@@ -50,12 +50,14 @@ export type CommentConfig = {
 		category: string;
 		categoryId: string;
 		mapping: string;
-		strict: string;
-		reactionsEnabled: string;
-		emitMetadata: string;
+		strict: boolean;
+		reactionsEnabled: boolean;
+		emitMetadata?: boolean;
+		theme?: string;
 		inputPosition: string;
 		lang: string;
-		loading: string;
+		loading?: string;
+		lazyLoad?: boolean;
 	};
 	disqus?: {
 		shortname: string;
