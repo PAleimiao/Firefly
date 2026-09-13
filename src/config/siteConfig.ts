@@ -76,7 +76,7 @@ export const siteConfig: SiteConfig = {
 		logo: {
 			type: "image",
 			value: "/assets/images/logo.gif",
-			alt: "流萤",
+			alt: "米雪儿",
 		},
 		// 导航栏标题
 		title: "welcome to CXL",
