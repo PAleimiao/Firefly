@@ -54,7 +54,7 @@ export const friendsConfig: FriendLink[] = [
 
 	{
 		title: "二次元工具箱",
-		imgurl: "https://pan.ecylt.top/f/rj2iy/www.ecylt.top-icon.jpeg",
+		imgurl: "https://pan.ecylt.top/f/qjlh0/www.ecylt.top-icon.jpeg",
 		desc: "二次元工具箱 - 按下F启动穿越！ - 二次元工具箱",
 		siteurl: "https://tools.ecylt.top/",
 		tags: ["tools"],
