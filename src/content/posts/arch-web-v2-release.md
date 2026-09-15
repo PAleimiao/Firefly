@@ -9,7 +9,9 @@ slug: arch-web-v2-release
 
 # (｀・ω・´)v2 重写完成报告
 
-> **项目地址：** 还是那个 [https://web.cxl--package.top/](https://web.cxl--package.top/)
+> **项目地址：** 这次是 [https://web.cxl--package.top/](https://web.cxl--package.top/)
+v1还是
+[https://cxl--package.top/](https://cxl--package.top/)
 >
 > **状态：** 能跑，而且这次知道为什么能跑
 
