@@ -56,7 +56,9 @@ QQ机器人需要两个东西配合：
 GitHub 仓库：`https://github.com/zz6zz666/AstrBot-Android-App`
 
 - 有梯子的直接去 Release 页面下载最新 `.apk`
-- 没梯子的去 123 云盘（仓库里有分享链接）
+- 没梯子的去 123 云盘
+- 没梯子的去 123 云盘
+**[点击此处访问123云盘链接](https://1825468990.share.123pan.cn/123pan/4zXWjv-6UFTA)**
 
 安装完成后，打开 App，**允许通知权限**（必须！否则后台会被杀）。
 
