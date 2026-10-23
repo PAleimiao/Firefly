@@ -275,10 +275,8 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   }).observe(canvas.parentElement);
 
   // ---------- 素材导入 ----------
-  $("ve-add").addEventListener("change", (e) => {
-    const files = [...e.target.files];
-    if (!files.length) return;
-
+  function addVideoFiles(files) {
+    if (!files || !files.length) return;
     let loaded = 0;
     files.forEach((f) => {
       const url = URL.createObjectURL(f);
@@ -286,6 +284,9 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       video.src = url;
       video.muted = true;
       video.preload = "metadata";
+      video.addEventListener("error", () => {
+        statusEl.textContent = `无法解码 ${f.name}：浏览器不支持这个编码（常见于 HEVC / 10bit），先转成 H.264 的 MP4 再试`;
+      });
       video.addEventListener("loadedmetadata", () => {
         clips.push({
           el: video,
@@ -305,6 +306,17 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         }
       });
     });
+  }
+
+  $("ve-add").addEventListener("change", (e) => addVideoFiles([...e.target.files]));
+
+  // 拖拽导入
+  window.addEventListener("dragover", (e) => { e.preventDefault(); });
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const files = [...(e.dataTransfer?.files || [])].filter((f) => f.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|ogv|mkv)$/i.test(f.name));
+    if (!files.length) { statusEl.textContent = "拖进来的不是视频文件"; return; }
+    addVideoFiles(files);
   });
 
   // ---------- 片段列表渲染 ----------
