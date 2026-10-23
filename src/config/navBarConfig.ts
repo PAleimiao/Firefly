@@ -109,6 +109,12 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				url: "/tools/chart-viewer/",
 				icon: "material-symbols:music-note",
 			},
+			// 谱面编辑器
+			{
+				name: "谱面编辑器",
+				url: "/tools/chart-editor/",
+				icon: "material-symbols:edit-note",
+			},
 			// PMX 动画工坊
 			{
 				name: "PMX 动画工坊",

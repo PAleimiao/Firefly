@@ -1,0 +1,640 @@
+---
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="谱面编辑器" description="在浏览器里制作 Phira / RPE 谱面">
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-4 sm:px-6 md:px-9 py-4 sm:py-6 relative w-full">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+          <Icon is:inline name="material-symbols:edit-note" class="text-[1.5rem]"></Icon>
+        </div>
+        <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">谱面编辑器</div>
+      </div>
+      <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4">
+        直接在浏览器里写谱：点画布加音符、拖动调位置、导出 <b>RPE JSON</b>（Phira 可直接读）。所有数据只存在本地，不上传。
+      </p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+        <!-- 左侧设置 -->
+        <div class="space-y-3">
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4">
+            <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">谱面信息</div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">曲名</label>
+            <input id="ce-name" type="text" placeholder="曲名" class="w-full mb-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">曲师</label>
+                <input id="ce-composer" type="text" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">谱师</label>
+                <input id="ce-charter" type="text" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">难度</label>
+                <input id="ce-level" type="text" placeholder="IN 15" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">BPM</label>
+                <input id="ce-bpm" type="number" min="1" step="0.1" value="120" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+            </div>
+            <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1 mt-2">偏移 (ms)</label>
+            <input id="ce-offset" type="number" step="1" value="0" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+          </div>
+
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4">
+            <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-3">工具</div>
+            <div class="grid grid-cols-2 gap-2 mb-3" id="ce-tools">
+              <button data-tool="1" class="ce-tool px-2 py-2 rounded-lg border text-xs font-medium">Tap 点击</button>
+              <button data-tool="2" class="ce-tool px-2 py-2 rounded-lg border text-xs font-medium">Drag 按住</button>
+              <button data-tool="3" class="ce-tool px-2 py-2 rounded-lg border text-xs font-medium">Hold 长条</button>
+              <button data-tool="4" class="ce-tool px-2 py-2 rounded-lg border text-xs font-medium">Flick 滑动</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-3" id="ce-layers">
+              <button data-above="1" class="ce-layer px-2 py-2 rounded-lg border text-xs font-medium">判定线上</button>
+              <button data-above="0" class="ce-layer px-2 py-2 rounded-lg border text-xs font-medium">判定线下</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">吸附</label>
+                <select id="ce-snap" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm">
+                  <option value="1">1 拍</option>
+                  <option value="0.5">1/2</option>
+                  <option value="0.25" selected>1/4</option>
+                  <option value="0.125">1/8</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Hold 长度(拍)</label>
+                <input id="ce-hold" type="number" min="0.125" step="0.125" value="1" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 space-y-2">
+            <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-1">操作</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="ce-play" class="px-3 py-2 rounded-lg bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">播放</button>
+              <button id="ce-stop" class="px-3 py-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-sm font-medium hover:opacity-85 transition">停止</button>
+              <button id="ce-import" class="px-3 py-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-sm font-medium hover:opacity-85 transition">导入 JSON</button>
+              <button id="ce-export" class="px-3 py-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-sm font-medium hover:opacity-85 transition">导出 RPE</button>
+              <button id="ce-audio" class="px-3 py-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-sm font-medium hover:opacity-85 transition">载入音频</button>
+              <button id="ce-clear" class="px-3 py-2 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-sm font-medium hover:opacity-85 transition">清空</button>
+            </div>
+            <input id="ce-import-file" type="file" accept=".json,application/json" class="hidden" />
+            <input id="ce-audio-file" type="file" accept="audio/*" class="hidden" />
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 pt-1" id="ce-status">就绪</div>
+          </div>
+        </div>
+
+        <!-- 右侧画布 -->
+        <div class="space-y-2 min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs text-neutral-500 dark:text-neutral-400" id="ce-count">0 个音符</span>
+            <span class="w-px h-4 bg-(--line-divider)"></span>
+            <button id="ce-zoom-in" class="px-2 py-1 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-xs">放大</button>
+            <button id="ce-zoom-out" class="px-2 py-1 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-xs">缩小</button>
+            <button id="ce-fit" class="px-2 py-1 rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) text-xs">适应</button>
+            <button id="ce-del" class="px-2 py-1 rounded-lg bg-(--btn-regular-bg) border border-red-500/40 text-red-500 text-xs">删除选中</button>
+            <span class="ml-auto text-xs text-neutral-400 dark:text-neutral-500">左键加音符 · 拖动改位置 · Delete 删除 · 空格播放</span>
+          </div>
+          <canvas id="ce-canvas" class="w-full rounded-xl touch-none" style="height:380px"></canvas>
+          <div class="text-xs text-neutral-500 dark:text-neutral-400" id="ce-hover">横轴=拍数，纵轴=位置 (-675 ~ 675)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
+
+<script>
+  type Note = { type: number; beat: number; endBeat: number; x: number; above: number };
+
+  const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+  const canvas = $<HTMLCanvasElement>("ce-canvas");
+  const ctx = canvas.getContext("2d")!;
+  const statusEl = $("ce-status");
+  const countEl = $("ce-count");
+  const hoverEl = $("ce-hover");
+
+  const PAD = 28;
+  const POS_MAX = 675;
+  const COLORS: Record<number, string> = { 1: "#2dd4bf", 2: "#fbbf24", 3: "#60a5fa", 4: "#f472b6" };
+
+  let notes: Note[] = [];
+  let selected = -1;
+  let tool = 1;
+  let above = 1;
+  let snap = 0.25;
+  let holdLen = 1;
+  let bpm = 120;
+  let offsetMs = 0;
+  let viewStart = 0;
+  let viewSpan = 16;
+  let playing = false;
+  let playSec = 0;
+  let raf = 0;
+  let lastTs = 0;
+  let dragging = false;
+  let audioCtx: AudioContext | null = null;
+  let audioBuffer: AudioBuffer | null = null;
+  let audioSrc: AudioBufferSourceNode | null = null;
+
+  const setStatus = (m: string) => { statusEl.textContent = m; };
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+  const snapBeat = (b: number) => Math.round(b / snap) * snap;
+  const beatToSec = (b: number) => (b * 60) / bpm;
+  const secToBeat = (s: number) => (s * bpm) / 60;
+
+  function gcd(a: number, b: number): number { return b ? gcd(b, a % b) : a; }
+  function trip(beat: number): number[] {
+    const den = 8;
+    let whole = Math.floor(beat + 1e-9);
+    let num = Math.round((beat - whole) * den);
+    if (num >= den) { whole += 1; num = 0; }
+    if (num === 0) return [whole, 0, 1];
+    const g = gcd(num, den);
+    return [whole, num / g, den / g];
+  }
+  function parseTrip(v: unknown): number | null {
+    if (Array.isArray(v) && v.length >= 3) {
+      const den = Number(v[2]) || 1;
+      return Number(v[0]) + Number(v[1]) / den;
+    }
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+    return null;
+  }
+
+  /* ---------- 坐标 ---------- */
+  function pxPerBeat(): number {
+    const w = canvas.clientWidth;
+    return (w - PAD * 2) / viewSpan;
+  }
+  function beatToX(b: number): number { return PAD + (b - viewStart) * pxPerBeat(); }
+  function xToBeat(x: number): number { return viewStart + (x - PAD) / pxPerBeat(); }
+  function posToY(pos: number): number {
+    const h = canvas.clientHeight;
+    return PAD + ((POS_MAX - pos) / (POS_MAX * 2)) * (h - PAD * 2);
+  }
+  function yToPos(y: number): number {
+    const h = canvas.clientHeight;
+    return POS_MAX - ((y - PAD) / (h - PAD * 2)) * (POS_MAX * 2);
+  }
+
+  /* ---------- 绘制 ---------- */
+  function draw() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#0f1115";
+    ctx.fillRect(0, 0, w, h);
+
+    // 网格
+    const startBeat = Math.floor(viewStart);
+    const endBeat = Math.ceil(viewStart + viewSpan);
+    for (let b = startBeat; b <= endBeat; b++) {
+      const x = beatToX(b);
+      if (x < 0 || x > w) continue;
+      ctx.strokeStyle = b % 4 === 0 ? "#2b303c" : "#1d222b";
+      ctx.beginPath();
+      ctx.moveTo(x, PAD);
+      ctx.lineTo(x, h - PAD);
+      ctx.stroke();
+      if (b % 4 === 0) {
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "11px ui-monospace, monospace";
+        ctx.fillText(String(b), x + 3, h - PAD + 14);
+      }
+    }
+    // 中线
+    ctx.strokeStyle = "#333a47";
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(PAD, posToY(0));
+    ctx.lineTo(w - PAD, posToY(0));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 音符
+    notes.forEach((n, i) => {
+      const x = beatToX(n.beat);
+      const y = posToY(n.x);
+      if (x < -40 || x > w + 40) return;
+      const color = COLORS[n.type] || "#fff";
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2;
+      if (n.type === 3 && n.endBeat > n.beat) {
+        const x2 = beatToX(n.endBeat);
+        ctx.globalAlpha = 0.35;
+        ctx.fillRect(x, y - 4, Math.max(6, x2 - x), 8);
+        ctx.globalAlpha = 1;
+      }
+      if (n.type === 1) {
+        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+        n.above ? ctx.fill() : ctx.stroke();
+      } else if (n.type === 2) {
+        const s = 5;
+        n.above ? ctx.fillRect(x - s, y - s, s * 2, s * 2) : ctx.strokeRect(x - s, y - s, s * 2, s * 2);
+      } else if (n.type === 4) {
+        ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.lineTo(x + 6, y + 5); ctx.lineTo(x - 6, y + 5); ctx.closePath();
+        n.above ? ctx.fill() : ctx.stroke();
+      } else if (n.type === 3) {
+        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+        n.above ? ctx.fill() : ctx.stroke();
+      }
+      if (i === selected) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.stroke();
+      }
+    });
+
+    // 播放头
+    if (playing || playSec > 0) {
+      const bx = beatToX(secToBeat(playSec));
+      if (bx >= PAD && bx <= w - PAD) {
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(bx, PAD); ctx.lineTo(bx, h - PAD); ctx.stroke();
+      }
+    }
+  }
+
+  /* ---------- 命中 / 编辑 ---------- */
+  function hitTest(x: number, y: number): number {
+    for (let i = notes.length - 1; i >= 0; i--) {
+      const nx = beatToX(notes[i].beat);
+      const ny = posToY(notes[i].x);
+      if (Math.hypot(nx - x, ny - y) < 10) return i;
+    }
+    return -1;
+  }
+
+  canvas.addEventListener("pointerdown", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const hit = hitTest(x, y);
+    canvas.setPointerCapture(e.pointerId);
+    if (hit >= 0) {
+      selected = hit;
+      dragging = true;
+    } else {
+      const beat = Math.max(0, snapBeat(xToBeat(x)));
+      const pos = clamp(yToPos(y), -POS_MAX, POS_MAX);
+      const n: Note = { type: tool, beat, endBeat: tool === 3 ? beat + holdLen : beat, x: Math.round(pos), above };
+      notes.push(n);
+      selected = notes.length - 1;
+      setStatus(`添加 ${["", "Tap", "Drag", "Hold", "Flick"][tool]} 于第 ${beat.toFixed(2)} 拍`);
+    }
+    refreshCount();
+    draw();
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    hoverEl.textContent = `拍 ${xToBeat(x).toFixed(2)} · 位置 ${Math.round(yToPos(y))}`;
+    if (!dragging || selected < 0) return;
+    const n = notes[selected];
+    n.beat = Math.max(0, snapBeat(xToBeat(x)));
+    if (n.type === 3) n.endBeat = Math.max(n.beat + snap, n.endBeat);
+    n.x = Math.round(clamp(yToPos(y), -POS_MAX, POS_MAX));
+    draw();
+  });
+  const endDrag = () => { dragging = false; };
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const anchor = xToBeat(e.clientX - rect.left);
+    const factor = e.deltaY > 0 ? 1.25 : 0.8;
+    viewSpan = clamp(viewSpan * factor, 2, 128);
+    viewStart = Math.max(0, anchor - (anchor - viewStart) * factor);
+    draw();
+  }, { passive: false });
+
+  // 拖拽平移（右键或中键）
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  window.addEventListener("keydown", (e) => {
+    const t = e.target as HTMLElement | null;
+    if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    const n = selected >= 0 ? notes[selected] : null;
+    if (e.key === " ")
+      { e.preventDefault(); togglePlay(); return; }
+    if (e.key === "Delete" || e.key === "Backspace") {
+      if (n) { e.preventDefault(); notes.splice(selected, 1); selected = -1; refreshCount(); draw(); }
+      return;
+    }
+    if (!n) return;
+    if (e.key === "ArrowUp") { n.x = clamp(n.x + 10, -POS_MAX, POS_MAX); e.preventDefault(); draw(); }
+    else if (e.key === "ArrowDown") { n.x = clamp(n.x - 10, -POS_MAX, POS_MAX); e.preventDefault(); draw(); }
+    else if (e.key === "ArrowRight") { n.beat += snap; if (n.type === 3) n.endBeat += snap; e.preventDefault(); draw(); }
+    else if (e.key === "ArrowLeft") { n.beat = Math.max(0, n.beat - snap); if (n.type === 3) n.endBeat = Math.max(n.beat + snap, n.endBeat - snap); e.preventDefault(); draw(); }
+  });
+
+  /* ---------- 工具状态 ---------- */
+  function refreshTools() {
+    document.querySelectorAll<HTMLButtonElement>(".ce-tool").forEach((b) => {
+      const on = Number(b.dataset.tool) === tool;
+      b.className = "ce-tool px-2 py-2 rounded-lg border text-xs font-medium transition " + (on ? "border-(--primary) text-(--primary) bg-(--primary)/10" : "border-(--line-divider)");
+    });
+    document.querySelectorAll<HTMLButtonElement>(".ce-layer").forEach((b) => {
+      const on = Number(b.dataset.above) === above;
+      b.className = "ce-layer px-2 py-2 rounded-lg border text-xs font-medium transition " + (on ? "border-(--primary) text-(--primary) bg-(--primary)/10" : "border-(--line-divider)");
+    });
+  }
+  document.querySelectorAll<HTMLButtonElement>(".ce-tool").forEach((b) => {
+    b.addEventListener("click", () => { tool = Number(b.dataset.tool) || 1; refreshTools(); });
+  });
+  document.querySelectorAll<HTMLButtonElement>(".ce-layer").forEach((b) => {
+    b.addEventListener("click", () => { above = Number(b.dataset.above); refreshTools(); });
+  });
+
+  function refreshCount() {
+    countEl.textContent = `${notes.length} 个音符`;
+    saveLocal();
+  }
+
+  /* ---------- 播放 ---------- */
+  function sfx(freq: number) {
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "square";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.05);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0 + 0.06);
+  }
+
+  function tick(ts: number) {
+    if (!playing) return;
+    if (!lastTs) lastTs = ts;
+    const dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    const prev = playSec;
+    playSec += dt;
+    const prevBeat = secToBeat(prev);
+    const nowBeat = secToBeat(playSec);
+    for (const n of notes) {
+      if (n.beat > prevBeat && n.beat <= nowBeat) {
+        const freq = n.type === 1 ? 880 : n.type === 2 ? 660 : n.type === 3 ? 520 : 990;
+        sfx(freq);
+      }
+    }
+    if (nowBeat > viewStart + viewSpan * 0.9) {
+      viewStart = Math.max(0, nowBeat - viewSpan * 0.2);
+    }
+    draw();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function startAudio(at: number) {
+    if (!audioBuffer || !audioCtx) return;
+    stopAudio();
+    const src = audioCtx.createBufferSource();
+    src.buffer = audioBuffer;
+    src.connect(audioCtx.destination);
+    try { src.start(0, clamp(at, 0, audioBuffer.duration)); } catch (_) { return; }
+    audioSrc = src;
+  }
+  function stopAudio() {
+    if (audioSrc) {
+      try { audioSrc.stop(); } catch (_) { /* 忽略 */ }
+      try { audioSrc.disconnect(); } catch (_) { /* 忽略 */ }
+      audioSrc = null;
+    }
+  }
+
+  function togglePlay() {
+    if (playing) { pausePlay(); return; }
+    if (!audioCtx) {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    void audioCtx?.resume();
+    // 从选中音符或视口起点开始
+    playSec = Math.max(0, beatToSec(viewStart));
+    playing = true;
+    lastTs = 0;
+    $("ce-play").textContent = "暂停";
+    startAudio(playSec);
+    raf = requestAnimationFrame(tick);
+  }
+  function pausePlay() {
+    playing = false;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    stopAudio();
+    $("ce-play").textContent = "播放";
+    draw();
+  }
+  function stopPlay() {
+    pausePlay();
+    playSec = 0;
+    draw();
+  }
+
+  /* ---------- 导入 / 导出 ---------- */
+  function buildRPE(): Record<string, unknown> {
+    const sorted = [...notes].sort((a, b) => a.beat - b.beat);
+    const maxBeat = sorted.reduce((m, n) => Math.max(m, n.endBeat), 0);
+    return {
+      BPMList: [{ bpm, startTime: [0, 0, 1] }],
+      META: {
+        RPEVersion: 150,
+        offset: Math.round(offsetMs),
+        name: $<HTMLInputElement>("ce-name").value.trim() || "未命名谱面",
+        id: "0",
+        song: "song.ogg",
+        background: "background.png",
+        composer: $<HTMLInputElement>("ce-composer").value.trim() || "",
+        charter: $<HTMLInputElement>("ce-charter").value.trim() || "",
+        level: $<HTMLInputElement>("ce-level").value.trim() || "",
+      },
+      chartTime: Math.round(beatToSec(maxBeat) * 1000) / 1000,
+      judgeLineGroup: ["line"],
+      judgeLineList: [{
+        Name: "line",
+        Texture: "line.png",
+        father: -1,
+        isCover: 1,
+        zOrder: 0,
+        numOfNotes: sorted.length,
+        notes: sorted.map((n) => ({
+          type: n.type,
+          startTime: trip(n.beat),
+          endTime: trip(n.type === 3 ? n.endBeat : n.beat),
+          positionX: n.x,
+          above: n.above ? 1 : 0,
+          isFake: false,
+          speed: 1,
+          size: 1,
+          alpha: 255,
+        })),
+        eventLayers: [{
+          speedEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 1, end: 1 }],
+          moveXEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
+          moveYEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
+          rotateEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
+          alphaEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 255, end: 255 }],
+        }],
+      }],
+    };
+  }
+
+  function exportJSON() {
+    if (!notes.length) { setStatus("还没有音符，先点画布加几个"); return; }
+    const blob = new Blob([JSON.stringify(buildRPE(), null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const base = ($<HTMLInputElement>("ce-name").value.trim() || "chart").replace(/[\\/:*?"<>|]/g, "_");
+    a.download = base + ".json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    setStatus(`已导出 ${notes.length} 个音符`);
+  }
+
+  function importJSON(data: Record<string, unknown>) {
+    const lines = Array.isArray(data.judgeLineList) ? data.judgeLineList as Record<string, unknown>[] : [];
+    const line = lines[0];
+    if (!line || !Array.isArray(line.notes)) { setStatus("没找到 judgeLineList / notes"); return; }
+    const out: Note[] = [];
+    for (const raw of line.notes as Record<string, unknown>[]) {
+      const start = parseTrip(raw.startTime);
+      if (start === null) continue;
+      const end = parseTrip(raw.endTime);
+      out.push({
+        type: Number(raw.type) || 1,
+        beat: start,
+        endBeat: end !== null && end > start ? end : start,
+        x: Number(raw.positionX) || 0,
+        above: Number(raw.above) === 0 ? 0 : 1,
+      });
+    }
+    notes = out;
+    const meta = (data.META || {}) as Record<string, unknown>;
+    const bpmList = Array.isArray(data.BPMList) ? data.BPMList as Record<string, unknown>[] : [];
+    if (bpmList.length) {
+      const b = Number(bpmList[0].bpm);
+      if (b > 0) { bpm = b; $<HTMLInputElement>("ce-bpm").value = String(b); }
+    }
+    if (typeof meta.offset === "number") { offsetMs = meta.offset; $<HTMLInputElement>("ce-offset").value = String(meta.offset); }
+    if (typeof meta.name === "string") $<HTMLInputElement>("ce-name").value = meta.name;
+    if (typeof meta.composer === "string") $<HTMLInputElement>("ce-composer").value = meta.composer;
+    if (typeof meta.charter === "string") $<HTMLInputElement>("ce-charter").value = meta.charter;
+    if (typeof meta.level === "string") $<HTMLInputElement>("ce-level").value = meta.level;
+    selected = -1;
+    refreshCount();
+    draw();
+    setStatus(`已导入 ${notes.length} 个音符`);
+  }
+
+  /* ---------- 本地保存 ---------- */
+  const LS_KEY = "firefly-chart-editor-v1";
+  function saveLocal() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({ notes, bpm, offsetMs, name: $<HTMLInputElement>("ce-name").value }));
+    } catch (_) { /* 忽略 */ }
+  }
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as { notes?: Note[]; bpm?: number; offsetMs?: number; name?: string };
+      if (Array.isArray(d.notes)) notes = d.notes;
+      if (d.bpm) { bpm = d.bpm; $<HTMLInputElement>("ce-bpm").value = String(d.bpm); }
+      if (typeof d.offsetMs === "number") { offsetMs = d.offsetMs; $<HTMLInputElement>("ce-offset").value = String(d.offsetMs); }
+      if (d.name) $<HTMLInputElement>("ce-name").value = d.name;
+      setStatus("已恢复上次编辑的内容");
+    } catch (_) { /* 忽略 */ }
+  }
+
+  /* ---------- 绑定 ---------- */
+  $("ce-play").addEventListener("click", togglePlay);
+  $("ce-stop").addEventListener("click", stopPlay);
+  $("ce-export").addEventListener("click", exportJSON);
+  $("ce-clear").addEventListener("click", () => {
+    if (!notes.length) return;
+    if (!confirm(`确定清空 ${notes.length} 个音符？`)) return;
+    notes = []; selected = -1; refreshCount(); draw(); setStatus("已清空");
+  });
+  $("ce-del").addEventListener("click", () => {
+    if (selected < 0) return;
+    notes.splice(selected, 1); selected = -1; refreshCount(); draw();
+  });
+  $("ce-import").addEventListener("click", () => $<HTMLInputElement>("ce-import-file").click());
+  $<HTMLInputElement>("ce-import-file").addEventListener("change", async (e) => {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0];
+    if (!f) return;
+    try {
+      importJSON(JSON.parse(await f.text()) as Record<string, unknown>);
+    } catch (err) {
+      setStatus(`导入失败：${err instanceof Error ? err.message : String(err)}`);
+    }
+    input.value = "";
+  });
+  $("ce-audio").addEventListener("click", () => $<HTMLInputElement>("ce-audio-file").click());
+  $<HTMLInputElement>("ce-audio-file").addEventListener("change", async (e) => {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0];
+    if (!f) return;
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (!audioCtx) { setStatus("当前浏览器不支持音频"); return; }
+      setStatus("正在解码音频…");
+      audioBuffer = await audioCtx.decodeAudioData(await f.arrayBuffer());
+      setStatus(`音频已载入：${f.name}`);
+    } catch (err) {
+      setStatus(`音频解码失败：${err instanceof Error ? err.message : String(err)}`);
+    }
+    input.value = "";
+  });
+  $<HTMLInputElement>("ce-bpm").addEventListener("change", () => {
+    bpm = Math.max(1, Number($<HTMLInputElement>("ce-bpm").value) || 120);
+    saveLocal(); draw();
+  });
+  $<HTMLInputElement>("ce-offset").addEventListener("change", () => {
+    offsetMs = Number($<HTMLInputElement>("ce-offset").value) || 0;
+    saveLocal();
+  });
+  $<HTMLSelectElement>("ce-snap").addEventListener("change", () => {
+    snap = Number($<HTMLSelectElement>("ce-snap").value) || 0.25;
+  });
+  $<HTMLInputElement>("ce-hold").addEventListener("change", () => {
+    holdLen = Math.max(0.125, Number($<HTMLInputElement>("ce-hold").value) || 1);
+  });
+  $("ce-zoom-in").addEventListener("click", () => { viewSpan = clamp(viewSpan * 0.75, 2, 128); draw(); });
+  $("ce-zoom-out").addEventListener("click", () => { viewSpan = clamp(viewSpan * 1.33, 2, 128); draw(); });
+  $("ce-fit").addEventListener("click", () => {
+    const maxBeat = notes.reduce((m, n) => Math.max(m, n.endBeat), 16);
+    viewStart = 0; viewSpan = Math.max(8, maxBeat * 1.1); draw();
+  });
+  window.addEventListener("resize", () => draw());
+
+  /* ---------- 初始化 ---------- */
+  refreshTools();
+  loadLocal();
+  refreshCount();
+  draw();
+</script>
