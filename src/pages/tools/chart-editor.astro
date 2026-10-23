@@ -101,8 +101,38 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
             <button id="ce-del" class="px-2 py-1 rounded-lg bg-(--btn-regular-bg) border border-red-500/40 text-red-500 text-xs">删除选中</button>
             <span class="ml-auto text-xs text-neutral-400 dark:text-neutral-500">左键加音符 · 拖动改位置 · Delete 删除 · 空格播放</span>
           </div>
-          <canvas id="ce-canvas" class="w-full rounded-xl touch-none" style="height:380px"></canvas>
+          <div id="ce-drop-hint" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 pointer-events-none">
+            <div class="rounded-xl bg-(--card-bg) border border-(--primary) px-6 py-4 text-sm text-neutral-900 dark:text-neutral-100">松开导入谱面 JSON 或音频</div>
+          </div>
+          <canvas id="ce-canvas" class="w-full rounded-xl touch-none select-none" style="height:380px;user-select:none;-webkit-user-select:none;touch-action:none"></canvas>
           <div class="text-xs text-neutral-500 dark:text-neutral-400" id="ce-hover">横轴=拍数，纵轴=位置 (-675 ~ 675)</div>
+
+          <!-- 判定线动画 -->
+          <div class="rounded-xl border border-(--line-divider) bg-(--card-bg) px-4 py-4 mt-3">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">判定线动画</div>
+              <span class="text-xs text-neutral-500 dark:text-neutral-400">在播放头位置加关键帧，导出成判定线事件</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Y (-450~450)</label>
+                <input id="ce-line-y" type="number" step="10" value="0" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">旋转 (度)</label>
+                <input id="ce-line-rot" type="number" step="15" value="0" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">不透明度</label>
+                <input id="ce-line-alpha" type="number" min="0" max="255" step="5" value="255" class="w-full rounded-lg bg-(--btn-regular-bg) border border-(--line-divider) px-2 py-1.5 text-sm" />
+              </div>
+              <div class="flex items-end">
+                <button id="ce-line-add" class="w-full px-3 py-2 rounded-lg bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">加关键帧</button>
+              </div>
+            </div>
+            <canvas id="ce-line-preview" class="w-full rounded-lg" style="height:120px"></canvas>
+            <div id="ce-line-keys" class="mt-2 max-h-32 overflow-auto"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -141,6 +171,10 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   let audioCtx: AudioContext | null = null;
   let audioBuffer: AudioBuffer | null = null;
   let audioSrc: AudioBufferSourceNode | null = null;
+
+  // 判定线关键帧
+  type LineKey = { beat: number; y: number; rot: number; alpha: number };
+  let lineKeys: LineKey[] = [{ beat: 0, y: 0, rot: 0, alpha: 255 }];
 
   const setStatus = (m: string) => { statusEl.textContent = m; };
   const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
@@ -280,6 +314,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   }
 
   canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -294,6 +329,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       const n: Note = { type: tool, beat, endBeat: tool === 3 ? beat + holdLen : beat, x: Math.round(pos), above };
       notes.push(n);
       selected = notes.length - 1;
+      dragging = true;
       setStatus(`添加 ${["", "Tap", "Drag", "Hold", "Flick"][tool]} 于第 ${beat.toFixed(2)} 拍`);
     }
     refreshCount();
@@ -402,6 +438,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       viewStart = Math.max(0, nowBeat - viewSpan * 0.2);
     }
     draw();
+    drawLinePreview();
     raf = requestAnimationFrame(tick);
   }
 
@@ -451,6 +488,108 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     draw();
   }
 
+  /* ---------- 判定线动画 ---------- */
+  function evalLine(beat: number): LineKey {
+    const ks = [...lineKeys].sort((a, b) => a.beat - b.beat);
+    if (!ks.length) return { beat: 0, y: 0, rot: 0, alpha: 255 };
+    if (beat <= ks[0].beat) return { ...ks[0] };
+    for (let i = 1; i < ks.length; i++) {
+      if (beat <= ks[i].beat) {
+        const span = Math.max(1e-6, ks[i].beat - ks[i - 1].beat);
+        const p = (beat - ks[i - 1].beat) / span;
+        return {
+          beat,
+          y: ks[i - 1].y + (ks[i].y - ks[i - 1].y) * p,
+          rot: ks[i - 1].rot + (ks[i].rot - ks[i - 1].rot) * p,
+          alpha: ks[i - 1].alpha + (ks[i].alpha - ks[i - 1].alpha) * p,
+        };
+      }
+    }
+    return { ...ks[ks.length - 1] };
+  }
+
+  function drawLinePreview() {
+    const cv = $<HTMLCanvasElement>("ce-line-preview");
+    if (!cv) return;
+    const c = cv.getContext("2d");
+    if (!c) return;
+    const w = cv.clientWidth || 300;
+    const h = 120;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+    c.fillStyle = "#0f1115";
+    c.fillRect(0, 0, w, h);
+    const beat = playing || playSec > 0 ? secToBeat(playSec) : viewStart;
+    const st = evalLine(beat);
+    const py = 10 + ((450 - clamp(st.y, -450, 450)) / 900) * (h - 20);
+    c.save();
+    c.translate(w / 2, py);
+    c.rotate((st.rot * Math.PI) / 180);
+    c.globalAlpha = clamp(st.alpha / 255, 0, 1);
+    c.strokeStyle = "#2dd4bf";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(-w * 0.42, 0);
+    c.lineTo(w * 0.42, 0);
+    c.stroke();
+    c.restore();
+    c.globalAlpha = 1;
+    c.fillStyle = "#6b7280";
+    c.font = "11px ui-monospace, monospace";
+    c.fillText(`拍 ${beat.toFixed(2)} · Y ${Math.round(st.y)} · ${Math.round(st.rot)}°`, 8, 14);
+  }
+
+  function renderLineKeys() {
+    const box = $("ce-line-keys");
+    if (!box) return;
+    const ks = [...lineKeys].sort((a, b) => a.beat - b.beat);
+    box.innerHTML = ks.map((k) =>
+      `<div class="flex items-center gap-2 text-xs py-1 border-b border-(--line-divider)">
+         <span class="font-mono w-16">${k.beat.toFixed(2)} 拍</span>
+         <span class="font-mono flex-1">Y ${Math.round(k.y)} · ${Math.round(k.rot)}° · A ${Math.round(k.alpha)}</span>
+         <button class="ce-key-del text-red-500 px-1" data-beat="${k.beat}">×</button>
+       </div>`).join('') || '<div class="text-xs text-neutral-500">暂无关键帧</div>';
+    box.querySelectorAll(".ce-key-del").forEach((el) => {
+      el.addEventListener("click", () => {
+        if (lineKeys.length <= 1) { setStatus("至少保留一个关键帧"); return; }
+        const beat = Number((el as HTMLElement).dataset.beat);
+        lineKeys = lineKeys.filter((k) => Math.abs(k.beat - beat) > 1e-6);
+        renderLineKeys();
+        drawLinePreview();
+      });
+    });
+  }
+
+  function addLineKey() {
+    const beat = snapBeat(playing ? secToBeat(playSec) : viewStart + viewSpan / 2);
+    const y = clamp(Number($<HTMLInputElement>("ce-line-y").value) || 0, -450, 450);
+    const rot = Number($<HTMLInputElement>("ce-line-rot").value) || 0;
+    const alpha = clamp(Number($<HTMLInputElement>("ce-line-alpha").value) || 255, 0, 255);
+    lineKeys = lineKeys.filter((k) => Math.abs(k.beat - beat) > 1e-6);
+    lineKeys.push({ beat, y, rot, alpha });
+    lineKeys.sort((a, b) => a.beat - b.beat);
+    renderLineKeys();
+    drawLinePreview();
+    setStatus(`已加判定线关键帧：第 ${beat.toFixed(2)} 拍`);
+  }
+
+  function buildEvents(get: (k: LineKey) => number): Record<string, unknown>[] {
+    const ks = [...lineKeys].sort((a, b) => a.beat - b.beat);
+    return ks.map((k, i) => {
+      const next = ks[i + 1] || k;
+      return {
+        startTime: trip(k.beat),
+        endTime: trip(next.beat),
+        start: get(k),
+        end: get(next),
+        easingType: 1,
+      };
+    });
+  }
+
   /* ---------- 导入 / 导出 ---------- */
   function buildRPE(): Record<string, unknown> {
     const sorted = [...notes].sort((a, b) => a.beat - b.beat);
@@ -491,9 +630,9 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         eventLayers: [{
           speedEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 1, end: 1 }],
           moveXEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
-          moveYEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
-          rotateEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 0, end: 0 }],
-          alphaEvents: [{ startTime: [0, 0, 1], endTime: [0, 0, 1], start: 255, end: 255 }],
+          moveYEvents: buildEvents((k) => k.y),
+          rotateEvents: buildEvents((k) => k.rot),
+          alphaEvents: buildEvents((k) => k.alpha),
         }],
       }],
     };
@@ -540,6 +679,32 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     if (typeof meta.composer === "string") $<HTMLInputElement>("ce-composer").value = meta.composer;
     if (typeof meta.charter === "string") $<HTMLInputElement>("ce-charter").value = meta.charter;
     if (typeof meta.level === "string") $<HTMLInputElement>("ce-level").value = meta.level;
+    // 判定线事件 → 关键帧
+    const layers = Array.isArray(line.eventLayers) ? line.eventLayers as Record<string, unknown>[] : [];
+    const layer = layers[0];
+    if (layer) {
+      const map = new Map<number, LineKey>();
+      const readEv = (name: string, set: (k: LineKey, v: number) => void) => {
+        const arr = Array.isArray(layer[name]) ? layer[name] as Record<string, unknown>[] : [];
+        for (const ev of arr) {
+          const b = parseTrip(ev.startTime);
+          if (b === null) continue;
+          const key = Math.round(b * 1000) / 1000;
+          const cur = map.get(key) || { beat: b, y: 0, rot: 0, alpha: 255 };
+          set(cur, Number(ev.start) || 0);
+          map.set(key, cur);
+        }
+      };
+      readEv("moveYEvents", (k, v) => { k.y = v; });
+      readEv("rotateEvents", (k, v) => { k.rot = v; });
+      readEv("alphaEvents", (k, v) => { k.alpha = v === 0 ? 255 : v; });
+      if (map.size) {
+        lineKeys = [...map.values()].sort((a, b) => a.beat - b.beat);
+        renderLineKeys();
+        drawLinePreview();
+      }
+    }
+
     selected = -1;
     refreshCount();
     draw();
@@ -630,11 +795,60 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     const maxBeat = notes.reduce((m, n) => Math.max(m, n.endBeat), 16);
     viewStart = 0; viewSpan = Math.max(8, maxBeat * 1.1); draw();
   });
-  window.addEventListener("resize", () => draw());
+  window.addEventListener("resize", () => { draw(); drawLinePreview(); });
+
+  // 判定线关键帧
+  $("ce-line-add").addEventListener("click", addLineKey);
+  ["ce-line-y", "ce-line-rot", "ce-line-alpha"].forEach((id) => {
+    $<HTMLInputElement>(id).addEventListener("change", () => drawLinePreview());
+  });
+
+  // 拖拽文件导入
+  let dragDepth = 0;
+  const showDrop = () => $("ce-drop-hint").classList.remove("hidden");
+  const hideDrop = () => $("ce-drop-hint").classList.add("hidden");
+  window.addEventListener("dragenter", (e) => { e.preventDefault(); dragDepth++; showDrop(); });
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (!dragDepth) hideDrop();
+  });
+  window.addEventListener("drop", async (e) => {
+    e.preventDefault();
+    dragDepth = 0;
+    hideDrop();
+    const f = e.dataTransfer?.files?.[0];
+    if (!f) return;
+    if (/\.json$/i.test(f.name)) {
+      try {
+        importJSON(JSON.parse(await f.text()) as Record<string, unknown>);
+      } catch (err) {
+        setStatus(`导入失败：${err instanceof Error ? err.message : String(err)}`);
+      }
+    } else if (/^audio\//.test(f.type) || /\.(mp3|ogg|wav|m4a|flac)$/i.test(f.name)) {
+      try {
+        if (!audioCtx) {
+          const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (!audioCtx) { setStatus("当前浏览器不支持音频"); return; }
+        setStatus("正在解码音频…");
+        audioBuffer = await audioCtx.decodeAudioData(await f.arrayBuffer());
+        setStatus(`音频已载入：${f.name}`);
+      } catch (err) {
+        setStatus(`音频解码失败：${err instanceof Error ? err.message : String(err)}`);
+      }
+    } else {
+      setStatus("只支持拖入谱面 .json 或音频文件");
+    }
+  });
 
   /* ---------- 初始化 ---------- */
   refreshTools();
   loadLocal();
   refreshCount();
+  renderLineKeys();
   draw();
+  drawLinePreview();
 </script>
