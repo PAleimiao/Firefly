@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>⚙️ Firefly 管理台 v2</title>
+<title>Firefly 管理台 v2</title>
 <style>
 :root{
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2b303c;
@@ -98,21 +98,21 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 <body>
 
 <div class="topbar">
-  <h1>⚙️ Firefly 管理台 <span class="muted" style="font-size:12px">v2</span></h1>
+  <h1>Firefly 管理台 <span class="muted" style="font-size:12px">v2</span></h1>
   <div class="right">
     <span id="status" class="status err">未配置 Token</span>
-    <button class="btn ghost" id="btn-token">🔑 Token</button>
+    <button class="btn ghost" id="btn-token">Token</button>
   </div>
 </div>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="post" class="active">📝 文章</button>
-  <button data-tab="anime">📺 番剧</button>
-  <button data-tab="profile">👤 个人资料</button>
-  <button data-tab="pages">🔀 页面开关</button>
-  <button data-tab="announce">📢 公告</button>
-  <button data-tab="music">🎵 音乐</button>
-  <button data-tab="friends">🔗 友链</button>
+  <button data-tab="post" class="active">文章</button>
+  <button data-tab="anime">番剧</button>
+  <button data-tab="profile">个人资料</button>
+  <button data-tab="pages">页面开关</button>
+  <button data-tab="announce">公告</button>
+  <button data-tab="music">音乐</button>
+  <button data-tab="friends">友链</button>
 </nav>
 
 <main>
@@ -122,7 +122,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <div class="card">
         <h2>文章列表</h2>
         <div class="row" style="margin-bottom:8px">
-          <button class="btn" id="btn-reload-posts">🔄 刷新</button>
+          <button class="btn" id="btn-reload-posts">刷新</button>
           <input type="text" id="post-search" placeholder="搜索文件名…" style="flex:1">
         </div>
         <div class="list" id="post-list"><div class="muted" style="padding:10px">点击刷新加载</div></div>
@@ -141,8 +141,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
           <span><span class="t">置顶</span><span class="d">开启后文章置顶在列表最前</span></span>
         </label>
         <div class="row" style="margin-top:12px">
-          <button class="btn primary" id="btn-publish">🚀 发布</button>
-          <button class="btn" id="btn-newpost">📝 新建</button>
+          <button class="btn primary" id="btn-publish">发布</button>
+          <button class="btn" id="btn-newpost">新建</button>
         </div>
         <div class="hint" id="post-current"></div>
       </div>
@@ -150,8 +150,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <div class="card">
         <div class="row between" style="margin-bottom:10px">
           <div class="row">
-            <button class="btn" id="btn-tab-edit">✏️ 编辑</button>
-            <button class="btn ghost" id="btn-tab-preview">👁️ 预览</button>
+            <button class="btn" id="btn-tab-edit">编辑</button>
+            <button class="btn ghost" id="btn-tab-preview">预览</button>
           </div>
           <span class="muted" id="word-count">0 字</span>
         </div>
@@ -175,13 +175,13 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
         <div class="row" style="margin:10px 0">
           <button class="btn" id="btn-add-ep">+ 添加一集</button>
         </div>
-        <button class="btn primary" id="btn-save-anime">💾 保存到仓库</button>
+        <button class="btn primary" id="btn-save-anime">保存到仓库</button>
       </div>
 
       <div class="card">
         <div class="row between" style="margin-bottom:10px">
           <h2 style="margin:0">番剧列表</h2>
-          <button class="btn" id="btn-load-anime">🔄 加载</button>
+          <button class="btn" id="btn-load-anime">加载</button>
         </div>
         <div id="anime-list" class="list" style="max-height:none"><div class="muted" style="padding:10px">点击加载</div></div>
         <div id="anime-edit" class="hidden" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
@@ -194,8 +194,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
           <div id="e-episodes"></div>
           <div class="row" style="margin:10px 0">
             <button class="btn" id="btn-add-e-ep">+ 添加一集</button>
-            <button class="btn primary" id="btn-save-anime-edit">💾 保存修改</button>
-            <button class="btn danger" id="btn-del-anime">🗑️ 删除整部</button>
+            <button class="btn primary" id="btn-save-anime-edit">保存修改</button>
+            <button class="btn danger" id="btn-del-anime">删除整部</button>
           </div>
         </div>
       </div>
@@ -223,8 +223,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <div class="hint">图标名可从 <a href="https://icones.js.org/" target="_blank" rel="noopener" style="color:var(--primary)">icones.js.org</a> 查；RSS 用 <code>fa7-solid:rss</code> + <code>/rss/</code>。</div>
 
       <div class="row" style="margin-top:16px">
-        <button class="btn primary" id="btn-save-profile">💾 保存</button>
-        <button class="btn" id="btn-reload-profile">🔄 重新读取</button>
+        <button class="btn primary" id="btn-save-profile">保存</button>
+        <button class="btn" id="btn-reload-profile">重新读取</button>
       </div>
     </div>
   </section>
@@ -247,8 +247,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
         <h2>其他开关</h2>
         <div id="pg-extras"></div>
         <div class="row" style="margin-top:16px">
-          <button class="btn primary" id="btn-save-pages">💾 保存全部</button>
-          <button class="btn" id="btn-reload-pages">🔄 重新读取</button>
+          <button class="btn primary" id="btn-save-pages">保存全部</button>
+          <button class="btn" id="btn-reload-pages">重新读取</button>
         </div>
       </div>
     </div>
@@ -273,8 +273,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <label class="field">链接文字</label><input type="text" id="an-link-text">
       <label class="field">链接地址</label><input type="text" id="an-link-url">
       <div class="row" style="margin-top:16px">
-        <button class="btn primary" id="btn-save-announce">💾 保存</button>
-        <button class="btn" id="btn-reload-announce">🔄 重新读取</button>
+        <button class="btn primary" id="btn-save-announce">保存</button>
+        <button class="btn" id="btn-reload-announce">重新读取</button>
       </div>
     </div>
   </section>
@@ -322,13 +322,13 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
         <h2>测试</h2>
         <p class="hint">点下面的按钮，用浏览器直接拉一次歌单，看能不能拿到曲目。</p>
         <div class="row">
-          <button class="btn" id="btn-test-music">🎧 测试歌单</button>
+          <button class="btn" id="btn-test-music">测试歌单</button>
           <span id="music-test-status" class="muted"></span>
         </div>
         <div id="music-test-out" class="preview" style="margin-top:12px;min-height:120px;font-size:12.5px"></div>
         <div class="row" style="margin-top:16px">
-          <button class="btn primary" id="btn-save-music">💾 保存</button>
-          <button class="btn" id="btn-reload-music">🔄 重新读取</button>
+          <button class="btn primary" id="btn-save-music">保存</button>
+          <button class="btn" id="btn-reload-music">重新读取</button>
         </div>
       </div>
     </div>
@@ -342,8 +342,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <div id="fr-list"></div>
       <div class="row" style="margin:12px 0">
         <button class="btn" id="btn-add-friend">+ 添加友链</button>
-        <button class="btn primary" id="btn-save-friends">💾 保存</button>
-        <button class="btn" id="btn-reload-friends">🔄 重新读取</button>
+        <button class="btn primary" id="btn-save-friends">保存</button>
+        <button class="btn" id="btn-reload-friends">重新读取</button>
       </div>
       <div class="hint">imgurl 可以是外链，也可以放 <code>/assets/images/friends/xxx.png</code>。</div>
     </div>
@@ -353,7 +353,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 <!-- Token 弹窗 -->
 <div class="modal" id="token-modal">
   <div class="box">
-    <h3 style="margin-top:0">🔑 GitHub Token</h3>
+    <h3 style="margin-top:0">GitHub Token</h3>
     <p class="hint">需要 repo 权限的 Personal Access Token，只存在浏览器 localStorage，不会上传到任何地方。</p>
     <input type="password" id="token-input" placeholder="ghp_…">
     <label class="toggle" style="margin-top:12px">
