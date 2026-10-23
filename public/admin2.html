@@ -93,6 +93,29 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 .fdel:hover{color:var(--danger)}
 .badge{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:1px 7px;border-radius:99px}
 .dirty{color:var(--warn)}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.toolbar button{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
+.toolbar button:hover{border-color:var(--primary);color:var(--primary)}
+.toolbar .tb-sep{width:1px;background:var(--line);margin:2px 4px}
+.toolbar .tb-strong{border-color:var(--primary);color:var(--primary)}
+@media (max-width:720px){
+  body{font-size:15px}
+  .topbar{padding:10px 12px;flex-wrap:wrap}
+  .topbar h1{font-size:15px}
+  .tabs{position:static;padding:8px 12px}
+  .tabs button{padding:8px 12px;font-size:13px}
+  main{padding:12px}
+  .grid2{grid-template-columns:1fr}
+  .card{padding:12px}
+  .btn{padding:10px 14px;min-height:42px}
+  input[type=text],input[type=password],input[type=number],input[type=date],textarea,select{font-size:16px;padding:10px}
+  .md{min-height:320px}
+  .toolbar button{padding:8px 10px;font-size:13px}
+  .linkrow,.frow{grid-template-columns:1fr;gap:6px}
+  .modal .box{width:100%;max-height:90vh;overflow:auto}
+  .toast{max-width:92vw;bottom:16px}
+  .item{padding:10px}
+}
 </style>
 </head>
 <body>
@@ -107,12 +130,15 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 
 <nav class="tabs" id="tabs">
   <button data-tab="post" class="active">文章</button>
+  <button data-tab="dynamic">动态</button>
   <button data-tab="anime">番剧</button>
   <button data-tab="profile">个人资料</button>
   <button data-tab="pages">页面开关</button>
   <button data-tab="announce">公告</button>
   <button data-tab="music">音乐</button>
   <button data-tab="friends">友链</button>
+  <button data-tab="sponsor">打赏</button>
+  <button data-tab="gallery">相册</button>
 </nav>
 
 <main>
@@ -155,6 +181,31 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
           </div>
           <span class="muted" id="word-count">0 字</span>
         </div>
+        <div class="toolbar" id="md-toolbar">
+          <button type="button" data-md="h2">标题</button>
+          <button type="button" data-md="bold">粗体</button>
+          <button type="button" data-md="italic">斜体</button>
+          <button type="button" data-md="strike">删除线</button>
+          <button type="button" data-md="mark">高亮</button>
+          <button type="button" data-md="code">行内代码</button>
+          <button type="button" data-md="codeblock">代码块</button>
+          <button type="button" data-md="quote">引用</button>
+          <button type="button" data-md="ul">列表</button>
+          <button type="button" data-md="ol">有序列表</button>
+          <button type="button" data-md="hr">分割线</button>
+          <button type="button" data-md="table">表格</button>
+          <button type="button" data-md="details">折叠块</button>
+          <button type="button" data-md="note">提醒框</button>
+          <button type="button" data-md="katex">公式</button>
+          <button type="button" data-md="mermaid">Mermaid</button>
+          <button type="button" data-md="github">GitHub 卡片</button>
+          <button type="button" data-md="more">摘要分隔</button>
+          <span class="tb-sep"></span>
+          <button type="button" id="btn-insert-image" class="tb-strong">导入图片</button>
+          <button type="button" id="btn-insert-link" class="tb-strong">导入链接</button>
+          <button type="button" id="btn-insert-video" class="tb-strong">导入视频</button>
+        </div>
+        <input type="file" id="image-input" accept="image/*" multiple class="hidden">
         <textarea id="f-markdown" class="md" placeholder="# 在这里写 Markdown…"></textarea>
         <div id="preview" class="preview hidden"></div>
       </div>
@@ -348,6 +399,94 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       <div class="hint">imgurl 可以是外链，也可以放 <code>/assets/images/friends/xxx.png</code>。</div>
     </div>
   </section>
+  <section class="panel" id="panel-dynamic">
+    <div class="grid2">
+      <div class="card">
+        <h2>发布动态</h2>
+        <label class="field">时间</label>
+        <input type="datetime-local" id="dy-time" step="1">
+        <label class="field">内容（支持 Markdown）</label>
+        <textarea id="dy-body" class="md" placeholder="随便写点什么…"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="btn-save-dynamic">发布</button>
+          <button class="btn" id="btn-now">用当前时间</button>
+          <button class="btn" id="btn-clear-dynamic">清空</button>
+        </div>
+        <div class="hint" id="dy-current"></div>
+      </div>
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px">
+          <h2 style="margin:0">动态列表</h2>
+          <button class="btn" id="btn-load-dynamic">刷新</button>
+        </div>
+        <div id="dynamic-list" class="list" style="max-height:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-sponsor">
+    <div class="card" style="max-width:900px">
+      <h2>打赏</h2>
+      <p class="hint">对应 src/config/sponsorConfig.ts，收款码建议上传到 public/assets/images/sponsor/。</p>
+      <label class="field">用途说明</label>
+      <input type="text" id="sp-usage">
+      <div id="sp-toggles"></div>
+      <h3>收款方式</h3>
+      <div id="sp-methods"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btn-add-method">添加方式</button>
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="btn-save-sponsor">保存</button>
+        <button class="btn" id="btn-reload-sponsor">重新读取</button>
+      </div>
+      <input type="file" id="qr-input" accept="image/*" class="hidden">
+    </div>
+  </section>
+
+  <section class="panel" id="panel-gallery">
+    <div class="grid2">
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px">
+          <h2 style="margin:0">相册列表</h2>
+          <button class="btn" id="btn-reload-gallery">刷新</button>
+        </div>
+        <div id="ga-list" class="list" style="max-height:none"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btn-add-album">新建相册</button>
+          <button class="btn primary" id="btn-save-gallery">保存相册配置</button>
+        </div>
+        <div class="hint">图片放在 public/gallery/相册id/，外链写到同目录 urls.txt</div>
+      </div>
+      <div class="card">
+        <h2 id="ga-detail-title">选择一个相册</h2>
+        <div id="ga-detail" class="hidden">
+          <label class="field">相册 ID（目录名）</label><input type="text" id="ga-id">
+          <label class="field">名称</label><input type="text" id="ga-name">
+          <label class="field">描述</label><input type="text" id="ga-desc">
+          <label class="field">地点</label><input type="text" id="ga-location">
+          <label class="field">日期（YYYY-MM-DD）</label><input type="text" id="ga-date">
+          <label class="field">标签（逗号分隔）</label><input type="text" id="ga-tags">
+          <label class="field">访问密码（留空则公开）</label><input type="text" id="ga-password">
+          <label class="field">密码提示</label><input type="text" id="ga-password-hint">
+
+          <h3>图片</h3>
+          <div class="row">
+            <button class="btn" id="btn-upload-photos">上传图片</button>
+            <button class="btn" id="btn-refresh-photos">刷新列表</button>
+          </div>
+          <div id="ga-photos" class="list" style="margin-top:10px;max-height:260px"></div>
+
+          <h3>外链图片（urls.txt）</h3>
+          <textarea id="ga-urls" rows="4" placeholder="一行一个图片地址"></textarea>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" id="btn-save-urls">保存 urls.txt</button>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" multiple class="hidden">
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <!-- Token 弹窗 -->
@@ -381,5 +520,6 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 
 <div class="toast" id="toast"></div>
 <script src="/admin2.js"></script>
+<script src="/admin2-plus.js"></script>
 </body>
 </html>
