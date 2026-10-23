@@ -504,7 +504,12 @@ import Layout from "@/layouts/Layout.astro";
     });
   }
   document.querySelectorAll<HTMLButtonElement>(".ce-tool").forEach((b) => {
-    b.addEventListener("click", () => { tool = Number(b.dataset.tool) || 1; refreshTools(); });
+    b.addEventListener("click", () => {
+      const t = Number(b.dataset.tool);
+      tool = Number.isFinite(t) ? t : 1;
+      refreshTools();
+      setStatus(tool === 0 ? "选择模式：拖框选，Shift 加选，Ctrl+A 全选" : `工具：${["选择", "Tap", "Drag", "Hold", "Flick"][tool]}`);
+    });
   });
   document.querySelectorAll<HTMLButtonElement>(".ce-layer").forEach((b) => {
     b.addEventListener("click", () => { above = Number(b.dataset.above); refreshTools(); });
