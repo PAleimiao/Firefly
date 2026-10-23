@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>⚙️ Firefly 管理台 v2</title>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2b303c;
+  --text:#e6e9ef; --muted:#8b93a3; --primary:#2dd4bf; --danger:#ef4444;
+  --warn:#f59e0b; --ok:#22c55e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar h1{font-size:16px;margin:0}
+.topbar .right{display:flex;align-items:center;gap:10px}
+.status{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--line)}
+.status.ok{color:var(--ok);border-color:#14532d;background:#052e16}
+.status.err{color:var(--warn);border-color:#78350f;background:#2a1a05}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:57px;z-index:19}
+.tabs button{white-space:nowrap;background:transparent;color:var(--muted);border:1px solid transparent;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+.tabs button:hover{background:var(--panel2);color:var(--text)}
+.tabs button.active{background:var(--panel2);color:var(--primary);border-color:var(--line)}
+main{padding:20px;max-width:1500px;margin:0 auto}
+.panel{display:none}
+.panel.active{display:block}
+.grid2{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-size:14px;margin:0 0 12px;color:var(--primary)}
+.card h3{font-size:13px;margin:18px 0 8px;color:var(--muted)}
+label.field{display:block;margin:10px 0 4px;font-size:12px;color:var(--muted)}
+input[type=text],input[type=password],input[type=number],input[type=date],textarea,select{
+  width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+textarea{resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn.primary{background:var(--primary);color:#04211d;border-color:var(--primary);font-weight:600}
+.btn.primary:hover{filter:brightness(1.1);color:#04211d}
+.btn.danger{color:var(--danger);border-color:#7f1d1d}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.list{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.item{padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.item:last-child{border-bottom:0}
+.item:hover{background:var(--panel2)}
+.item .del{color:var(--muted)}
+.item .del:hover{color:var(--danger)}
+.muted{color:var(--muted);font-size:12px}
+.hint{color:var(--muted);font-size:11.5px;margin-top:4px}
+.toggle{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
+.toggle:hover{background:var(--panel2)}
+.toggle input{margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex:0 0 auto}
+.toggle .t{font-size:13px}
+.toggle .d{color:var(--muted);font-size:11.5px;margin-top:2px}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#3a4150;border-radius:99px;transition:.2s;cursor:pointer}
+.slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:var(--primary)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+.md{min-height:420px;font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.7}
+.preview{min-height:420px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);overflow:auto}
+.preview h1,.preview h2,.preview h3{margin:14px 0 8px}
+.preview h1{font-size:1.5em}.preview h2{font-size:1.25em}.preview h3{font-size:1.1em}
+.preview code{background:#0b0d11;padding:1px 5px;border-radius:4px;font-size:12.5px}
+.preview pre{background:#0b0d11;padding:12px;border-radius:8px;overflow:auto}
+.preview pre code{background:none;padding:0}
+.preview blockquote{border-left:3px solid var(--primary);margin:8px 0;padding:2px 12px;color:var(--muted)}
+.preview img{max-width:100%;border-radius:8px}
+.preview a{color:var(--primary)}
+.preview ul,.preview ol{padding-left:22px}
+.preview hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.preview table{border-collapse:collapse}
+.preview th,.preview td{border:1px solid var(--line);padding:6px 10px}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;width:min(460px,100%)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid var(--line);padding:10px 18px;border-radius:10px;opacity:0;transition:.25s;z-index:60;font-size:13px;max-width:80vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:#7f1d1d;color:#fca5a5}
+.toast.ok{border-color:#14532d;color:#86efac}
+.linkrow{display:grid;grid-template-columns:150px 1fr 90px auto;gap:8px;margin-bottom:8px;align-items:center}
+@media(max-width:700px){.linkrow{grid-template-columns:1fr}}
+.frow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center;margin-bottom:8px}
+.fdel{color:var(--muted);cursor:pointer}
+.fdel:hover{color:var(--danger)}
+.badge{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:1px 7px;border-radius:99px}
+.dirty{color:var(--warn)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚙️ Firefly 管理台 <span class="muted" style="font-size:12px">v2</span></h1>
+  <div class="right">
+    <span id="status" class="status err">未配置 Token</span>
+    <button class="btn ghost" id="btn-token">🔑 Token</button>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="post" class="active">📝 文章</button>
+  <button data-tab="anime">📺 番剧</button>
+  <button data-tab="profile">👤 个人资料</button>
+  <button data-tab="pages">🔀 页面开关</button>
+  <button data-tab="announce">📢 公告</button>
+  <button data-tab="music">🎵 音乐</button>
+  <button data-tab="friends">🔗 友链</button>
+</nav>
+
+<main>
+  <!-- ================= 文章 ================= -->
+  <section class="panel active" id="panel-post">
+    <div class="grid2">
+      <div class="card">
+        <h2>文章列表</h2>
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn" id="btn-reload-posts">🔄 刷新</button>
+          <input type="text" id="post-search" placeholder="搜索文件名…" style="flex:1">
+        </div>
+        <div class="list" id="post-list"><div class="muted" style="padding:10px">点击刷新加载</div></div>
+        <div class="hint" id="post-hint"></div>
+
+        <h3>文章信息</h3>
+        <label class="field">标题 *</label><input type="text" id="f-title">
+        <label class="field">Slug（留空自动生成）</label><input type="text" id="f-slug">
+        <label class="field">发布日期</label><input type="date" id="f-published">
+        <label class="field">描述</label><textarea id="f-description" rows="2"></textarea>
+        <label class="field">标签（逗号分隔）</label><input type="text" id="f-tags">
+        <label class="field">分类</label><input type="text" id="f-category">
+        <label class="field">封面图路径</label><input type="text" id="f-image" placeholder="./images/cover.avif">
+        <label class="toggle" style="margin-top:10px">
+          <input type="checkbox" id="f-pinned">
+          <span><span class="t">置顶</span><span class="d">开启后文章置顶在列表最前</span></span>
+        </label>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="btn-publish">🚀 发布</button>
+          <button class="btn" id="btn-newpost">📝 新建</button>
+        </div>
+        <div class="hint" id="post-current"></div>
+      </div>
+
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px">
+          <div class="row">
+            <button class="btn" id="btn-tab-edit">✏️ 编辑</button>
+            <button class="btn ghost" id="btn-tab-preview">👁️ 预览</button>
+          </div>
+          <span class="muted" id="word-count">0 字</span>
+        </div>
+        <textarea id="f-markdown" class="md" placeholder="# 在这里写 Markdown…"></textarea>
+        <div id="preview" class="preview hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 番剧 ================= -->
+  <section class="panel" id="panel-anime">
+    <div class="grid2">
+      <div class="card">
+        <h2>添加番剧</h2>
+        <label class="field">标题 *</label><input type="text" id="a-title">
+        <label class="field">slug *（小写字母/数字/横线）</label><input type="text" id="a-slug">
+        <label class="field">封面路径/直链 *</label><input type="text" id="a-cover" placeholder="/assets/anime-covers/xxx.jpg">
+        <label class="field">简介</label><textarea id="a-desc" rows="3"></textarea>
+        <h3>选集</h3>
+        <div id="a-episodes"></div>
+        <div class="row" style="margin:10px 0">
+          <button class="btn" id="btn-add-ep">+ 添加一集</button>
+        </div>
+        <button class="btn primary" id="btn-save-anime">💾 保存到仓库</button>
+      </div>
+
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px">
+          <h2 style="margin:0">番剧列表</h2>
+          <button class="btn" id="btn-load-anime">🔄 加载</button>
+        </div>
+        <div id="anime-list" class="list" style="max-height:none"><div class="muted" style="padding:10px">点击加载</div></div>
+        <div id="anime-edit" class="hidden" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+          <h3 id="anime-edit-title"></h3>
+          <label class="field">标题</label><input type="text" id="e-title">
+          <label class="field">slug</label><input type="text" id="e-slug">
+          <label class="field">封面</label><input type="text" id="e-cover">
+          <label class="field">简介</label><textarea id="e-desc" rows="2"></textarea>
+          <h3>选集</h3>
+          <div id="e-episodes"></div>
+          <div class="row" style="margin:10px 0">
+            <button class="btn" id="btn-add-e-ep">+ 添加一集</button>
+            <button class="btn primary" id="btn-save-anime-edit">💾 保存修改</button>
+            <button class="btn danger" id="btn-del-anime">🗑️ 删除整部</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 个人资料 ================= -->
+  <section class="panel" id="panel-profile">
+    <div class="card" style="max-width:900px">
+      <h2>个人资料</h2>
+      <p class="hint">对应 <code>src/config/profileConfig.ts</code>，改完点保存会直接提交到仓库。</p>
+
+      <label class="field">头像路径 / 直链</label>
+      <input type="text" id="p-avatar">
+      <label class="field">名字</label>
+      <input type="text" id="p-name">
+      <label class="field">签名</label>
+      <input type="text" id="p-bio">
+
+      <h3>社交图标</h3>
+      <div id="p-links"></div>
+      <div class="row" style="margin:10px 0">
+        <button class="btn" id="btn-add-link">+ 添加图标</button>
+      </div>
+      <div class="hint">图标名可从 <a href="https://icones.js.org/" target="_blank" rel="noopener" style="color:var(--primary)">icones.js.org</a> 查；RSS 用 <code>fa7-solid:rss</code> + <code>/rss/</code>。</div>
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="btn-save-profile">💾 保存</button>
+        <button class="btn" id="btn-reload-profile">🔄 重新读取</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 页面开关 ================= -->
+  <section class="panel" id="panel-pages">
+    <div class="grid2">
+      <div class="card">
+        <h2>页面显示开关</h2>
+        <p class="hint">对应 <code>siteConfig.pages</code>。关闭后该页面返回 404，导航栏对应入口自动隐藏。</p>
+        <div id="pg-pages"></div>
+        <h2 style="margin-top:20px">站长信息</h2>
+        <label class="field">站点标题</label><input type="text" id="s-title">
+        <label class="field">副标题</label><input type="text" id="s-subtitle">
+        <label class="field">站点描述</label><textarea id="s-description" rows="2"></textarea>
+        <label class="field">站点 URL</label><input type="text" id="s-siteurl">
+        <label class="field">主题色相（0-360，165=青绿）</label><input type="number" id="s-hue" min="0" max="360">
+      </div>
+      <div class="card">
+        <h2>其他开关</h2>
+        <div id="pg-extras"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn primary" id="btn-save-pages">💾 保存全部</button>
+          <button class="btn" id="btn-reload-pages">🔄 重新读取</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 公告 ================= -->
+  <section class="panel" id="panel-announce">
+    <div class="card" style="max-width:900px">
+      <h2>公告</h2>
+      <p class="hint">对应 <code>announcementConfig.ts</code>。</p>
+      <label class="toggle">
+        <input type="checkbox" id="an-closable">
+        <span><span class="t">允许访客关闭</span><span class="d">关闭后公告常驻，访客点不掉</span></span>
+      </label>
+      <label class="field">标题</label><input type="text" id="an-title">
+      <label class="field">内容</label><textarea id="an-content" rows="6"></textarea>
+      <h3>公告里的链接</h3>
+      <label class="toggle">
+        <input type="checkbox" id="an-link-enabled">
+        <span><span class="t">显示链接</span><span class="d">公告底部多一个跳转按钮</span></span>
+      </label>
+      <label class="field">链接文字</label><input type="text" id="an-link-text">
+      <label class="field">链接地址</label><input type="text" id="an-link-url">
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="btn-save-announce">💾 保存</button>
+        <button class="btn" id="btn-reload-announce">🔄 重新读取</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 音乐 ================= -->
+  <section class="panel" id="panel-music">
+    <div class="grid2">
+      <div class="card">
+        <h2>音乐播放器</h2>
+        <p class="hint">对应 <code>musicConfig.ts</code>。</p>
+        <div id="m-switches"></div>
+
+        <label class="field">播放模式</label>
+        <select id="m-mode">
+          <option value="meting">meting（在线歌单）</option>
+          <option value="local">local（本地音乐）</option>
+        </select>
+
+        <label class="field">音量（0–1）</label><input type="number" id="m-volume" min="0" max="1" step="0.05">
+
+        <h3>歌单 / API</h3>
+        <label class="field">音乐平台</label>
+        <select id="m-server">
+          <option value="netease">网易云</option>
+          <option value="tencent">QQ 音乐</option>
+          <option value="kugou">酷狗</option>
+          <option value="baidu">百度</option>
+        </select>
+        <label class="field">类型</label>
+        <select id="m-type">
+          <option value="playlist">歌单</option>
+          <option value="song">单曲</option>
+          <option value="album">专辑</option>
+          <option value="search">搜索</option>
+          <option value="artist">歌手</option>
+        </select>
+        <label class="field">歌单/单曲 ID</label><input type="text" id="m-id">
+        <label class="field">API 地址（支持 :server :type :id :r 占位符）</label>
+        <input type="text" id="m-api">
+        <label class="field">备用 API（一行一个）</label>
+        <textarea id="m-fallback" rows="3"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>测试</h2>
+        <p class="hint">点下面的按钮，用浏览器直接拉一次歌单，看能不能拿到曲目。</p>
+        <div class="row">
+          <button class="btn" id="btn-test-music">🎧 测试歌单</button>
+          <span id="music-test-status" class="muted"></span>
+        </div>
+        <div id="music-test-out" class="preview" style="margin-top:12px;min-height:120px;font-size:12.5px"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn primary" id="btn-save-music">💾 保存</button>
+          <button class="btn" id="btn-reload-music">🔄 重新读取</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 友链 ================= -->
+  <section class="panel" id="panel-friends">
+    <div class="card">
+      <h2>友链</h2>
+      <p class="hint">对应 <code>src/config/friendsConfig.ts</code>。保存后友链页马上生效。</p>
+      <div id="fr-list"></div>
+      <div class="row" style="margin:12px 0">
+        <button class="btn" id="btn-add-friend">+ 添加友链</button>
+        <button class="btn primary" id="btn-save-friends">💾 保存</button>
+        <button class="btn" id="btn-reload-friends">🔄 重新读取</button>
+      </div>
+      <div class="hint">imgurl 可以是外链，也可以放 <code>/assets/images/friends/xxx.png</code>。</div>
+    </div>
+  </section>
+</main>
+
+<!-- Token 弹窗 -->
+<div class="modal" id="token-modal">
+  <div class="box">
+    <h3 style="margin-top:0">🔑 GitHub Token</h3>
+    <p class="hint">需要 repo 权限的 Personal Access Token，只存在浏览器 localStorage，不会上传到任何地方。</p>
+    <input type="password" id="token-input" placeholder="ghp_…">
+    <label class="toggle" style="margin-top:12px">
+      <input type="checkbox" id="token-save" checked>
+      <span><span class="t">记住 Token</span><span class="d">存在本机浏览器里</span></span>
+    </label>
+    <div class="row" style="justify-content:flex-end;margin-top:12px">
+      <button class="btn" id="btn-token-cancel">取消</button>
+      <button class="btn primary" id="btn-token-ok">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="modal" id="confirm-modal">
+  <div class="box">
+    <h3 style="margin-top:0" id="confirm-title">确认</h3>
+    <p class="hint" id="confirm-text"></p>
+    <div class="row" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="btn-confirm-cancel">取消</button>
+      <button class="btn danger" id="btn-confirm-ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/admin-v2.js"></script>
+</body>
+</html>
