@@ -70,6 +70,12 @@ function applyMd(action) {
   const fn = MD_ACTIONS[action];
   if (fn) fn(ta);
 }
+function openImgModal() {
+  $('img-url').value = '';
+  $('img-alt').value = '';
+  $('img-modal').classList.add('show');
+  setTimeout(() => $('img-url').focus(), 60);
+}
 
 /* ---------- 上传 ---------- */
 function fileToBase64(file) {
@@ -517,7 +523,23 @@ function bindPlus() {
     toolbar.querySelectorAll('[data-md]').forEach((btn) => {
       btn.onclick = () => applyMd(btn.dataset.md);
     });
-    $('btn-insert-image').onclick = () => $('image-input').click();
+    $('btn-insert-image').onclick = () => openImgModal();
+    $('btn-img-cancel').onclick = () => $('img-modal').classList.remove('show');
+    $('btn-img-file').onclick = () => {
+      $('img-modal').classList.remove('show');
+      $('image-input').click();
+    };
+    $('btn-img-insert').onclick = () => {
+      const url = $('img-url').value.trim();
+      if (!url) { toast('请填写图片地址，或选择本地文件', 'error'); return; }
+      const alt = $('img-alt').value.trim() || url.split('/').pop() || '图片';
+      mdBlock($('f-markdown'), `![${alt}](${url})`);
+      $('img-modal').classList.remove('show');
+      toast('已插入图片');
+    };
+    $('img-url').onkeydown = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); $('btn-img-insert').click(); }
+    };
     $('image-input').onchange = () => {
       const input = $('image-input');
       handlePostImages(input.files);

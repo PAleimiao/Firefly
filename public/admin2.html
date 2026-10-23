@@ -489,6 +489,23 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
   </section>
 </main>
 
+<!-- 图片导入弹窗 -->
+<div class="modal" id="img-modal">
+  <div class="box">
+    <h3 style="margin-top:0">导入图片</h3>
+    <label class="field">图片地址（http(s):// 或以 / 开头的站内路径）</label>
+    <input type="text" id="img-url" placeholder="https://example.com/a.png">
+    <label class="field">图片描述（可选，留空用文件名）</label>
+    <input type="text" id="img-alt" placeholder="截图">
+    <div class="hint">也可以点下面的按钮，从本机选图片上传到仓库。</div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="btn-img-cancel">取消</button>
+      <button class="btn" id="btn-img-file">选择本地文件</button>
+      <button class="btn primary" id="btn-img-insert">插入图片</button>
+    </div>
+  </div>
+</div>
+
 <!-- Token 弹窗 -->
 <div class="modal" id="token-modal">
   <div class="box">
