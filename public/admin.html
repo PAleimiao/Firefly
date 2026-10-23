@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📝 Firefly 博客后台</title>
+    <title>Firefly 博客后台</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -240,26 +240,26 @@
 </head>
 <body>
     <div class="header">
-        <h1>📝 Firefly 博客后台</h1>
-        <a href="/admin-v2.html" style="margin-left:12px;color:#2dd4bf;text-decoration:none;font-size:13px;">🚀 新版管理台 v2</a>
-        <div class="status" id="status">点击设置 → 配置 Token</div>
+        <h1>Firefly 博客后台</h1>
+        <a href="/admin-v2.html" style="margin-left:12px;color:#2dd4bf;text-decoration:none;font-size:13px;">新版管理台 v2</a>
+        <div class="status" id="status">点击设置 配置 Token</div>
     </div>
 
     <div class="container">
         <div class="panel">
-            <h2>⚙️ 文章设置</h2>
+            <h2>文章设置</h2>
 
             <div class="form-group">
                 <label>Token 设置</label>
-                <button class="btn btn-secondary" style="width:100%;" onclick="openTokenModal()">🔑 配置 GitHub Token</button>
+                <button class="btn btn-secondary" style="width:100%;" onclick="openTokenModal()">配置 GitHub Token</button>
             </div>
 
             <div class="form-group">
                 <label>文章列表</label>
-                <button class="btn btn-secondary" style="width:100%;margin-bottom:0.5rem;" onclick="loadPosts()">🔄 刷新列表</button>
+                <button class="btn btn-secondary" style="width:100%;margin-bottom:0.5rem;" onclick="loadPosts()">刷新列表</button>
                 <div class="file-list" id="fileList">
                     <div class="empty-state">
-                        <div class="icon">📂</div>
+                        <div class="icon"></div>
                         <div>点击刷新加载文章</div>
                     </div>
                 </div>
@@ -310,16 +310,16 @@
             </div>
 
             <div class="actions">
-                <button class="btn btn-primary" id="publishBtn" onclick="publish()">🚀 发布文章</button>
-                <button class="btn btn-secondary" onclick="newPost()">📝 新建</button>
+                <button class="btn btn-primary" id="publishBtn" onclick="publish()">发布文章</button>
+                <button class="btn btn-secondary" onclick="newPost()">新建</button>
             </div>
         </div>
 
         <div class="panel" style="padding: 0; overflow: hidden;">
             <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
                 <div class="tabs">
-                    <div class="tab active" onclick="switchTab('edit')" id="tab-edit">✏️ 编辑</div>
-                    <div class="tab" onclick="switchTab('preview')" id="tab-preview">👁️ 预览</div>
+                    <div class="tab active" onclick="switchTab('edit')" id="tab-edit">编辑</div>
+                    <div class="tab" onclick="switchTab('preview')" id="tab-preview">预览</div>
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text2);">
                     <span id="wordCount">0</span> 字
@@ -345,7 +345,7 @@
     <!-- Token Modal -->
     <div class="modal-overlay" id="tokenModal">
         <div class="modal">
-            <h3>🔑 GitHub Token 配置</h3>
+            <h3>GitHub Token 配置</h3>
             <p>需要 GitHub Personal Access Token 才能提交文章。Token 仅存储在浏览器本地，不会上传到服务器。</p>
             <input type="password" class="token-input" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxx">
             <label class="save-token">
@@ -387,10 +387,10 @@
         function updateStatus() {
             const el = document.getElementById('status');
             if (currentToken) {
-                el.textContent = '✅ Token 已配置';
+                el.textContent = 'Token 已配置';
                 el.className = 'status ok';
             } else {
-                el.textContent = '⚠️ 点击设置 → 配置 Token';
+                el.textContent = '点击设置 配置 Token';
                 el.className = 'status err';
             }
         }
@@ -505,7 +505,7 @@
                 const posts = data.filter(f => f.type === 'file' && f.name.endsWith('.md'));
                 postsCache = posts;
                 if (posts.length === 0) {
-                    list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div>暂无文章</div></div>';
+                    list.innerHTML = '<div class="empty-state"><div class="icon"></div><div>暂无文章</div></div>';
                     return;
                 }
                 list.innerHTML = posts.map(f => {
@@ -514,12 +514,12 @@
                         <div><div class="fname">${f.name}</div></div>
                         <div style="display:flex;align-items:center;gap:0.5rem;">
                             <span class="fdate">${(f.size/1024).toFixed(1)}KB</span>
-                            <span class="fdel" onclick="event.stopPropagation();deletePost('${f.name}','${f.sha}')">🗑</span>
+                            <span class="fdel" onclick="event.stopPropagation();deletePost('${f.name}','${f.sha}')">×</span>
                         </div>
                     </div>`;
                 }).join('');
             } catch (e) {
-                list.innerHTML = '<div class="empty-state"><div class="icon">❌</div><div>加载失败: ' + e.message + '</div></div>';
+                list.innerHTML = '<div class="empty-state"><div class="icon"></div><div>加载失败: ' + e.message + '</div></div>';
                 showToast('加载失败: ' + e.message, 'error');
             }
         }
@@ -628,19 +628,19 @@
                 if (currentFile) payload.sha = currentFile.sha;
 
                 await api('PUT', '/contents/' + POSTS_PATH + '/' + filename, payload);
-                showToast('🎉 发布成功！Cloudflare 正在构建...', 'success');
+                showToast('发布成功！Cloudflare 正在构建...', 'success');
                 currentFile = { name: filename };
                 loadPosts();
             } catch (e) {
                 showToast('发布失败: ' + e.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '🚀 发布文章';
+                btn.innerHTML = '发布文章';
             }
         }
 
         function deletePost(name, sha) {
-            document.getElementById('confirmTitle').textContent = '🗑️ 删除文章';
+            document.getElementById('confirmTitle').textContent = '删除文章';
             document.getElementById('confirmText').textContent = '确定要删除「' + name + '」吗？此操作不可恢复。';
             document.getElementById('confirmBtn').onclick = async () => {
                 closeConfirmModal();
@@ -679,9 +679,9 @@
 
 <!-- ========== 番剧管理 ========== -->
 <div class="section" style="margin-top: 40px; border-top: 2px solid #333; padding-top: 30px;">
-  <h2>📺 番剧管理</h2>
+  <h2>番剧管理</h2>
   <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
-    填写表单 → 生成 JSON → 复制到 src/data/animeData.json → 推送到仓库
+    填写表单 生成 JSON 复制到 src/data/animeData.json 推送到仓库
   </p>
 
   <div class="form-group">
@@ -727,7 +727,7 @@
   </div>
 
   <button type="button" onclick="generateAnimeJson()" style="background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
-    💾 直接保存到仓库
+    直接保存到仓库
   </button>
 </div>
 
@@ -806,7 +806,7 @@ async function generateAnimeJson() {
   // 先读取现有数据
   const btn = document.querySelector('button[onclick="generateAnimeJson()"]');
   const oldText = btn.innerHTML;
-  btn.innerHTML = "🔄 保存中...";
+  btn.innerHTML = "保存中...";
   btn.disabled = true;
 
   try {
@@ -856,13 +856,13 @@ async function generateAnimeJson() {
       throw new Error(err.message || "保存失败");
     }
 
-    btn.innerHTML = "✅ 保存成功！";
+    btn.innerHTML = "保存成功！";
     setTimeout(() => {
       btn.innerHTML = oldText;
       btn.disabled = false;
     }, 2000);
 
-    alert("✅ 番剧「" + title + "」已保存到仓库！\n\n请去 Cloudflare Pages 重新部署后生效。");
+    alert("番剧「" + title + "」已保存到仓库！\n\n请去 Cloudflare Pages 重新部署后生效。");
 
     // 清空表单
     document.getElementById('anime-title').value = '';
@@ -875,7 +875,7 @@ async function generateAnimeJson() {
   } catch (e) {
     btn.innerHTML = oldText;
     btn.disabled = false;
-    alert("❌ 保存失败: " + e.message);
+    alert("保存失败: " + e.message);
   }
 }
 
@@ -887,13 +887,13 @@ addEpisode();
 
 <!-- ========== 番剧列表 ========== -->
 <div class="section" style="margin-top: 40px; border-top: 2px solid #333; padding-top: 30px;">
-  <h2>📋 番剧列表</h2>
+  <h2>番剧列表</h2>
   <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
     点击番剧展开查看/编辑集数，可直接修改现有番剧或追加新集
   </p>
 
   <button type="button" onclick="loadAnimeList()" style="background: #3498db; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px;">
-    🔄 加载番剧列表
+    加载番剧列表
   </button>
 
   <div id="anime-list-container" style="display: none;">
@@ -907,7 +907,7 @@ addEpisode();
     <div class="form-group" style="margin-bottom: 15px;">
       <label>英文标识 (slug) <span style="color: #e74c3c;">*</span></label>
       <input type="text" id="edit-anime-slug" placeholder="如: watashi-koibito" style="width: 100%; padding: 10px; background: #0d0d0d; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 14px;" />
-      <p style="color: #888; font-size: 12px; margin-top: 4px;">⚠️ 只能用小写字母、数字、横线，不能重复。修改后旧链接会失效！</p>
+      <p style="color: #888; font-size: 12px; margin-top: 4px;">只能用小写字母、数字、横线，不能重复。修改后旧链接会失效！</p>
     </div>
 
     <div id="edit-episodes-list"></div>
@@ -918,7 +918,7 @@ addEpisode();
 
     <div style="margin-top: 15px;">
       <button type="button" onclick="saveAnimeChanges()" style="background: #27ae60; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px;">
-        💾 保存修改到仓库
+        保存修改到仓库
       </button>
       <span id="anime-save-status" style="margin-left: 10px; color: #888;"></span>
     </div>
@@ -987,8 +987,8 @@ function renderAnimeList() {
             `).join("")}
           </div>
           <div style="margin-top: 10px; display: flex; gap: 10px;">
-            <button type="button" onclick="editAnime(${idx})" style="background: #3498db; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">✏️ 编辑/追加</button>
-            <button type="button" onclick="deleteAnime(${idx})" style="background: #c0392b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">🗑️ 删除</button>
+            <button type="button" onclick="editAnime(${idx})" style="background: #3498db; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">编辑/追加</button>
+            <button type="button" onclick="deleteAnime(${idx})" style="background: #c0392b; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">删除</button>
           </div>
         </div>
       </div>
@@ -1138,12 +1138,12 @@ async function saveAnimeListToGitHub() {
 
     const result = await res.json();
     animeListSha = result.content.sha;
-    status.textContent = "✅ 保存成功！请去 Cloudflare 重新部署";
+    status.textContent = "保存成功！请去 Cloudflare 重新部署";
     status.style.color = "#27ae60";
 
     renderAnimeList();
   } catch (e) {
-    status.textContent = "❌ 保存失败: " + e.message;
+    status.textContent = "保存失败: " + e.message;
     status.style.color = "#e74c3c";
   }
 }
