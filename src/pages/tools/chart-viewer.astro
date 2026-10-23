@@ -71,6 +71,21 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
           <div class="flex flex-wrap items-center gap-2 mb-3">
             <button id="cv-play" class="px-4 py-2 rounded-xl bg-(--primary) text-white dark:text-black/70 text-sm font-medium hover:opacity-85 active:scale-95 transition">▶ 播放</button>
             <button id="cv-rewind" class="px-4 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">⏮ 回开头</button>
+            <select id="cv-speed" class="px-2 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider)">
+              <option value="0.5">0.5x</option>
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="2">2x</option>
+            </select>
+            <label class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) cursor-pointer hover:opacity-85 transition">
+              <input id="cv-loop" type="checkbox" class="w-4 h-4" />
+              循环
+            </label>
+            <button id="cv-audio-btn" class="px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">载入音频</button>
+            <input id="cv-audio" type="file" accept="audio/*" class="hidden" />
+            <button id="cv-shot" class="px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) hover:opacity-85 active:scale-95 transition">截图</button>
             <label class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-(--btn-regular-bg) text-(--btn-content) text-sm font-medium border border-(--line-divider) cursor-pointer hover:opacity-85 transition">
               <input id="cv-sound" type="checkbox" class="w-4 h-4" />
               出声
@@ -90,7 +105,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
   </div>
 
   <!-- ZIP 解压库（JSZip，CDN 加载，仅在浏览器本地运行） -->
-  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script is:inline defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <script>
     const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -114,6 +129,11 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     const zoomOutBtn = $<HTMLButtonElement>("cv-zoom-out");
     const zoomFitBtn = $<HTMLButtonElement>("cv-zoom-fit");
     const timeEl = $("cv-time");
+    const speedSel = $<HTMLSelectElement>("cv-speed");
+    const loopEl = $<HTMLInputElement>("cv-loop");
+    const audioBtn = $<HTMLButtonElement>("cv-audio-btn");
+    const audioInput = $<HTMLInputElement>("cv-audio");
+    const shotBtn = $<HTMLButtonElement>("cv-shot");
 
     const setStatus = (msg: string) => { statusEl.textContent = msg; };
     const fmtTime = (s: number) => {
@@ -312,6 +332,34 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     let soundQueue: NoteInfo[] = [];
     let soundIdx = 0;
 
+    // 播放速度 / 循环 / 外部音频
+    let speed = 1;
+    let loopMode = false;
+    let audioBuffer: AudioBuffer | null = null;
+    let audioSource: AudioBufferSourceNode | null = null;
+
+    function stopAudioSource() {
+      if (audioSource) {
+        try { audioSource.stop(); } catch (_) { /* 已停止 */ }
+        try { audioSource.disconnect(); } catch (_) { /* 忽略 */ }
+        audioSource = null;
+      }
+    }
+    function startAudioSource(at: number) {
+      if (!audioBuffer || !audioCtx) return;
+      stopAudioSource();
+      const src = audioCtx.createBufferSource();
+      src.buffer = audioBuffer;
+      src.playbackRate.value = speed;
+      src.connect(audioCtx.destination);
+      try {
+        src.start(0, Math.max(0, Math.min(at, audioBuffer.duration)));
+      } catch (_) {
+        return;
+      }
+      audioSource = src;
+    }
+
     function blip(type: number) {
       if (!audioCtx) return;
       const t0 = audioCtx.currentTime;
@@ -482,6 +530,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       lastTs = 0;
       if (rafId) cancelAnimationFrame(rafId);
       rafId = 0;
+      stopAudioSource();
       playBtn.textContent = "▶ 播放";
     }
 
@@ -491,7 +540,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       const dt = (ts - lastTs) / 1000;
       lastTs = ts;
       const prevT = playT;
-      playT += dt;
+      playT += dt * speed;
 
       // 出声：扫到音符就响，不勾就静默走谱
       if (soundEl.checked && audioCtx && audioCtx.state === "running") {
@@ -511,8 +560,20 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       viewStart = Math.max(0, playT - viewSpan * 0.25);
       clampView();
       if (playT >= current.duration) {
+        if (loopMode) {
+          playT = 0;
+          soundIdx = 0;
+          skipSoundTo(0);
+          startAudioSource(0);
+          viewStart = 0;
+          clampView();
+          drawCanvas(current);
+          rafId = requestAnimationFrame(tick);
+          return;
+        }
         playT = current.duration;
         stopPlay();
+        stopAudioSource();
         drawCanvas(current);
         return;
       }
@@ -537,6 +598,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       skipSoundTo(playT);
       playing = true;
       playBtn.textContent = "⏸ 暂停";
+      startAudioSource(playT);
       rafId = requestAnimationFrame(tick);
     });
 
@@ -547,6 +609,56 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       soundIdx = 0;
       resetView();
       drawCanvas(current);
+    });
+
+    // ---------- 速度 / 循环 / 音频 / 截图 / 快捷键 ----------
+    speedSel.addEventListener("change", () => {
+      speed = Number(speedSel.value) || 1;
+      if (playing && audioBuffer) startAudioSource(playT);
+    });
+    loopEl.addEventListener("change", () => {
+      loopMode = loopEl.checked;
+    });
+    audioBtn.addEventListener("click", () => audioInput.click());
+    audioInput.addEventListener("change", async () => {
+      const f = audioInput.files?.[0];
+      if (!f) return;
+      try {
+        if (!audioCtx) {
+          const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (!audioCtx) { setStatus("当前浏览器不支持音频播放"); return; }
+        setStatus("正在解码音频…");
+        audioBuffer = await audioCtx.decodeAudioData(await f.arrayBuffer());
+        setStatus(`音频已载入：${f.name}（${fmtTime(audioBuffer.duration)}）`);
+      } catch (err) {
+        setStatus(`音频解码失败：${err instanceof Error ? err.message : String(err)}`);
+      }
+    });
+    shotBtn.addEventListener("click", () => {
+      if (!current) return;
+      drawCanvas(current);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `chart-${Date.now()}.png`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }, "image/png");
+    });
+    window.addEventListener("keydown", (e) => {
+      const t = e.target as HTMLElement | null;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (e.code === "Space") { e.preventDefault(); playBtn.click(); return; }
+      if (!current) return;
+      if (e.key === "ArrowLeft") { viewStart -= viewSpan * 0.2; clampView(); drawCanvas(current); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { viewStart += viewSpan * 0.2; clampView(); drawCanvas(current); e.preventDefault(); }
+      else if (e.key === "+" || e.key === "=") { zoomAt(1 / 1.4, viewStart + viewSpan / 2); e.preventDefault(); }
+      else if (e.key === "-" || e.key === "_") { zoomAt(1.4, viewStart + viewSpan / 2); e.preventDefault(); }
+      else if (e.key.toLowerCase() === "r") { rewindBtn.click(); e.preventDefault(); }
+      else if (e.key.toLowerCase() === "f") { zoomFitBtn.click(); e.preventDefault(); }
     });
 
     // ---------- 缩放 / 平移 ----------
@@ -594,6 +706,25 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       return !!o && typeof o === "object" && Array.isArray((o as Record<string, unknown>).judgeLineList);
     }
 
+    interface JSZipLike {
+      loadAsync: (b: Blob) => Promise<{ files: Record<string, { async: (t: string) => Promise<string> }> }>;
+    }
+    let jszipPromise: Promise<JSZipLike | null> | null = null;
+    function ensureJSZip(): Promise<JSZipLike | null> {
+      const w = window as unknown as { JSZip?: JSZipLike };
+      if (w.JSZip) return Promise.resolve(w.JSZip);
+      if (!jszipPromise) {
+        jszipPromise = new Promise((resolve) => {
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+          s.onload = () => resolve((window as unknown as { JSZip?: JSZipLike }).JSZip ?? null);
+          s.onerror = () => resolve(null);
+          document.head.appendChild(s);
+        });
+      }
+      return jszipPromise;
+    }
+
     async function handleFile(file: File) {
       nameEl.textContent = file.name;
       resultEl.classList.add("hidden");
@@ -611,8 +742,8 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         }
 
         // 谱面包：解压找谱面
-        const JSZip = (window as unknown as { JSZip?: { loadAsync: (b: Blob) => Promise<{ files: Record<string, { async: (t: string) => Promise<string> }> }> } }).JSZip;
-        if (!JSZip) { setStatus("解压库没加载成功，刷新页面再试"); return; }
+        const JSZip = await ensureJSZip();
+        if (!JSZip) { setStatus("解压库加载失败（网络问题），刷新页面再试"); return; }
         setStatus("正在解压谱面包…");
         const zip = await JSZip.loadAsync(file);
         const candidates: ChartCandidate[] = [];

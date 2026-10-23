@@ -346,6 +346,10 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
         });
       });
       row.querySelector(".ve-del-clip").addEventListener("click", () => {
+        const removed = clips[i];
+        if (removed && removed.url && !clips.some((x, xi) => xi !== i && x.url === removed.url)) {
+          try { URL.revokeObjectURL(removed.url); } catch (_) { /* 忽略 */ }
+        }
         clips.splice(i, 1);
         if (selectedClipIndex === i) { selectedClipIndex = -1; $("ve-clip-edit").innerHTML = "点击上方素材列表中的片段进行编辑"; }
         else if (selectedClipIndex > i) selectedClipIndex--;
@@ -413,6 +417,18 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
       renderClips();
       renderTimeline();
       renderClipEditor(clips[selectedClipIndex]);
+    });
+    $("ve-clip-split").addEventListener("click", () => {
+      if (selectedClipIndex < 0) return;
+      const c = clips[selectedClipIndex];
+      const mid = (c.in + c.out) / 2;
+      if (mid - c.in < 0.1 || c.out - mid < 0.1) return;
+      clips.splice(selectedClipIndex + 1, 0, { ...c, in: mid });
+      c.out = mid;
+      renderClips();
+      renderTimeline();
+      renderClipEditor(c);
+      statusEl.textContent = "已在片段中间点分割";
     });
   }
 
@@ -596,6 +612,14 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
     let recorder = null;
     const chunks = [];
     if (recording) {
+      if (typeof MediaRecorder === "undefined") {
+        statusEl.textContent = "当前浏览器不支持视频导出，请换 Chrome / Edge";
+        busy = false;
+        return false;
+      }
+      // 先建好音频图，才能把音轨并进录制流，否则第一次导出会没有声音
+      const firstClip = clips.find((c) => c && c.el);
+      if (firstClip) ensureAudio(firstClip.el);
       const stream = canvas.captureStream(fps);
       if (mediaDest) mediaDest.stream.getAudioTracks().forEach((tr) => stream.addTrack(tr));
       const mime = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") 
@@ -631,8 +655,21 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
       await new Promise((resolve) => {
         let lastFrame = 0;
+        let lastCt = -1;
+        let stuckSince = performance.now();
         function frame() {
           if (stopFlag) { resolve(); return; }
+          if (el.currentTime === lastCt) {
+            if (performance.now() - stuckSince > 3000) {
+              statusEl.textContent = "这个视频浏览器解不了（可能是 HEVC / 10bit），建议转成 H.264 的 MP4 再试";
+              stopFlag = true;
+              resolve();
+              return;
+            }
+          } else {
+            lastCt = el.currentTime;
+            stuckSince = performance.now();
+          }
           const now = performance.now();
           if (now - lastFrame < frameInterval) {
             requestAnimationFrame(frame);
