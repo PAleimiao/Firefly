@@ -111,8 +111,8 @@ function openTokenModal() { $('token-input').value = TOKEN; $('token-modal').cla
 function closeTokenModal() { $('token-modal').classList.remove('show'); }
 function updateStatus() {
   const el = $('status');
-  if (TOKEN) { el.textContent = '✅ Token 已配置'; el.className = 'status ok'; }
-  else { el.textContent = '⚠️ 未配置 Token'; el.className = 'status err'; }
+  if (TOKEN) { el.textContent = 'Token 已配置'; el.className = 'status ok'; }
+  else { el.textContent = '未配置 Token'; el.className = 'status err'; }
 }
 function bindToken() {
   $('btn-token').onclick = openTokenModal;
@@ -169,7 +169,7 @@ function renderPostList() {
     `<div class="item" data-name="${f.name}">
        <span class="fname">${f.name}</span>
        <span class="row" style="gap:8px"><span class="muted">${(f.size / 1024).toFixed(1)}KB</span>
-       <span class="del" data-del="${f.name}" data-sha="${f.sha}">🗑</span></span>
+       <span class="del" data-del="${f.name}" data-sha="${f.sha}">×</span></span>
      </div>`).join('');
   $('post-list').querySelectorAll('.item').forEach((el) => {
     el.onclick = (ev) => {
@@ -180,7 +180,7 @@ function renderPostList() {
   $('post-list').querySelectorAll('[data-del]').forEach((el) => {
     el.onclick = async (ev) => {
       ev.stopPropagation();
-      if (!(await confirmBox('🗑️ 删除文章', `确定删除「${el.dataset.del}」？不可恢复。`))) return;
+      if (!(await confirmBox('删除文章', `确定删除「${el.dataset.del}」？不可恢复。`))) return;
       try {
         await deleteFile(POSTS_PATH + '/' + el.dataset.del, el.dataset.sha, '删除文章: ' + el.dataset.del);
         toast('已删除');
@@ -282,8 +282,8 @@ async function publishPost() {
 
     // slug 改名：删掉旧文件，避免出现重复文章
     if (currentPost && currentPost.name !== filename) {
-      await deleteFile(POSTS_PATH + '/' + currentPost.name, currentPost.sha, '重命名文章: ' + currentPost.name + ' → ' + filename);
-      toast('已重命名：' + currentPost.name + ' → ' + filename);
+      await deleteFile(POSTS_PATH + '/' + currentPost.name, currentPost.sha, '重命名文章: ' + currentPost.name + ' ' + filename);
+      toast('已重命名：' + currentPost.name + ' ' + filename);
     } else {
       toast('发布成功，Cloudflare 正在构建…');
     }
@@ -294,7 +294,7 @@ async function publishPost() {
     toast('发布失败：' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '🚀 发布';
+    btn.textContent = '发布';
   }
 }
 function updateWordCount() {
@@ -471,7 +471,7 @@ async function saveAnimeEdit() {
 async function deleteAnimeItem() {
   if (editingAnime < 0) return;
   const a = animeData[editingAnime];
-  if (!(await confirmBox('🗑️ 删除番剧', `确定删除「${a.title}」？不可恢复。`))) return;
+  if (!(await confirmBox('删除番剧', `确定删除「${a.title}」？不可恢复。`))) return;
   animeData.splice(editingAnime, 1);
   await saveAnimeData('admin: 删除番剧 ' + a.title);
   $('anime-edit').classList.add('hidden');
@@ -490,7 +490,7 @@ function linkRow(l) {
     `<input type="text" class="lk-icon" placeholder="图标，如 fa7-brands:qq" value="${escHtml(l.icon || '')}">
      <input type="text" class="lk-url" placeholder="链接地址" value="${escHtml(l.url || '')}">
      <label class="row" style="gap:4px;font-size:12px"><input type="checkbox" class="lk-show" ${l.showName ? 'checked' : ''}> 文字</label>
-     <span class="fdel">✕</span>`;
+     <span class="fdel"></span>`;
   div.querySelector('.fdel').onclick = () => div.remove();
   $('p-links').appendChild(div);
 }
@@ -560,12 +560,12 @@ async function saveProfile() {
    页面开关 + 站点信息
    ========================================================================== */
 const PAGE_TOGGLES = [
-  ['friends', '友链页面', '关闭后 /friends 返回 404，导航「社交 → 友链」消失'],
+  ['friends', '友链页面', '关闭后 /friends 返回 404，导航「社交 友链」消失'],
   ['sponsor', '打赏页面', '关闭后 /sponsor 返回 404，导航「打赏」消失'],
-  ['guestbook', '留言板', '关闭后 /guestbook 返回 404，导航「社交 → 留言」消失'],
-  ['bangumi', '番组计划', '关闭后 /bangumi 返回 404，导航「我的 → 番组计划」消失'],
-  ['gallery', '相册', '关闭后 /gallery 返回 404，导航「我的 → 相册」消失'],
-  ['anime', '追番', '关闭后 /anime 返回 404，导航「我的 → 追番」消失'],
+  ['guestbook', '留言板', '关闭后 /guestbook 返回 404，导航「社交 留言」消失'],
+  ['bangumi', '番组计划', '关闭后 /bangumi 返回 404，导航「我的 番组计划」消失'],
+  ['gallery', '相册', '关闭后 /gallery 返回 404，导航「我的 相册」消失'],
+  ['anime', '追番', '关闭后 /anime 返回 404，导航「我的 追番」消失'],
   ['dynamic', '动态', '关闭后 /dynamic 返回 404，导航「动态」消失'],
 ];
 const EXTRA_TOGGLES = [
@@ -697,18 +697,18 @@ async function testMusic() {
     let parsed;
     try { parsed = JSON.parse(text); } catch (_) { parsed = null; }
     if (Array.isArray(parsed)) {
-      $('music-test-status').textContent = `✅ 拿到 ${parsed.length} 首`;
+      $('music-test-status').textContent = `拿到 ${parsed.length} 首`;
       $('music-test-out').innerHTML = parsed.slice(0, 10).map((t) =>
-        `<div>🎵 ${escHtml(t.name || '?')} — ${escHtml(t.artist || t.ar?.map((x) => x.name).join('/') || '')}</div>`).join('');
+        `<div>${escHtml(t.name || '?')} — ${escHtml(t.artist || t.ar?.map((x) => x.name).join('/') || '')}</div>`).join('');
     } else if (parsed && parsed.error) {
-      $('music-test-status').textContent = '❌ ' + parsed.error;
+      $('music-test-status').textContent = '' + parsed.error;
       $('music-test-out').textContent = JSON.stringify(parsed);
     } else {
-      $('music-test-status').textContent = '⚠️ 返回不是曲目数组';
+      $('music-test-status').textContent = '返回不是曲目数组';
       $('music-test-out').textContent = text.slice(0, 500);
     }
   } catch (e) {
-    $('music-test-status').textContent = '❌ 请求失败（可能被 CORS 拦截）';
+    $('music-test-status').textContent = '请求失败（可能被 CORS 拦截）';
     $('music-test-out').textContent = e.message;
   }
 }
@@ -750,7 +750,7 @@ function friendRow(f) {
      <div class="frow"><span class="muted">权重</span><input type="number" class="fr-weight" value="${Number(f.weight) || 0}"></div>
      <div class="row between">
        <label class="row" style="gap:6px;font-size:12px"><input type="checkbox" class="fr-enabled" ${f.enabled ? 'checked' : ''}> 启用</label>
-       <span class="fdel">✕ 删除</span>
+       <span class="fdel">删除</span>
      </div>`;
   div.querySelector('.fdel').onclick = () => div.remove();
   $('fr-list').appendChild(div);
