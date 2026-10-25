@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <rect width="680" height="300" rx="12" fill="#fff5f9"/>
+  <text x="340" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#333">SSH 连接原理：你的电脑怎么"钻"进服务器</text>
+
+  <!-- your pc -->
+  <rect x="40" y="110" width="150" height="90" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="115" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">你的电脑</text>
+  <text x="115" y="170" text-anchor="middle" font-size="12" fill="#333">Windows Terminal</text>
+  <text x="115" y="190" text-anchor="middle" font-size="12" fill="#666">ssh root@IP地址</text>
+
+  <!-- internet -->
+  <rect x="245" y="110" width="190" height="90" rx="10" fill="#ffe3ef" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="340" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">互联网</text>
+  <text x="340" y="170" text-anchor="middle" font-size="12" fill="#333">公网 IP + 22 端口</text>
+  <text x="340" y="190" text-anchor="middle" font-size="12" fill="#666">安全组要放行！</text>
+
+  <!-- server -->
+  <rect x="490" y="110" width="150" height="90" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="565" y="145" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">你的服务器</text>
+  <text x="565" y="170" text-anchor="middle" font-size="12" fill="#333">root 用户登录</text>
+  <text x="565" y="190" text-anchor="middle" font-size="12" fill="#666">黑窗口 = 成功</text>
+
+  <!-- arrows -->
+  <path d="M190 155 L245 155" stroke="#ff7eb6" stroke-width="2.5"/>
+  <path d="M240 149 L248 155 L240 161 Z" fill="#ff7eb6"/>
+  <path d="M435 155 L490 155" stroke="#ff7eb6" stroke-width="2.5"/>
+  <path d="M485 149 L493 155 L485 161 Z" fill="#ff7eb6"/>
+
+  <!-- caption -->
+  <text x="340" y="240" text-anchor="middle" font-size="12" fill="#999">连接卡住 90% 是中间这段的问题：安全组没开 22 端口 / IP 打错 / 密码错了</text>
+  <text x="340" y="262" text-anchor="middle" font-size="12" fill="#999">连上之后，你就拥有了一个 24 小时不关机的命令行 Linux——剩下的教程都从这扇门开始</text>
+</svg>
