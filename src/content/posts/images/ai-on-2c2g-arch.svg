@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 330" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <rect width="680" height="330" rx="12" fill="#fff5f9"/>
+  <text x="340" y="32" text-anchor="middle" font-size="18" font-weight="700" fill="#333">2C2G 跑 AI 的完整架构：客户端怎么摸到你的模型</text>
+
+  <!-- client -->
+  <rect x="30" y="120" width="130" height="80" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="95" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">AI 客户端</text>
+  <text x="95" y="172" text-anchor="middle" font-size="11" fill="#333">ChatBox 等</text>
+  <text x="95" y="190" text-anchor="middle" font-size="11" fill="#666">地址 /v1 + 随便填 Key</text>
+
+  <!-- nginx -->
+  <rect x="230" y="120" width="130" height="80" rx="10" fill="#ffe3ef" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="295" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">nginx</text>
+  <text x="295" y="172" text-anchor="middle" font-size="11" fill="#333">反向代理 :80</text>
+  <text x="295" y="190" text-anchor="middle" font-size="11" fill="#666">buffering off / 600s</text>
+
+  <!-- ollama -->
+  <rect x="430" y="120" width="130" height="80" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="495" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">Ollama</text>
+  <text x="495" y="172" text-anchor="middle" font-size="11" fill="#333">127.0.0.1:11434</text>
+  <text x="495" y="190" text-anchor="middle" font-size="11" fill="#666">只听本地，不裸奔</text>
+
+  <!-- model -->
+  <rect x="470" y="240" width="230" height="56" rx="10" fill="#ff7eb6"/>
+  <text x="585" y="264" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">qwen3:0.6b → riko（人格模型）</text>
+  <text x="585" y="284" text-anchor="middle" font-size="11" fill="#ffe3ef">522MB · 8~10 token/s · 思考链中文</text>
+
+  <!-- arrows -->
+  <path d="M160 160 L230 160" stroke="#ff7eb6" stroke-width="2.5"/>
+  <path d="M225 154 L233 160 L225 166 Z" fill="#ff7eb6"/>
+  <path d="M360 160 L430 160" stroke="#ff7eb6" stroke-width="2.5"/>
+  <path d="M425 154 L433 160 L425 166 Z" fill="#ff7eb6"/>
+  <path d="M495 200 L495 240" stroke="#ff7eb6" stroke-width="2.5"/>
+  <path d="M489 235 L495 243 L501 235 Z" fill="#ff7eb6"/>
+
+  <text x="340" y="316" text-anchor="middle" font-size="11" fill="#bbb">客户端填「服务器 IP + /v1」即可，服务端 OpenAI 兼容——换任何客户端都不用改架构</text>
+</svg>
