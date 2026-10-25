@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 470" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <rect width="680" height="470" rx="12" fill="#fff5f9"/>
+  <text x="340" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#333">薅服务器决策流程图（2026.10 版）</text>
+
+  <!-- start -->
+  <rect x="260" y="52" width="160" height="40" rx="20" fill="#ff7eb6"/>
+  <text x="340" y="77" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">你想白嫖一台服务器</text>
+  <path d="M340 92 L340 106" stroke="#ff7eb6" stroke-width="2"/>
+
+  <!-- diamond 1 -->
+  <path d="M340 106 L470 156 L340 206 L210 156 Z" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="340" y="152" text-anchor="middle" font-size="13" font-weight="600" fill="#333">你是在校学生吗？</text>
+  <text x="340" y="170" text-anchor="middle" font-size="11" fill="#999">25 岁以下腾讯云免学生证</text>
+
+  <!-- yes branch -->
+  <path d="M210 156 L124 156 L124 248" fill="none" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="150" y="146" font-size="12" font-weight="700" fill="#ff7eb6">是</text>
+  <rect x="24" y="248" width="200" height="122" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="124" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">学生通道</text>
+  <text x="40" y="298" font-size="12" fill="#333">· GitHub 学生包 → Azure $100</text>
+  <text x="40" y="318" font-size="12" fill="#333">· Heroku $13/月 × 24 个月</text>
+  <text x="40" y="338" font-size="12" fill="#333">· 阿里云高校计划 300 元券</text>
+  <text x="40" y="358" font-size="12" fill="#333">· 腾讯云云+校园 25.92 元起</text>
+
+  <!-- no branch -->
+  <path d="M470 156 L556 156 L556 248" fill="none" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="500" y="146" font-size="12" font-weight="700" fill="#ff7eb6">否</text>
+  <rect x="456" y="248" width="200" height="122" rx="10" fill="#fff" stroke="#ff7eb6" stroke-width="2"/>
+  <text x="556" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#ff5a9e">个人新用户通道</text>
+  <text x="472" y="298" font-size="12" fill="#333">· 阿里云免费试用 3 个月</text>
+  <text x="472" y="318" font-size="12" fill="#333">· 腾讯云轻量 7 天 ~ 1 个月</text>
+  <text x="472" y="338" font-size="12" fill="#333">· 华为云试用 7 ~ 30 天</text>
+  <text x="472" y="358" font-size="12" fill="#333">· AWS / Azure 12 个月</text>
+
+  <!-- bottom oracle note -->
+  <path d="M124 370 L124 396 L556 396 L556 370" fill="none" stroke="#ff7eb6" stroke-width="2"/>
+  <path d="M340 206 L340 206" fill="none"/>
+  <rect x="150" y="396" width="380" height="52" rx="10" fill="#ff7eb6"/>
+  <text x="340" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">两条路最后都通向同一个终点：Oracle Cloud Always Free</text>
+  <text x="340" y="438" text-anchor="middle" font-size="12" fill="#ffe3ef">4 核 ARM + 24G 内存，永久免费，白嫖界的耶路撒冷</text>
+</svg>
